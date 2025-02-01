@@ -3,7 +3,9 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),    
+    path('admin/', admin.site.urls),
+    path('', views.landing_page, name='landing_page'),
+    path('dashboard/', views.dashboard, name='dashboard'),    
     path('lab/<str:lab_name>/', views.list_lab_computers, name='list_lab_computers'),
     path('book/<int:computer_id>/', views.book_computer, name='book_computer'),
     path('my-bookings/', views.my_bookings, name='my_bookings'),

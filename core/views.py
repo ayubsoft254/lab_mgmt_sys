@@ -5,6 +5,25 @@ from django.contrib import messages
 from .models import User, LabResource, Booking, Ticket
 from django.core.exceptions import ValidationError
 
+# Landing page view
+def landing_page(request):
+    return render(request, 'lab_management/landing_page.html')
+
+# Dashboard view
+@login_required
+def dashboard(request):
+    user = request.user
+    bookings = Booking.objects.filter(user=user)
+    tickets = Ticket.objects.filter(created_by=user)
+    labs = LabResource.objects.values('lab').distinct()  # Get unique labs
+
+    context = {
+        'bookings': bookings,
+        'tickets': tickets,
+        'labs': labs,
+    }
+    return render(request, 'lab_management/dashboard.html', context)
+
 # View to list available computers in a lab
 @login_required
 def list_lab_computers(request, lab_name):
