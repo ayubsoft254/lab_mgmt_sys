@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 
 # Landing page view
 def landing_page(request):
-    return render(request, 'lab_management/landing_page.html')
+    return render(request, 'landing_page.html')
 
 # Dashboard view
 @login_required
@@ -22,7 +22,7 @@ def dashboard(request):
         'tickets': tickets,
         'labs': labs,
     }
-    return render(request, 'lab_management/dashboard.html', context)
+    return render(request, 'dashboard.html', context)
 
 # View to list available computers in a lab
 @login_required
@@ -32,7 +32,7 @@ def list_lab_computers(request, lab_name):
         'lab_name': lab_name,
         'computers': computers,
     }
-    return render(request, 'lab_management/lab_computers.html', context)
+    return render(request, 'lab_computers.html', context)
 
 # View to book a computer
 @login_required
@@ -70,7 +70,7 @@ def book_computer(request, computer_id):
     context = {
         'computer': computer,
     }
-    return render(request, 'lab_management/book_computer.html', context)
+    return render(request, 'book_computer.html', context)
 
 # View to list a user's bookings
 @login_required
@@ -79,7 +79,7 @@ def my_bookings(request):
     context = {
         'bookings': bookings,
     }
-    return render(request, 'lab_management/my_bookings.html', context)
+    return render(request, 'my_bookings.html', context)
 
 # View to cancel a booking
 @login_required
@@ -111,7 +111,7 @@ def create_ticket(request):
         messages.success(request, "Ticket created successfully.")
         return redirect('view_tickets')
 
-    return render(request, 'lab_management/create_ticket.html')
+    return render(request, 'create_ticket.html')
 
 # View to list all tickets
 @login_required
@@ -120,7 +120,7 @@ def view_tickets(request):
     context = {
         'tickets': tickets,
     }
-    return render(request, 'lab_management/view_tickets.html', context)
+    return render(request, 'view_tickets.html', context)
 
 # View to update a ticket's status (e.g., mark as resolved)
 @login_required
@@ -136,4 +136,4 @@ def update_ticket(request, ticket_id):
     context = {
         'ticket': ticket,
     }
-    return render(request, 'lab_management/update_ticket.html', context)
+    return render(request, 'update_ticket.html', context)
