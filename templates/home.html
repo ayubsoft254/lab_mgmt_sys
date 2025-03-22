@@ -1,0 +1,175 @@
+{% extends 'booking/base.html' %}
+
+{% block title %}Lab Management System - Home{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1>Welcome to the Lab Management System</h1>
+            
+            {% if user.is_authenticated %}
+                <p>Hello, {{ user.username }}!</p>
+                
+                {% if notifications %}
+                    <div class="alert alert-info">
+                        <p>You have {{ notifications|length }} unread notification{{ notifications|length|pluralize }}</p>
+                        <a href="{% url 'notification_list' %}" class="btn btn-sm btn-info">View Notifications</a>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Available Labs</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for lab in labs %}
+                            <div class="col-md-4 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ lab.name }}</h5>
+                                        <h6 class="card-subtitle mb-2 text-muted">{{ lab.location }}</h6>
+                                        <p class="card-text">{{ lab.description|truncatewords:20 }}</p>
+                                        <p><strong>Capacity:</strong> {{ lab.capacity }} computers</p>
+                                        <a href="{% url 'lab_detail' lab.id %}" class="btn btn-primary">View Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="col-12">
+                                <p>No labs available at the moment.</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if user.is_student and upcoming_bookings %}
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Your Upcoming Bookings</h2>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Lab</th>
+                                    <th>Computer</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for booking in upcoming_bookings %}
+                                    <tr>
+                                        <td>{{ booking.computer.lab.name }}</td>
+                                        <td>Computer #{{ booking.computer.computer_number }}</td>
+                                        <td>{{ booking.start_time|date:"M d, Y" }}</td>
+                                        <td>{{ booking.start_time|date:"H:i" }} - {{ booking.end_time|date:"H:i" }}</td>
+                                        <td>
+                                            {% if booking.is_approved %}
+                                                <span class="badge bg-success">Approved</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">Pending</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if user.is_lecturer and upcoming_sessions %}
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Your Upcoming Lab Sessions</h2>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Lab</th>
+                                    <th>Title</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for session in upcoming_sessions %}
+                                    <tr>
+                                        <td>{{ session.lab.name }}</td>
+                                        <td>{{ session.title }}</td>
+                                        <td>{{ session.start_time|date:"M d, Y" }}</td>
+                                        <td>{{ session.start_time|date:"H:i" }} - {{ session.end_time|date:"H:i" }}</td>
+                                        <td>
+                                            {% if session.is_approved %}
+                                                <span class="badge bg-success">Approved</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">Pending</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            {% if user.is_student %}
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Book a Computer</h5>
+                        <p class="card-text">Browse available labs and book a computer for your studies.</p>
+                        <a href="{% url 'lab_list' %}" class="btn btn-primary">View Labs</a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <div class="col-md-6 mb-3">
+            {% if user.is_lecturer %}
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Book a Lab Session</h5>
+                        <p class="card-text">Schedule a lab session for your class.</p>
+                        <a href="{% url 'lecturer_booking' %}" class="btn btn-primary">Book Session</a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <div class="col-md-6 mb-3">
+            {% if user.is_admin %}
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Admin Dashboard</h5>
+                        <p class="card-text">Manage lab bookings and requests.</p>
+                        <a href="{% url 'admin_dashboard' %}" class="btn btn-primary">Admin Dashboard</a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
