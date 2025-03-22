@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h2 class="mb-4">Admin Dashboard</h2>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Quick Stats</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="#pending-bookings" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            Pending Bookings
+                            <span class="badge bg-primary rounded-pill">{{ pending_computer_bookings.count }}</span>
+                        </a>
+                        <a href="#pending-sessions" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            Pending Lab Sessions
+                            <span class="badge bg-primary rounded-pill">{{ pending_lab_sessions.count }}</span>
+                        </a>
+                        <a href="#labs" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            Total Labs
+                            <span class="badge bg-primary rounded-pill">{{ labs.count }}</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <!-- Pending Computer Bookings -->
+            <div class="card mb-4" id="pending-bookings">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0">Pending Computer Bookings</h5>
+                </div>
+                <div class="card-body">
+                    {% if pending_computer_bookings %}
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Booking ID</th>
+                                        <th>Student</th>
+                                        <th>Lab</th>
+                                        <th>Computer</th>
+                                        <th>Date & Time</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for booking in pending_computer_bookings %}
+                                        <tr>
+                                            <td>{{ booking.booking_code|truncatechars:8 }}</td>
+                                            <td>{{ booking.student.username }}</td>
+                                            <td>{{ booking.computer.lab.name }}</td>
+                                            <td>Computer #{{ booking.computer.computer_number }}</td>
+                                            <td>
+                                                {{ booking.start_time|date:"M d, Y" }}<br>
+                                                {{ booking.start_time|date:"H:i" }} - {{ booking.end_time|date:"H:i" }}
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'approve_booking' booking.id %}" class="btn btn-success btn-sm">Approve</a>
+                                                <button class="btn btn-danger btn-sm">Reject</button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info mb-0">No pending computer bookings.</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Pending Lab Sessions -->
+            <div class="card mb-4" id="pending-sessions">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0">Pending Lab Sessions</h5>
+                </div>
+                <div class="card-body">
+                    {% if pending_lab_sessions %}
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Lecturer</th>
+                                        <th>Lab</th>
+                                        <th>Date & Time</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for session in pending_lab_sessions %}
+                                        <tr>
+                                            <td>{{ session.title }}</td>
+                                            <td>{{ session.lecturer.username }}</td>
+                                            <td>{{ session.lab.name }}</td>
+                                            <td>
+                                                {{ session.start_time|date:"M d, Y" }}<br>
+                                                {{ session.start_time|date:"H:i" }} - {{ session.end_time|date:"H:i" }}
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'approve_session' session.id %}" class="btn btn-success btn-sm">Approve</a>
+                                                <button class="btn btn-danger btn-sm">Reject</button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info mb-0">No pending lab sessions.</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Labs Overview -->
+            <div class="card" id="labs">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Labs Overview</h5>
+                </div>
+                <div class="card-body">
+                    {% if labs %}
+                        <div class="row">
+                            {% for lab in labs %}
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ lab.name }}</h5>
+                                            <h6 class="card-subtitle mb-2 text-muted">{{ lab.location }}</h6>
+                                            <p class="card-text">
+                                                <strong>Capacity:</strong> {{ lab.capacity }} computers<br>
+                                                <strong>Description:</strong> {{ lab.description|truncatechars:100 }}
+                                            </p>
+                                        </div>
+                                        <div class="card-footer">
+                                            <a href="{% url 'lab_detail' lab.id %}" class="btn btn-primary btn-sm">View Details</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info mb-0">No labs available.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

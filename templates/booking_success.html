@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Booking Successful{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0">Booking Successful!</h3>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-check-circle fa-5x text-success"></i>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <p class="mb-0">Your booking is pending approval. You will be notified once it's approved.</p>
+                    </div>
+                    
+                    <h4 class="mb-3">Booking Details:</h4>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Booking Code:</th>
+                            <td>{{ booking.booking_code }}</td>
+                        </tr>
+                        <tr>
+                            <th>Lab:</th>
+                            <td>{{ booking.computer.lab.name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Computer:</th>
+                            <td>{{ booking.computer.computer_number }}</td>
+                        </tr>
+                        <tr>
+                            <th>Date:</th>
+                            <td>{{ booking.start_time|date:"F j, Y" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Time:</th>
+                            <td>{{ booking.start_time|date:"g:i A" }} - {{ booking.end_time|date:"g:i A" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Status:</th>
+                            <td>
+                                {% if booking.is_approved %}
+                                    <span class="badge bg-success">Approved</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">Pending Approval</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    <div class="text-center mt-4">
+                        <a href="{% url 'home' %}" class="btn btn-primary me-2">Go to Home</a>
+                        <a href="{% url 'lab_detail' booking.computer.lab.id %}" class="btn btn-secondary">Back to Lab</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

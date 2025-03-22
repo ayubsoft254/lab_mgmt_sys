@@ -1,7 +1,7 @@
 from django.forms import ValidationError
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, logout
 from django.contrib import messages
 from django.urls import reverse
 from django.db.models import Q, Count
@@ -243,3 +243,8 @@ def notification_list_view(request):
     return render(request, 'notification_list.html', {
         'notifications': notifications
     })
+
+def logout_view(request):
+    logout(request)
+    messages.success(request, "You have been successfully logged out.")
+    return redirect('login')

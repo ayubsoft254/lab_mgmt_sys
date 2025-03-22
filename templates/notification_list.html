@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">Notifications</h3>
+                    {% if notifications %}
+                        <form method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-light btn-sm">Mark All as Read</button>
+                        </form>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if notifications %}
+                        <div class="list-group">
+                            {% for notification in notifications %}
+                                <div class="list-group-item list-group-item-action flex-column align-items-start {% if not notification.is_read %}list-group-item-info{% endif %}">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h5 class="mb-1">
+                                            {% if notification.notification_type == 'new_booking' %}
+                                                <i class="fas fa-calendar-plus me-2 text-primary"></i>New Booking
+                                            {% elif notification.notification_type == 'booking_cancelled' %}
+                                                <i class="fas fa-calendar-times me-2 text-danger"></i>Booking Cancelled
+                                            {% elif notification.notification_type == 'session_booked' %}
+                                                <i class="fas fa-chalkboard-teacher me-2 text-success"></i>Session Booked
+                                            {% elif notification.notification_type == 'booking_approved' %}
+                                                <i class="fas fa-check-circle me-2 text-success"></i>Booking Approved
+                                            {% elif notification.notification_type == 'booking_rejected' %}
+                                                <i class="fas fa-times-circle me-2 text-danger"></i>Booking Rejected
+                                            {% else %}
+                                                <i class="fas fa-bell me-2"></i>Notification
+                                            {% endif %}
+                                        </h5>
+                                        <small>{{ notification.created_at|timesince }} ago</small>
+                                    </div>
+                                    <p class="mb-1">{{ notification.message }}</p>
+                                    {% if not notification.is_read %}
+                                        <span class="badge bg-info text-dark">New</span>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <p class="mb-0">You have no notifications.</p>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{% url 'home' %}" class="btn btn-primary">Back to Home</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
