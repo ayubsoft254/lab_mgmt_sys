@@ -3,163 +3,368 @@
 {% block title %}Admin Dashboard{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-4">
-    <h2 class="mb-4">Admin Dashboard</h2>
+<div class="container mt-4">
+    <h1>Admin Dashboard</h1>
     
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
-    
-    <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-3 mb-4">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Quick Stats</h5>
-                </div>
+    <!-- Stats Overview -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-header">Labs</div>
                 <div class="card-body">
-                    <div class="list-group">
-                        <a href="#pending-bookings" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                            Pending Bookings
-                            <span class="badge bg-primary rounded-pill">{{ pending_computer_bookings.count }}</span>
-                        </a>
-                        <a href="#pending-sessions" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                            Pending Lab Sessions
-                            <span class="badge bg-primary rounded-pill">{{ pending_lab_sessions.count }}</span>
-                        </a>
-                        <a href="#labs" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                            Total Labs
-                            <span class="badge bg-primary rounded-pill">{{ labs.count }}</span>
-                        </a>
+                    <h5 class="card-title">{{ stats.total_labs }}</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-header">Available Computers</div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ stats.available_computers }} / {{ stats.total_computers }}</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning mb-3">
+                <div class="card-header">Maintenance</div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ stats.maintenance_computers }}</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-danger mb-3">
+                <div class="card-header">Pending Approvals</div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ stats.total_pending_approvals }}</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nav tabs for different sections -->
+    <ul class="nav nav-tabs mb-3" id="adminTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" 
+                    data-bs-target="#pending" type="button" role="tab">Pending Approvals</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="upcoming-tab" data-bs-toggle="tab" 
+                    data-bs-target="#upcoming" type="button" role="tab">Upcoming</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="past-tab" data-bs-toggle="tab" 
+                    data-bs-target="#past" type="button" role="tab">Past</button>
+        </li>
+    </ul>
+    
+    <!-- Tab content -->
+    <div class="tab-content" id="adminTabsContent">
+        <!-- Pending Approvals Tab -->
+        <div class="tab-pane fade show active" id="pending" role="tabpanel">
+            <div class="row">
+                <!-- Pending Computer Bookings -->
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h4>Pending Computer Bookings</h4>
+                        </div>
+                        <div class="card-body">
+                            {% if pending_computer_bookings %}
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Computer</th>
+                                                <th>Student</th>
+                                                <th>Time</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for booking in pending_computer_bookings %}
+                                                <tr>
+                                                    <td>{{ booking.computer }}</td>
+                                                    <td>{{ booking.student.username }}</td>
+                                                    <td>{{ booking.start_time|date:"M d, H:i" }} - {{ booking.end_time|date:"H:i" }}</td>
+                                                    <td>
+                                                        <a href="{% url 'approve_booking' booking.id %}" class="btn btn-sm btn-success">Approve</a>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p>No pending computer bookings.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pending Lab Sessions -->
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h4>Pending Lab Sessions</h4>
+                        </div>
+                        <div class="card-body">
+                            {% if pending_lab_sessions %}
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Lab</th>
+                                                <th>Lecturer</th>
+                                                <th>Title</th>
+                                                <th>Time</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for session in pending_lab_sessions %}
+                                                <tr>
+                                                    <td>{{ session.lab.name }}</td>
+                                                    <td>{{ session.lecturer.username }}</td>
+                                                    <td>{{ session.title }}</td>
+                                                    <td>{{ session.start_time|date:"M d, H:i" }} - {{ session.end_time|date:"H:i" }}</td>
+                                                    <td>
+                                                        <a href="{% url 'approve_session' session.id %}" class="btn btn-sm btn-success">Approve</a>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p>No pending lab sessions.</p>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <!-- Main Content -->
-        <div class="col-md-9">
-            <!-- Pending Computer Bookings -->
-            <div class="card mb-4" id="pending-bookings">
-                <div class="card-header bg-warning">
-                    <h5 class="mb-0">Pending Computer Bookings</h5>
+        <!-- Upcoming Tab -->
+        <div class="tab-pane fade" id="upcoming" role="tabpanel">
+            <!-- Date Filter -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Filter by Date</h4>
                 </div>
                 <div class="card-body">
-                    {% if pending_computer_bookings %}
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Booking ID</th>
-                                        <th>Student</th>
-                                        <th>Lab</th>
-                                        <th>Computer</th>
-                                        <th>Date & Time</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for booking in pending_computer_bookings %}
-                                        <tr>
-                                            <td>{{ booking.booking_code|truncatechars:8 }}</td>
-                                            <td>{{ booking.student.username }}</td>
-                                            <td>{{ booking.computer.lab.name }}</td>
-                                            <td>Computer #{{ booking.computer.computer_number }}</td>
-                                            <td>
-                                                {{ booking.start_time|date:"M d, Y" }}<br>
-                                                {{ booking.start_time|date:"H:i" }} - {{ booking.end_time|date:"H:i" }}
-                                            </td>
-                                            <td>
-                                                <a href="{% url 'approve_booking' booking.id %}" class="btn btn-success btn-sm">Approve</a>
-                                                <button class="btn btn-danger btn-sm">Reject</button>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
+                    <form method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="date_from" class="form-label">From</label>
+                            <input type="date" class="form-control" id="date_from" name="date_from" 
+                                   value="{{ date_from|date:'Y-m-d' }}">
                         </div>
-                    {% else %}
-                        <div class="alert alert-info mb-0">No pending computer bookings.</div>
-                    {% endif %}
+                        <div class="col-md-4">
+                            <label for="date_to" class="form-label">To</label>
+                            <input type="date" class="form-control" id="date_to" name="date_to"
+                                   value="{{ date_to|date:'Y-m-d' }}">
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary">Apply Filter</button>
+                            <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary ms-2">Reset</a>
+                        </div>
+                    </form>
                 </div>
             </div>
             
-            <!-- Pending Lab Sessions -->
-            <div class="card mb-4" id="pending-sessions">
-                <div class="card-header bg-warning">
-                    <h5 class="mb-0">Pending Lab Sessions</h5>
-                </div>
-                <div class="card-body">
-                    {% if pending_lab_sessions %}
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Title</th>
-                                        <th>Lecturer</th>
-                                        <th>Lab</th>
-                                        <th>Date & Time</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for session in pending_lab_sessions %}
-                                        <tr>
-                                            <td>{{ session.title }}</td>
-                                            <td>{{ session.lecturer.username }}</td>
-                                            <td>{{ session.lab.name }}</td>
-                                            <td>
-                                                {{ session.start_time|date:"M d, Y" }}<br>
-                                                {{ session.start_time|date:"H:i" }} - {{ session.end_time|date:"H:i" }}
-                                            </td>
-                                            <td>
-                                                <a href="{% url 'approve_session' session.id %}" class="btn btn-success btn-sm">Approve</a>
-                                                <button class="btn btn-danger btn-sm">Reject</button>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
+            <div class="row">
+                <!-- Upcoming Computer Bookings -->
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h4>Upcoming Computer Bookings</h4>
                         </div>
-                    {% else %}
-                        <div class="alert alert-info mb-0">No pending lab sessions.</div>
-                    {% endif %}
-                </div>
-            </div>
-            
-            <!-- Labs Overview -->
-            <div class="card" id="labs">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0">Labs Overview</h5>
-                </div>
-                <div class="card-body">
-                    {% if labs %}
-                        <div class="row">
-                            {% for lab in labs %}
-                                <div class="col-md-6 col-lg-4 mb-3">
-                                    <div class="card h-100">
-                                        <div class="card-body">
-                                            <h5 class="card-title">{{ lab.name }}</h5>
-                                            <h6 class="card-subtitle mb-2 text-muted">{{ lab.location }}</h6>
-                                            <p class="card-text">
-                                                <strong>Capacity:</strong> {{ lab.capacity }} computers<br>
-                                                <strong>Description:</strong> {{ lab.description|truncatechars:100 }}
-                                            </p>
-                                        </div>
-                                        <div class="card-footer">
-                                            <a href="{% url 'lab_detail' lab.id %}" class="btn btn-primary btn-sm">View Details</a>
-                                        </div>
-                                    </div>
+                        <div class="card-body">
+                            {% if upcoming_computer_bookings %}
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Computer</th>
+                                                <th>Student</th>
+                                                <th>Time</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for booking in upcoming_computer_bookings %}
+                                                <tr>
+                                                    <td>{{ booking.computer }}</td>
+                                                    <td>{{ booking.student.username }}</td>
+                                                    <td>{{ booking.start_time|date:"M d, H:i" }} - {{ booking.end_time|date:"H:i" }}</td>
+                                                    <td>
+                                                        <span class="badge bg-success">Approved</span>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
                                 </div>
-                            {% endfor %}
+                            {% else %}
+                                <p>No upcoming computer bookings{% if date_from and date_to %} for the selected date range{% endif %}.</p>
+                            {% endif %}
                         </div>
-                    {% else %}
-                        <div class="alert alert-info mb-0">No labs available.</div>
-                    {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Upcoming Lab Sessions -->
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h4>Upcoming Lab Sessions</h4>
+                        </div>
+                        <div class="card-body">
+                            {% if upcoming_lab_sessions %}
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Lab</th>
+                                                <th>Lecturer</th>
+                                                <th>Title</th>
+                                                <th>Time</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for session in upcoming_lab_sessions %}
+                                                <tr>
+                                                    <td>{{ session.lab.name }}</td>
+                                                    <td>{{ session.lecturer.username }}</td>
+                                                    <td>{{ session.title }}</td>
+                                                    <td>{{ session.start_time|date:"M d, H:i" }} - {{ session.end_time|date:"H:i" }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p>No upcoming lab sessions{% if date_from and date_to %} for the selected date range{% endif %}.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Past Tab -->
+        <div class="tab-pane fade" id="past" role="tabpanel">
+            <!-- Date Filter -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Filter by Date</h4>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="date_from" class="form-label">From</label>
+                            <input type="date" class="form-control" id="date_from" name="date_from" 
+                                   value="{{ date_from|date:'Y-m-d' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="date_to" class="form-label">To</label>
+                            <input type="date" class="form-control" id="date_to" name="date_to"
+                                   value="{{ date_to|date:'Y-m-d' }}">
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary">Apply Filter</button>
+                            <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary ms-2">Reset</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="row">
+                <!-- Past Computer Bookings -->
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h4>Past Computer Bookings</h4>
+                        </div>
+                        <div class="card-body">
+                            {% if past_computer_bookings %}
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Computer</th>
+                                                <th>Student</th>
+                                                <th>Time</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for booking in past_computer_bookings %}
+                                                <tr>
+                                                    <td>{{ booking.computer }}</td>
+                                                    <td>{{ booking.student.username }}</td>
+                                                    <td>{{ booking.start_time|date:"M d, H:i" }} - {{ booking.end_time|date:"H:i" }}</td>
+                                                    <td>
+                                                        {% if booking.is_cancelled %}
+                                                            <span class="badge bg-danger">Cancelled</span>
+                                                        {% elif booking.is_approved %}
+                                                            <span class="badge bg-success">Completed</span>
+                                                        {% else %}
+                                                            <span class="badge bg-warning">Not Approved</span>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% if not date_from and not date_to %}
+                                    <p class="text-muted"><small>Showing only the 20 most recent past bookings. Use date filter for more.</small></p>
+                                {% endif %}
+                            {% else %}
+                                <p>No past computer bookings found{% if date_from and date_to %} for the selected date range{% endif %}.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Past Lab Sessions -->
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h4>Past Lab Sessions</h4>
+                        </div>
+                        <div class="card-body">
+                            {% if past_lab_sessions %}
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Lab</th>
+                                                <th>Lecturer</th>
+                                                <th>Title</th>
+                                                <th>Time</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for session in past_lab_sessions %}
+                                                <tr>
+                                                    <td>{{ session.lab.name }}</td>
+                                                    <td>{{ session.lecturer.username }}</td>
+                                                    <td>{{ session.title }}</td>
+                                                    <td>{{ session.start_time|date:"M d, H:i" }} - {{ session.end_time|date:"H:i" }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% if not date_from and not date_to %}
+                                    <p class="text-muted"><small>Showing only the 20 most recent past sessions. Use date filter for more.</small></p>
+                                {% endif %}
+                            {% else %}
+                                <p>No past lab sessions found{% if date_from and date_to %} for the selected date range{% endif %}.</p>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

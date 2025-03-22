@@ -172,23 +172,104 @@ def admin_dashboard_view(request):
         messages.error(request, "Access denied. Admin privileges required.")
         return redirect('home')
     
+    now = timezone.now()
+    
+    # Pending approvals
     pending_computer_bookings = ComputerBooking.objects.filter(
         is_approved=False,
         is_cancelled=False,
-        end_time__gte=timezone.now()
+        end_time__gte=now
     ).order_by('start_time')
     
     pending_lab_sessions = LabSession.objects.filter(
         is_approved=False,
-        end_time__gte=timezone.now()
+        end_time__gte=now
     ).order_by('start_time')
+    
+    # Upcoming (approved) bookings and sessions
+    upcoming_computer_bookings = ComputerBooking.objects.filter(
+        is_approved=True,
+        is_cancelled=False,
+        end_time__gte=now  # Show bookings from now onwards
+    ).order_by('start_time')
+    
+    upcoming_lab_sessions = LabSession.objects.filter(
+        is_approved=True,
+        end_time__gte=now  # Show sessions from now onwards
+    ).order_by('start_time')
+    
+    # Past bookings and sessions
+    past_computer_bookings = ComputerBooking.objects.filter(
+        end_time__lt=now
+    ).order_by('-start_time')[:20]  # Limit to recent 20 for performance
+    
+    past_lab_sessions = LabSession.objects.filter(
+        end_time__lt=now
+    ).order_by('-start_time')[:20]  # Limit to recent 20 for performance
+    
+    # Filter by date range if provided
+    date_from = request.GET.get('date_from')
+    date_to = request.GET.get('date_to')
+    
+    if date_from and date_to:
+        try:
+            date_from = timezone.datetime.strptime(date_from, '%Y-%m-%d')
+            date_to = timezone.datetime.strptime(date_to, '%Y-%m-%d')
+            date_to = timezone.datetime.combine(date_to, timezone.datetime.max.time())  # End of day
+            
+            # Apply filters to past records
+            past_computer_bookings = ComputerBooking.objects.filter(
+                end_time__lt=now,
+                start_time__gte=date_from,
+                end_time__lte=date_to
+            ).order_by('-start_time')
+            
+            past_lab_sessions = LabSession.objects.filter(
+                end_time__lt=now,
+                start_time__gte=date_from,
+                end_time__lte=date_to
+            ).order_by('-start_time')
+            
+            # Apply filters to upcoming records
+            upcoming_computer_bookings = ComputerBooking.objects.filter(
+                is_approved=True,
+                is_cancelled=False,
+                start_time__gte=date_from,
+                end_time__lte=date_to
+            ).order_by('start_time')
+            
+            upcoming_lab_sessions = LabSession.objects.filter(
+                is_approved=True,
+                start_time__gte=date_from,
+                end_time__lte=date_to
+            ).order_by('start_time')
+        except ValueError:
+            messages.error(request, "Invalid date format. Please use YYYY-MM-DD.")
+    
+    # Get basic stats
+    stats = {
+        'total_labs': Lab.objects.count(),
+        'total_computers': Computer.objects.count(),
+        'available_computers': Computer.objects.filter(status='available').count(),
+        'maintenance_computers': Computer.objects.filter(status='maintenance').count(),
+        'pending_bookings_count': pending_computer_bookings.count(),
+        'pending_sessions_count': pending_lab_sessions.count(),
+        'total_pending_approvals': pending_computer_bookings.count() + pending_lab_sessions.count(),
+    }
     
     labs = Lab.objects.all()
     
     return render(request, 'admin_dashboard.html', {
         'pending_computer_bookings': pending_computer_bookings,
         'pending_lab_sessions': pending_lab_sessions,
-        'labs': labs
+        'upcoming_computer_bookings': upcoming_computer_bookings,
+        'upcoming_lab_sessions': upcoming_lab_sessions,
+        'past_computer_bookings': past_computer_bookings,
+        'past_lab_sessions': past_lab_sessions,
+        'stats': stats,
+        'labs': labs,
+        'date_from': date_from,
+        'date_to': date_to,
     })
 
 @login_required
