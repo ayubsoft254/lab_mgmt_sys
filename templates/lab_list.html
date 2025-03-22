@@ -1,0 +1,42 @@
+{% extends 'booking/base.html' %}
+
+{% block title %}Available Labs - Lab Management System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1>Available Labs</h1>
+            <p>Browse through our available computer labs for booking.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        {% for lab in labs %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ lab.name }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">{{ lab.location }}</h6>
+                        <p class="card-text">{{ lab.description }}</p>
+                        <p><strong>Capacity:</strong> {{ lab.capacity }} computers</p>
+                        <a href="{% url 'lab_detail' lab.id %}" class="btn btn-primary">View Details</a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    No labs are currently available in the system.
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <a href="{% url 'home' %}" class="btn btn-secondary">Back to Home</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,100 @@
+{% extends 'booking/base.html' %}
+
+{% block title %}{{ lab.name }} - Lab Details{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1>{{ lab.name }}</h1>
+            <p class="lead">{{ lab.location }}</p>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Lab Information</h2>
+                </div>
+                <div class="card-body">
+                    <p><strong>Description:</strong> {{ lab.description }}</p>
+                    <p><strong>Capacity:</strong> {{ lab.capacity }} computers</p>
+                    {% if user.is_student %}
+                        <a href="{% url 'student_booking' lab.id %}" class="btn btn-primary">Book a Computer</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Upcoming Sessions</h2>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_sessions %}
+                        <div class="list-group">
+                            {% for session in upcoming_sessions %}
+                                <div class="list-group-item">
+                                    <h5 class="mb-1">{{ session.title }}</h5>
+                                    <p class="mb-1"><strong>Date:</strong> {{ session.start_time|date:"M d, Y" }}</p>
+                                    <p class="mb-1"><strong>Time:</strong> {{ session.start_time|date:"H:i" }} - {{ session.end_time|date:"H:i" }}</p>
+                                    <small class="text-muted">Booked by: {{ session.lecturer.username }}</small>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p>No upcoming sessions scheduled for this lab.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Available Computers</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for computer in computers %}
+                            <div class="col-md-3 mb-3">
+                                <div class="card {% if computer.status == 'available' %}border-success{% elif computer.status == 'maintenance' %}border-danger{% else %}border-warning{% endif %}">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Computer #{{ computer.computer_number }}</h5>
+                                        <p class="card-text"><strong>Status:</strong> 
+                                            {% if computer.status == 'available' %}
+                                                <span class="badge bg-success">Available</span>
+                                            {% elif computer.status == 'maintenance' %}
+                                                <span class="badge bg-danger">Under Maintenance</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">Reserved</span>
+                                            {% endif %}
+                                        </p>
+                                        <p class="card-text">{{ computer.specs|truncatewords:10 }}</p>
+                                        {% if computer.status == 'available' and user.is_student %}
+                                            <a href="{% url 'computer_booking' lab.id computer.id %}" class="btn btn-sm btn-success">Book This Computer</a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="col-12">
+                                <p>No computers are registered for this lab.</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <a href="{% url 'lab_list' %}" class="btn btn-secondary">Back to Lab List</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

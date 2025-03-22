@@ -19,7 +19,7 @@ def register_view(request):
             return redirect('home')
     else:
         form = CustomUserCreationForm()
-    return render(request, 'booking/register.html', {'form': form})
+    return render(request, 'register.html', {'form': form})
 
 @login_required
 def home_view(request):
@@ -42,7 +42,7 @@ def home_view(request):
     
     labs = Lab.objects.all()
     
-    return render(request, 'booking/home.html', {
+    return render(request, 'home.html', {
         'labs': labs,
         'upcoming_bookings': upcoming_bookings,
         'upcoming_sessions': upcoming_sessions,
@@ -52,7 +52,7 @@ def home_view(request):
 @login_required
 def lab_list_view(request):
     labs = Lab.objects.all()
-    return render(request, 'booking/lab_list.html', {'labs': labs})
+    return render(request, 'lab_list.html', {'labs': labs})
 
 @login_required
 def lab_detail_view(request, lab_id):
@@ -66,7 +66,7 @@ def lab_detail_view(request, lab_id):
         is_approved=True
     ).order_by('start_time')
     
-    return render(request, 'booking/lab_detail.html', {
+    return render(request, 'lab_detail.html', {
         'lab': lab,
         'computers': computers,
         'upcoming_sessions': upcoming_sessions
@@ -99,7 +99,7 @@ def student_booking_view(request, lab_id, computer_id=None):
             
             if conflicting_sessions.exists():
                 messages.error(request, "Lab is reserved for a session during this time slot")
-                return render(request, 'booking/student_booking.html', {'form': form, 'lab': lab})
+                return render(request, 'student_booking.html', {'form': form, 'lab': lab})
             
             booking.save()
             
@@ -120,7 +120,7 @@ def student_booking_view(request, lab_id, computer_id=None):
         
         form = ComputerBookingForm(lab_id=lab_id, initial=initial_data)
     
-    return render(request, 'booking/student_booking.html', {
+    return render(request, 'student_booking.html', {
         'form': form,
         'lab': lab,
         'computer': computer
@@ -159,12 +159,12 @@ def lecturer_booking_view(request):
     else:
         form = LabSessionForm()
     
-    return render(request, 'booking/lecturer_booking.html', {'form': form})
+    return render(request, 'lecturer_booking.html', {'form': form})
 
 @login_required
 def booking_success_view(request, booking_id):
     booking = get_object_or_404(ComputerBooking, id=booking_id, student=request.user)
-    return render(request, 'booking/booking_success.html', {'booking': booking})
+    return render(request, 'booking_success.html', {'booking': booking})
 
 @login_required
 def admin_dashboard_view(request):
@@ -185,7 +185,7 @@ def admin_dashboard_view(request):
     
     labs = Lab.objects.all()
     
-    return render(request, 'booking/admin_dashboard.html', {
+    return render(request, 'admin_dashboard.html', {
         'pending_computer_bookings': pending_computer_bookings,
         'pending_lab_sessions': pending_lab_sessions,
         'labs': labs
@@ -240,6 +240,6 @@ def notification_list_view(request):
         Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
         return redirect('notification_list')
     
-    return render(request, 'booking/notification_list.html', {
+    return render(request, 'notification_list.html', {
         'notifications': notifications
     })

@@ -1,0 +1,123 @@
+{% extends 'booking/base.html' %}
+
+{% block title %}Book a Computer - {{ lab.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1>Book a Computer in {{ lab.name }}</h1>
+            <p class="lead">{{ lab.location }}</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Booking Form</h2>
+                </div>
+                <div class="card-body">
+                    {% if computer %}
+                        <p>You are booking Computer #{{ computer.computer_number }}</p>
+                    {% endif %}
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.computer.id_for_label }}" class="form-label">Computer</label>
+                            {{ form.computer }}
+                            {% if form.computer.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.computer.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.date.id_for_label }}" class="form-label">Date</label>
+                            {{ form.date }}
+                            {% if form.date.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.date.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.start_time.id_for_label }}" class="form-label">Start Time</label>
+                                {{ form.start_time }}
+                                {% if form.start_time.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.start_time.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.end_time.id_for_label }}" class="form-label">End Time</label>
+                                {{ form.end_time }}
+                                {% if form.end_time.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.end_time.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary">Submit Booking</button>
+                            <a href="{% url 'lab_detail' lab.id %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Booking Information</h2>
+                </div>
+                <div class="card-body">
+                    <p>Please note the following:</p>
+                    <ul>
+                        <li>Bookings are subject to approval by an administrator.</li>
+                        <li>Your booking may be cancelled if a lecturer needs the lab for a session.</li>
+                        <li>You will receive a notification about the status of your booking.</li>
+                        <li>Bookings cannot overlap with scheduled lab sessions.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Add Bootstrap classes to form elements
+    document.addEventListener('DOMContentLoaded', function() {
+        var formElements = document.querySelectorAll('select, input[type="date"], input[type="time"]');
+        formElements.forEach(function(element) {
+            element.classList.add('form-control');
+        });
+    });
+</script>
+{% endblock %}
