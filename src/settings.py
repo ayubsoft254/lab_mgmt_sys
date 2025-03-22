@@ -72,6 +72,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'src.wsgi.application'
 
+# Authentication settings
+LOGIN_URL = 'login'  # This tells @login_required to redirect to the URL named 'login'
+LOGIN_REDIRECT_URL = 'home'  # Where to redirect after successful login (optional)
+LOGOUT_REDIRECT_URL = 'login'  # Where to redirect after logout
+
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases

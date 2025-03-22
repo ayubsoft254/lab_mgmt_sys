@@ -5,23 +5,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Lab Management System{% endblock %}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+
 </head>
 <body class="bg-gray-100 min-h-screen">
     <nav class="bg-blue-600 text-white shadow-lg">
         <div class="container mx-auto px-4">
             <div class="flex justify-between items-center py-4">
-                <a href="{% url 'home' %}" class="text-xl font-bold">Lab Management</a>
+                <a href="{% url 'home' %}" class="text-xl font-bold text-white">Lab Management</a>
                 <div class="space-x-4">
                     {% if user.is_authenticated %}
-                        <a href="{% url 'lab_list' %}" class="hover:text-blue-200">Labs</a>
+                        <a href="{% url 'lab_list' %}" class="text-white hover:text-blue-200">Labs</a>
                         {% if user.is_lecturer %}
-                            <a href="{% url 'lecturer_booking' %}" class="hover:text-blue-200">Book Lab Session</a>
+                            <a href="{% url 'lecturer_booking' %}" class="text-white hover:text-blue-200">Book Lab Session</a>
                         {% endif %}
                         {% if user.is_admin %}
-                            <a href="{% url 'admin_dashboard' %}" class="hover:text-blue-200">Admin Dashboard</a>
+                            <a href="{% url 'admin_dashboard' %}" class="text-white hover:text-blue-200">Admin Dashboard</a>
                         {% endif %}
-                        <a href="{% url 'notification_list' %}" class="hover:text-blue-200 relative">
+                        <a href="{% url 'notification_list' %}" class="text-white hover:text-blue-200 relative">
                             Notifications
                             {% if unread_notifications_count > 0 %}
                                 <span class="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
@@ -29,11 +32,11 @@
                                 </span>
                             {% endif %}
                         </a>
-                        <a href="{% url 'logout' %}" class="hover:text-blue-200">Logout</a>
+                        <a href="{% url 'logout' %}" class="text-white hover:text-blue-200">Logout</a>
                         <span class="text-blue-200">{{ user.username }}</span>
                     {% else %}
-                        <a href="{% url 'login' %}" class="hover:text-blue-200">Login</a>
-                        <a href="{% url 'register' %}" class="hover:text-blue-200">Register</a>
+                        <a href="{% url 'login' %}" class="text-white hover:text-blue-200">Login</a>
+                        <a href="{% url 'register' %}" class="text-white hover:text-blue-200">Register</a>
                     {% endif %}
                 </div>
             </div>
