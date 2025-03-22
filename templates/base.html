@@ -1,0 +1,63 @@
+<!-- base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Lab Management System{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <nav class="bg-blue-600 text-white shadow-lg">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <a href="{% url 'home' %}" class="text-xl font-bold">Lab Management</a>
+                <div class="space-x-4">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'lab_list' %}" class="hover:text-blue-200">Labs</a>
+                        {% if user.is_lecturer %}
+                            <a href="{% url 'lecturer_booking' %}" class="hover:text-blue-200">Book Lab Session</a>
+                        {% endif %}
+                        {% if user.is_admin %}
+                            <a href="{% url 'admin_dashboard' %}" class="hover:text-blue-200">Admin Dashboard</a>
+                        {% endif %}
+                        <a href="{% url 'notification_list' %}" class="hover:text-blue-200 relative">
+                            Notifications
+                            {% if unread_notifications_count > 0 %}
+                                <span class="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                                    {{ unread_notifications_count }}
+                                </span>
+                            {% endif %}
+                        </a>
+                        <a href="{% url 'logout' %}" class="hover:text-blue-200">Logout</a>
+                        <span class="text-blue-200">{{ user.username }}</span>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="hover:text-blue-200">Login</a>
+                        <a href="{% url 'register' %}" class="hover:text-blue-200">Register</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8">
+        {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                    <div class="p-4 mb-2 rounded-md {% if message.tags == 'error' %}bg-red-100 text-red-700{% elif message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+    
+    <footer class="bg-gray-200 py-4 mt-8">
+        <div class="container mx-auto px-4 text-center text-gray-600">
+            &copy; {% now "Y" %} Lab Management System
+        </div>
+    </footer>
+</body>
+</html>
