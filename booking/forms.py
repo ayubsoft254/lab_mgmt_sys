@@ -2,11 +2,13 @@ from django import forms
 from .models import ComputerBooking, LabSession, Lab, Computer, User
 from django.contrib.auth.forms import UserCreationForm
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 class CustomUserCreationForm(UserCreationForm):
     ROLE_CHOICES = (
         ('student', 'Student'),
-        ('lecturer', 'Lecturer'),        
+        ('lecturer', 'Lecturer'),
+        ('admin', 'Admin'),
     )
     
     role = forms.ChoiceField(choices=ROLE_CHOICES)
@@ -14,6 +16,21 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = User
         fields = ('username', 'email', 'password1', 'password2', 'role')
+    
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        role = self.cleaned_data.get('role')
+        
+        if not email:
+            raise ValidationError('Email is required')
+            
+        if role == 'student' and not email.endswith('@students.ttu.ac.ke'):
+            raise ValidationError('Student email must end with @students.ttu.ac.ke')
+            
+        if role in ['lecturer', 'admin'] and not email.endswith('@ttu.ac.ke'):
+            raise ValidationError('Staff email must end with @ttu.ac.ke')
+            
+        return email
     
     def save(self, commit=True):
         user = super().save(commit=False)
