@@ -7,8 +7,7 @@ from django.core.exceptions import ValidationError
 class CustomUserCreationForm(UserCreationForm):
     ROLE_CHOICES = (
         ('student', 'Student'),
-        ('lecturer', 'Lecturer'),
-        ('admin', 'Admin'),
+        ('lecturer', 'Lecturer'),        
     )
     
     role = forms.ChoiceField(choices=ROLE_CHOICES)
