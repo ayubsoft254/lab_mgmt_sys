@@ -3,30 +3,30 @@
 {% block title %}Register{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">Create an Account</h3>
+<div class="container mx-auto px-4 py-10">
+    <div class="flex justify-center">
+        <div class="w-full max-w-md">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="bg-blue-600 text-white px-6 py-4">
+                    <h3 class="text-xl font-semibold">Create an Account</h3>
                 </div>
-                <div class="card-body">
+                <div class="px-6 py-4">
                     <form method="post">
                         {% csrf_token %}
                         
                         {% if form.non_field_errors %}
-                            <div class="alert alert-danger">
+                            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                                 {% for error in form.non_field_errors %}
                                     {{ error }}
                                 {% endfor %}
                             </div>
                         {% endif %}
                         
-                        <div class="form-group mb-3">
-                            <label for="{{ form.username.id_for_label }}">Username</label>
+                        <div class="mb-4">
+                            <label for="{{ form.username.id_for_label }}" class="block text-gray-700 text-sm font-bold mb-2">Username</label>
                             {{ form.username }}
                             {% if form.username.errors %}
-                                <div class="text-danger">
+                                <div class="text-red-600 text-sm mt-1">
                                     {% for error in form.username.errors %}
                                         {{ error }}
                                     {% endfor %}
@@ -34,11 +34,11 @@
                             {% endif %}
                         </div>
                         
-                        <div class="form-group mb-3">
-                            <label for="{{ form.email.id_for_label }}">Email</label>
+                        <div class="mb-4">
+                            <label for="{{ form.email.id_for_label }}" class="block text-gray-700 text-sm font-bold mb-2">Email</label>
                             {{ form.email }}
                             {% if form.email.errors %}
-                                <div class="text-danger">
+                                <div class="text-red-600 text-sm mt-1">
                                     {% for error in form.email.errors %}
                                         {{ error }}
                                     {% endfor %}
@@ -46,24 +46,24 @@
                             {% endif %}
                         </div>
                         
-                        <div class="form-group mb-3">
-                            <label for="{{ form.password1.id_for_label }}">Password</label>
+                        <div class="mb-4">
+                            <label for="{{ form.password1.id_for_label }}" class="block text-gray-700 text-sm font-bold mb-2">Password</label>
                             {{ form.password1 }}
                             {% if form.password1.errors %}
-                                <div class="text-danger">
+                                <div class="text-red-600 text-sm mt-1">
                                     {% for error in form.password1.errors %}
                                         {{ error }}
                                     {% endfor %}
                                 </div>
                             {% endif %}
-                            <small class="form-text text-muted">{{ form.password1.help_text }}</small>
+                            <p class="text-gray-600 text-xs mt-1">{{ form.password1.help_text }}</p>
                         </div>
                         
-                        <div class="form-group mb-3">
-                            <label for="{{ form.password2.id_for_label }}">Confirm Password</label>
+                        <div class="mb-4">
+                            <label for="{{ form.password2.id_for_label }}" class="block text-gray-700 text-sm font-bold mb-2">Confirm Password</label>
                             {{ form.password2 }}
                             {% if form.password2.errors %}
-                                <div class="text-danger">
+                                <div class="text-red-600 text-sm mt-1">
                                     {% for error in form.password2.errors %}
                                         {{ error }}
                                     {% endfor %}
@@ -71,11 +71,11 @@
                             {% endif %}
                         </div>
                         
-                        <div class="form-group mb-3">
-                            <label for="{{ form.role.id_for_label }}">Role</label>
+                        <div class="mb-6">
+                            <label for="{{ form.role.id_for_label }}" class="block text-gray-700 text-sm font-bold mb-2">Role</label>
                             {{ form.role }}
                             {% if form.role.errors %}
-                                <div class="text-danger">
+                                <div class="text-red-600 text-sm mt-1">
                                     {% for error in form.role.errors %}
                                         {{ error }}
                                     {% endfor %}
@@ -83,11 +83,11 @@
                             {% endif %}
                         </div>
                         
-                        <button type="submit" class="btn btn-primary btn-block w-100">Register</button>
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Register</button>
                     </form>
                 </div>
-                <div class="card-footer text-center">
-                    <p class="mb-0">Already have an account? <a href="{% url 'login' %}">Login</a></p>
+                <div class="bg-gray-50 px-6 py-4 text-center">
+                    <p class="text-sm text-gray-700">Already have an account? <a href="{% url 'login' %}" class="text-blue-600 hover:text-blue-800">Login</a></p>
                 </div>
             </div>
         </div>
