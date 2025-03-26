@@ -1,8 +1,9 @@
 from django import forms
-from .models import ComputerBooking, LabSession, Lab, Computer, User
+from .models import ComputerBooking, LabSession, Lab, Computer, User, RecurringSession
 from django.contrib.auth.forms import UserCreationForm
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+
 
 class CustomUserCreationForm(UserCreationForm):
     ROLE_CHOICES = (
@@ -128,5 +129,31 @@ class LabSessionForm(forms.ModelForm):
             
             cleaned_data['start_time'] = start_datetime
             cleaned_data['end_time'] = end_datetime
+        
+        return cleaned_data
+    
+class RecurringSessionForm(forms.ModelForm):
+    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    start_time = forms.TimeField(widget=forms.TimeInput(attrs={'type': 'time'}))
+    end_time = forms.TimeField(widget=forms.TimeInput(attrs={'type': 'time'}))
+    
+    class Meta:
+        model = RecurringSession
+        fields = ['lab', 'title', 'start_date', 'end_date', 'start_time', 'end_time', 'recurrence_type']
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        start_date = cleaned_data.get('start_date')
+        end_date = cleaned_data.get('end_date')
+        start_time = cleaned_data.get('start_time')
+        end_time = cleaned_data.get('end_time')
+        
+        # Validate dates and times
+        if start_date and end_date and start_date > end_date:
+            self.add_error('end_date', 'End date must be after start date')
+        
+        if start_time and end_time and start_time >= end_time:
+            self.add_error('end_time', 'End time must be after start time')
         
         return cleaned_data
