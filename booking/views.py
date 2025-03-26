@@ -7,7 +7,8 @@ from django.urls import reverse
 from django.db.models import Q, Count
 from django.utils import timezone
 from django.http import HttpResponse
-from .models import Lab, Computer, ComputerBooking, LabSession, Notification, User
+from .models import Lab, Computer, ComputerBooking, LabSession, Notification, User, RecurringSession
+from datetime import datetime, timedelta
 from .forms import ComputerBookingForm, LabSessionForm, CustomUserCreationForm
 
 def register_view(request):
@@ -329,3 +330,87 @@ def logout_view(request):
     logout(request)
     messages.success(request, "You have been successfully logged out.")
     return redirect('login')
+
+@login_required
+def free_timeslots_view(request, lab_id=None, computer_id=None):
+    # Determine the scope of the search (lab-wide or computer-specific)
+    if computer_id:
+        computer = get_object_or_404(Computer, id=computer_id)
+        lab = computer.lab
+    elif lab_id:
+        lab = get_object_or_404(Lab, id=lab_id)
+        computer = None
+    else:
+        # If no specific lab or computer is selected, return an error
+        return render(request, 'booking/free_timeslots.html', {
+            'error': 'Please select a lab or computer'
+        })
+    
+    # Set up date range (next 7 days)
+    start_date = timezone.now().date()
+    end_date = start_date + timedelta(days=7)
+    
+    # Get all booked time slots
+    if computer:
+        # Computer-specific bookings
+        booked_slots = ComputerBooking.objects.filter(
+            computer=computer,
+            is_approved=True,
+            is_cancelled=False,
+            start_time__date__range=[start_date, end_date]
+        )
+    else:
+        # Lab-wide sessions and bookings
+        booked_lab_sessions = LabSession.objects.filter(
+            lab=lab,
+            is_approved=True,
+            start_time__date__range=[start_date, end_date]
+        )
+        booked_computer_bookings = ComputerBooking.objects.filter(
+            computer__lab=lab,
+            is_approved=True,
+            is_cancelled=False,
+            start_time__date__range=[start_date, end_date]
+        )
+    
+    # Prepare time slots
+    time_slots = []
+    current_date = start_date
+    while current_date <= end_date:
+        # Generate hourly slots from 8:00 AM to 8:00 PM
+        for hour in range(8, 20):
+            slot_start = timezone.make_aware(datetime.combine(current_date, datetime.min.replace(hour=hour)))
+            slot_end = slot_start + timedelta(hours=1)
+            
+            # Check if slot is free
+            if computer:
+                is_free = not booked_slots.filter(
+                    start_time__lt=slot_end,
+                    end_time__gt=slot_start
+                ).exists()
+            else:
+                is_free = not (
+                    booked_lab_sessions.filter(
+                        start_time__lt=slot_end,
+                        end_time__gt=slot_start
+                    ).exists() or
+                    booked_computer_bookings.filter(
+                        start_time__lt=slot_end,
+                        end_time__gt=slot_start
+                    ).exists()
+                )
+            
+            time_slots.append({
+                'date': current_date,
+                'start_time': slot_start,
+                'end_time': slot_end,
+                'is_free': is_free
+            })
+        
+        current_date += timedelta(days=1)
+    
+    return render(request, 'booking/free_timeslots.html', {
+        'lab': lab,
+        'computer': computer,
+        'time_slots': time_slots
+    })
