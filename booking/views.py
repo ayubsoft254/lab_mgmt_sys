@@ -7,9 +7,9 @@ from django.urls import reverse
 from django.db.models import Q, Count
 from django.utils import timezone
 from django.http import HttpResponse
-from .models import Lab, Computer, ComputerBooking, LabSession, Notification, User, RecurringSession
+from .models import Lab, Computer, ComputerBooking, LabSession, Notification, User
 from datetime import datetime, timedelta
-from .forms import ComputerBookingForm, LabSessionForm, CustomUserCreationForm
+from .forms import ComputerBookingForm, LabSessionForm, CustomUserCreationForm, RecurringSessionForm
 
 def register_view(request):
     if request.method == 'POST':
@@ -414,3 +414,38 @@ def free_timeslots_view(request, lab_id=None, computer_id=None):
         'computer': computer,
         'time_slots': time_slots
     })
+
+@login_required
+def recurring_booking_view(request):
+    if not request.user.is_lecturer:
+        messages.error(request, "Only lecturers can book recurring sessions")
+        return redirect('home')
+    
+    if request.method == 'POST':
+        form = RecurringSessionForm(request.POST)
+        if form.is_valid():
+            recurring_session = form.save(commit=False)
+            recurring_session.lecturer = request.user
+            
+            try:
+                recurring_session.save()
+                
+                # Notify admin about new recurring session request
+                admin_users = User.objects.filter(is_admin=True)
+                for admin in admin_users:
+                    Notification.objects.create(
+                        user=admin,
+                        message=f"New recurring session request: {recurring_session.lab.name} - {recurring_session.title}",
+                        notification_type='recurring_session_booked'
+                    )
+                
+                messages.success(request, "Recurring session request submitted for approval")
+                return redirect('home')
+            except ValidationError as e:
+                for field, errors in e.message_dict.items():
+                    for error in errors:
+                        messages.error(request, error)
+    else:
+        form = RecurringSessionForm()
+    
+    return render(request, 'recurring_booking.html', {'form': form})
