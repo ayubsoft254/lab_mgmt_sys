@@ -409,7 +409,7 @@ def free_timeslots_view(request, lab_id=None, computer_id=None):
         
         current_date += timedelta(days=1)
     
-    return render(request, 'booking/free_timeslots.html', {
+    return render(request, 'free_timeslots.html', {
         'lab': lab,
         'computer': computer,
         'time_slots': time_slots
