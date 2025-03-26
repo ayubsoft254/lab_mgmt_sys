@@ -3,6 +3,12 @@ from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 import uuid
+from django.utils import timezone
+from django.core.exceptions import ValidationError
+from django.db.models import Q
+import uuid
+from dateutil.rrule import rrule, DAILY, WEEKLY, MONTHLY
+from dateutil.parser import parse
 
 class User(AbstractUser):
     is_student = models.BooleanField(default=False)
@@ -174,4 +180,98 @@ class Notification(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return f"Notification for {self.user.username}: {self.notification_type}"
+        return f"Notification for {self.user.username}: {self.notification_type}"    
+
+class RecurringSession(models.Model):
+    RECURRENCE_CHOICES = [
+        ('daily', 'Daily'),
+        ('weekly', 'Weekly'),
+        ('monthly', 'Monthly')
+    ]
+    
+    lab = models.ForeignKey('Lab', on_delete=models.CASCADE, related_name='recurring_sessions')
+    lecturer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='recurring_sessions')
+    title = models.CharField(max_length=100)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    start_date = models.DateField()
+    end_date = models.DateField()
+    recurrence_type = models.CharField(max_length=10, choices=RECURRENCE_CHOICES)
+    is_approved = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def clean(self):
+        # Validate time and date ranges
+        if self.end_date < self.start_date:
+            raise ValidationError('End date must be after start date')
+        
+        if self.end_time <= self.start_time:
+            raise ValidationError('End time must be after start time')
+        
+        # Check for conflicts with existing lab sessions and recurring sessions
+        conflicts = self.check_session_conflicts()
+        if conflicts:
+            raise ValidationError(f'Conflicts exist with existing sessions: {conflicts}')
+    
+    def check_session_conflicts(self):
+        conflicts = []
+        
+        # Get all occurrence dates
+        occurrence_dates = list(rrule(
+            freq={'daily': DAILY, 'weekly': WEEKLY, 'monthly': MONTHLY}[self.recurrence_type],
+            dtstart=parse(f"{self.start_date} {self.start_time}"),
+            until=parse(f"{self.end_date} {self.end_time}")
+        ))
+        
+        for occurrence in occurrence_dates:
+            # Check conflicts with existing lab sessions
+            conflicting_sessions = LabSession.objects.filter(
+                Q(lab=self.lab) &
+                Q(start_time__lt=occurrence + timezone.timedelta(hours=self.end_time.hour, minutes=self.end_time.minute)) &
+                Q(end_time__gt=occurrence + timezone.timedelta(hours=self.start_time.hour, minutes=self.start_time.minute)) &
+                Q(is_approved=True)
+            )
+            
+            # Check conflicts with other recurring sessions
+            conflicting_recurring_sessions = RecurringSession.objects.filter(
+                Q(lab=self.lab) &
+                Q(start_date__lte=occurrence.date()) &
+                Q(end_date__gte=occurrence.date()) &
+                Q(is_approved=True)
+            )
+            
+            if conflicting_sessions or conflicting_recurring_sessions:
+                conflicts.append(occurrence.strftime('%Y-%m-%d %H:%M'))
+        
+        return conflicts
+    
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+        
+        # If the recurring session is approved, create individual lab sessions
+        if self.is_approved:
+            occurrence_dates = list(rrule(
+                freq={'daily': DAILY, 'weekly': WEEKLY, 'monthly': MONTHLY}[self.recurrence_type],
+                dtstart=parse(f"{self.start_date} {self.start_time}"),
+                until=parse(f"{self.end_date} {self.end_time}")
+            ))
+            
+            for occurrence in occurrence_dates:
+                start_datetime = timezone.make_aware(occurrence)
+                end_datetime = timezone.make_aware(occurrence + timezone.timedelta(
+                    hours=self.end_time.hour, 
+                    minutes=self.end_time.minute
+                ))
+                
+                LabSession.objects.create(
+                    lab=self.lab,
+                    lecturer=self.lecturer,
+                    title=self.title,
+                    start_time=start_datetime,
+                    end_time=end_datetime,
+                    is_approved=True
+                )
+    
+    def __str__(self):
+        return f"{self.title} - {self.recurrence_type.capitalize()} from {self.start_date} to {self.end_date}"
