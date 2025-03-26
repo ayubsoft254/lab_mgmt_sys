@@ -1,0 +1,108 @@
+{% extends 'booking/base.html' %}
+
+{% block content %}
+<div class="container mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6">Book Recurring Lab Session</h1>
+
+    <form method="post" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.lab.id_for_label }}">
+                Select Lab
+            </label>
+            {{ form.lab }}
+            {% if form.lab.errors %}
+                <p class="text-red-500 text-xs italic">{{ form.lab.errors }}</p>
+            {% endif %}
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.title.id_for_label }}">
+                Session Title
+            </label>
+            {{ form.title }}
+            {% if form.title.errors %}
+                <p class="text-red-500 text-xs italic">{{ form.title.errors }}</p>
+            {% endif %}
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.start_date.id_for_label }}">
+                    Start Date
+                </label>
+                {{ form.start_date }}
+                {% if form.start_date.errors %}
+                    <p class="text-red-500 text-xs italic">{{ form.start_date.errors }}</p>
+                {% endif %}
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.end_date.id_for_label }}">
+                    End Date
+                </label>
+                {{ form.end_date }}
+                {% if form.end_date.errors %}
+                    <p class="text-red-500 text-xs italic">{{ form.end_date.errors }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.start_time.id_for_label }}">
+                    Start Time
+                </label>
+                {{ form.start_time }}
+                {% if form.start_time.errors %}
+                    <p class="text-red-500 text-xs italic">{{ form.start_time.errors }}</p>
+                {% endif %}
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.end_time.id_for_label }}">
+                    End Time
+                </label>
+                {{ form.end_time }}
+                {% if form.end_time.errors %}
+                    <p class="text-red-500 text-xs italic">{{ form.end_time.errors }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.recurrence_type.id_for_label }}">
+                Recurrence Type
+            </label>
+            {{ form.recurrence_type }}
+            {% if form.recurrence_type.errors %}
+                <p class="text-red-500 text-xs italic">{{ form.recurrence_type.errors }}</p>
+            {% endif %}
+        </div>
+
+        <div class="flex items-center justify-between">
+            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+                Submit Recurring Session Request
+            </button>
+        </div>
+    </form>
+
+    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mt-6" role="alert">
+        <p class="font-bold">Important Notes:</p>
+        <ul class="list-disc pl-5">
+            <li>Recurring sessions are subject to admin approval</li>
+            <li>Conflicts with existing sessions will prevent booking</li>
+            <li>Choose the recurrence type carefully</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.db.models import Q, Count
 from django.utils import timezone
 from django.http import HttpResponse
-from .models import Lab, Computer, ComputerBooking, LabSession, Notification, User
+from .models import Lab, Computer, ComputerBooking, LabSession, Notification, User, RecurringSession
 from datetime import datetime, timedelta
 from .forms import ComputerBookingForm, LabSessionForm, CustomUserCreationForm, RecurringSessionForm
 
@@ -449,3 +449,50 @@ def recurring_booking_view(request):
         form = RecurringSessionForm()
     
     return render(request, 'recurring_booking.html', {'form': form})
+
+@login_required
+def recurring_sessions_list_view(request):
+    if request.user.is_lecturer:
+        # Show lecturer's recurring sessions
+        recurring_sessions = RecurringSession.objects.filter(
+            lecturer=request.user
+        ).order_by('-created_at')
+    elif request.user.is_admin:
+        # Show all recurring sessions for admin
+        recurring_sessions = RecurringSession.objects.all().order_by('-created_at')
+    else:
+        # Unauthorized access
+        messages.error(request, "You are not authorized to view recurring sessions")
+        return redirect('home')
+    
+    return render(request, 'booking/recurring_sessions_list.html', {
+        'recurring_sessions': recurring_sessions
+    })
+
+@login_required
+def cancel_recurring_session_view(request, session_id):
+    recurring_session = get_object_or_404(RecurringSession, id=session_id)
+    
+    # Ensure only the lecturer who created the session or an admin can cancel
+    if not (request.user == recurring_session.lecturer or request.user.is_admin):
+        messages.error(request, "You are not authorized to cancel this recurring session")
+        return redirect('recurring_sessions_list')
+    
+    if request.method == 'POST':
+        # Delete all future lab sessions associated with this recurring session
+        LabSession.objects.filter(
+            lab=recurring_session.lab,
+            lecturer=recurring_session.lecturer,
+            title=recurring_session.title,
+            start_time__gte=timezone.now()
+        ).delete()
+        
+        # Delete the recurring session
+        recurring_session.delete()
+        
+        messages.success(request, "Recurring session cancelled successfully")
+        return redirect('recurring_sessions_list')
+    
+    return render(request, 'cancel_recurring_session.html', {
+        'recurring_session': recurring_session
+    })
