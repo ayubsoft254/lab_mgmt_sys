@@ -1,0 +1,46 @@
+{% extends 'booking/base.html' %}
+
+{% block content %}
+<div class="container mx-auto p-4">
+    <h1 class="text-2xl font-bold mb-4">
+        {% if computer %}
+            Free Time Slots for {{ computer.lab.name }} - Computer #{{ computer.computer_number }}
+        {% else %}
+            Free Time Slots for {{ lab.name }}
+        {% endif %}
+    </h1>
+
+    {% if error %}
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+            {{ error }}
+        </div>
+    {% else %}
+        <table class="w-full border-collapse">
+            <thead>
+                <tr>
+                    <th class="border p-2">Date</th>
+                    <th class="border p-2">Time Slot</th>
+                    <th class="border p-2">Availability</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for slot in time_slots %}
+                    <tr>
+                        <td class="border p-2">{{ slot.date|date:"D, M d" }}</td>
+                        <td class="border p-2">
+                            {{ slot.start_time|date:"H:i" }} - {{ slot.end_time|date:"H:i" }}
+                        </td>
+                        <td class="border p-2">
+                            {% if slot.is_free %}
+                                <span class="text-green-600 font-bold">Available</span>
+                            {% else %}
+                                <span class="text-red-600 font-bold">Booked</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</div>
+{% endblock %}
