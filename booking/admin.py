@@ -38,5 +38,5 @@ class NotificationAdmin(admin.ModelAdmin):
 
 @admin.register(RecurringSession)
 class RecurringSessionAdmin(admin.ModelAdmin):
-    list_display = ('lab', 'lecturer', 'title', 'day_of_week', 'start_time', 'end_time')
+    list_display = ('lab', 'lecturer', 'title', 'recurrence_type', 'start_time', 'end_time')
     search_fields = ('lab__name', 'lecturer__username', 'title')
