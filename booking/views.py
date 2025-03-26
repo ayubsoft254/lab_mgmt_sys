@@ -342,7 +342,7 @@ def free_timeslots_view(request, lab_id=None, computer_id=None):
         computer = None
     else:
         # If no specific lab or computer is selected, return an error
-        return render(request, 'booking/free_timeslots.html', {
+        return render(request, 'free_timeslots.html', {
             'error': 'Please select a lab or computer'
         })
     
@@ -465,7 +465,7 @@ def recurring_sessions_list_view(request):
         messages.error(request, "You are not authorized to view recurring sessions")
         return redirect('home')
     
-    return render(request, 'booking/recurring_sessions_list.html', {
+    return render(request, 'recurring_sessions_list.html', {
         'recurring_sessions': recurring_sessions
     })
 

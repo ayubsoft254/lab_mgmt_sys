@@ -18,8 +18,7 @@ urlpatterns = [
     path('recurring/book/', views.recurring_booking_view, name='recurring_booking'),
     path('free-timeslots/', views.free_timeslots_view, name='free_timeslots'),
     path('labs/<int:lab_id>/free-timeslots/', views.free_timeslots_view, name='lab_free_timeslots'),
-    path('computers/<int:computer_id>/free-timeslots/', views.free_timeslots_view, name='computer_free_timeslots'),
-    path('recurring/book/', views.recurring_booking_view, name='recurring_booking'),
+    path('computers/<int:computer_id>/free-timeslots/', views.free_timeslots_view, name='computer_free_timeslots'),    
     path('recurring/list/', views.recurring_sessions_list_view, name='recurring_sessions_list'),
     path('recurring/<int:session_id>/cancel/', views.cancel_recurring_session_view, name='cancel_recurring_session'),
 ]
