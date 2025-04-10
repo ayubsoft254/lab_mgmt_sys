@@ -11,16 +11,9 @@ from .models import Lab, Computer, ComputerBooking, LabSession, Notification, Us
 from datetime import datetime, timedelta
 from .forms import ComputerBookingForm, LabSessionForm, CustomUserCreationForm, RecurringSessionForm
 
-def register_view(request):
-    if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('home')
-    else:
-        form = CustomUserCreationForm()
-    return render(request, 'register.html', {'form': form})
+
+def landing(request):
+    return render(request, 'landing.html')
 
 @login_required
 def home_view(request):
@@ -325,11 +318,6 @@ def notification_list_view(request):
     return render(request, 'notification_list.html', {
         'notifications': notifications
     })
-
-def logout_view(request):
-    logout(request)
-    messages.success(request, "You have been successfully logged out.")
-    return redirect('login')
 
 @login_required
 def free_timeslots_view(request, lab_id=None, computer_id=None):

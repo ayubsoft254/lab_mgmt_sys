@@ -37,15 +37,24 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
 
-    #myapps
+    # Third party apps
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    
+    # My apps
     'booking',
 ]
+
+SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    "allauth.account.middleware.AccountMiddleware",
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -64,7 +73,7 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+                'django.contrib.messages.context_processors.messages',                
             ],
         },
     },
@@ -73,9 +82,31 @@ TEMPLATES = [
 WSGI_APPLICATION = 'src.wsgi.application'
 
 # Authentication settings
-LOGIN_URL = 'login'  # This tells @login_required to redirect to the URL named 'login'
-LOGIN_REDIRECT_URL = 'home'  # Where to redirect after successful login (optional)
-LOGOUT_REDIRECT_URL = 'login'  # Where to redirect after logout
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+LOGIN_URL = 'account_login'  # Use allauth's login URL
+LOGIN_REDIRECT_URL = 'home'  # Where to redirect after successful login
+LOGOUT_REDIRECT_URL = 'account_login'  # Where to redirect after logout
+
+# Allauth settings
+ACCOUNT_LOGIN_METHODS = {'email', 'username'}  # New way to define allowed login methods
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']  # New signup fields format
+
+ACCOUNT_EMAIL_SUBJECT_PREFIX = "[TTU Computer Lab] "
+
+ACCOUNT_EMAIL_NOTIFICATIONS = True
+ACCOUNT_EMAIL_VERIFICATION_BY_CODE_ENABLED = True
+ACCOUNT_LOGIN_BY_CODE_ENABLED = True
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+
+ACCOUNT_ADAPTER = 'booking.adapters.CustomAccountAdapter'
+ACCOUNT_FORMS = {
+    'signup': 'booking.forms.CustomUserCreationForm',
+}
 
 
 # Database
@@ -87,6 +118,7 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
 
 
 # Password validation

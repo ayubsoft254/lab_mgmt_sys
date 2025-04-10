@@ -32,11 +32,11 @@
                                 </span>
                             {% endif %}
                         </a>
-                        <a href="{% url 'logout' %}" class="text-white hover:text-blue-200">Logout</a>
+                        <a href="{% url 'account_logout' %}" class="text-white hover:text-blue-200">Logout</a>
                         <span class="text-blue-200">{{ user.username }}</span>
                     {% else %}
-                        <a href="{% url 'login' %}" class="text-white hover:text-blue-200">Login</a>
-                        <a href="{% url 'register' %}" class="text-white hover:text-blue-200">Register</a>
+                        <a href="{% url 'account_login' %}" class="text-white hover:text-blue-200">Login</a>
+                        <a href="{% url 'account_signup' %}" class="text-white hover:text-blue-200">Register</a>
                     {% endif %}
                 </div>
             </div>
