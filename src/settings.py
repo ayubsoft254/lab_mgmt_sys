@@ -7,23 +7,41 @@ For more information on this file, see
 https://docs.djangoproject.com/en/5.1/topics/settings/
 
 For the full list of settings and their values, see
-https://docs.djangoproject.com/en/5.1/ref/settings/
-"""
+https://docs.djangoproject.com/en/5.1/ref/settings/"""
 
+from decouple import config
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
+# Email config
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = config("EMAIL_HOST", cast=str, default="smtp.gmail.com")
+EMAIL_PORT = config("EMAIL_PORT", cast=str, default="587") # Recommended
+EMAIL_HOST_USER = config("EMAIL_HOST_USER", cast=str, default=None)
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", cast=str, default=None)
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", cast=bool, default=True)  # Use EMAIL_PORT 587 for TLS
+EMAIL_USE_SSL = config("EMAIL_USE_SSL", cast=bool, default=False)  # Use MAIL_PORT 465 for SSL
+ADMIN_USER_NAME=config("ADMIN_USER_NAME", default="Admin user")
+ADMIN_USER_EMAIL=config("ADMIN_USER_EMAIL", default=None)
+
+MANAGERS=[]
+ADMINS=[]
+if all([ADMIN_USER_NAME, ADMIN_USER_EMAIL]):
+    # 500 errors are emailed to these users
+    ADMINS +=[
+        (f'{ADMIN_USER_NAME}', f'{ADMIN_USER_EMAIL}')
+    ]
+    MANAGERS=ADMINS
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-heb20w_7h)0_$6h69#5y646f2x$d)odm7!@l-pas1&5ck)__u-'
+SECRET_KEY = config("DJANGO_SECRET_KEY") 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config("DJANGO_DEBUG", cast=bool)
+BASE_URL = config("BASE_URL", default=None)
 
 ALLOWED_HOSTS = ['*']
 
@@ -40,9 +58,12 @@ INSTALLED_APPS = [
     'django.contrib.sites',
 
     # Third party apps
+    "allauth_ui",
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+    "widget_tweaks",
+    "slippers",
     
     # My apps
     'booking',
