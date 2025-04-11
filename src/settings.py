@@ -116,7 +116,7 @@ LOGOUT_REDIRECT_URL = 'account_login'  # Where to redirect after logout
 ACCOUNT_LOGIN_METHODS = {'email', 'username'}  # New way to define allowed login methods
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']  # New signup fields format
 
-ACCOUNT_EMAIL_SUBJECT_PREFIX = "[TTU Computer Lab] "
+ACCOUNT_EMAIL_SUBJECT_PREFIX = "[TTU Computer Lab]"
 
 ACCOUNT_EMAIL_NOTIFICATIONS = True
 ACCOUNT_EMAIL_VERIFICATION_BY_CODE_ENABLED = True
