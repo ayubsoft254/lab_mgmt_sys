@@ -120,8 +120,7 @@ User = get_user_model()
 class CustomUserCreationForm(forms.ModelForm):
     ROLE_CHOICES = [
         ('student', 'Student'),
-        ('lecturer', 'Lecturer'),
-        ('admin', 'Admin'),
+        ('lecturer', 'Lecturer'),        
     ]
     
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
