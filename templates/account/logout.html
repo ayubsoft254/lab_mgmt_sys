@@ -1,0 +1,87 @@
+{% load i18n %}
+
+{% block account_content %}
+<style>
+/* Base Styles */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9fafb;
+}
+
+/* Container */
+.logout-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Card */
+.logout-card {
+    width: 100%;
+    max-width: 400px;
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    border-top: 5px solid #047857;
+}
+
+/* Title */
+.logout-title {
+    text-align: center;
+    color: #047857;
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* Description */
+.logout-description {
+    font-size: 14px;
+    color: #374151;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Button */
+.logout-button {
+    padding: 10px;
+    background-color: #047857;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    transition: background-color 0.3s;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.logout-button:hover {
+    background-color: #065f46;
+}
+</style>
+
+<div class="logout-container">
+  <div class="logout-card">
+    <h2 class="logout-title">{% trans "Sign Out" %}</h2>
+
+    <p class="logout-description">
+      {% trans "Are you sure you want to sign out?" %}
+    </p>
+
+    <form method="POST" action="{% url 'account_logout' %}">
+      {% csrf_token %}
+      <button type="submit" class="logout-button">
+        {% trans "Sign Out" %}
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}
