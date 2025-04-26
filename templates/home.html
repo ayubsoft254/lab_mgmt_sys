@@ -150,15 +150,26 @@
         </div>
         <div class="col-md-6 mb-3">
             {% if user.is_lecturer %}
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Book a Lab Session</h5>
-                        <p class="card-text">Schedule a lab session for your class.</p>
-                        <a href="{% url 'lecturer_booking' %}" class="btn btn-primary">Book Session</a>
+                <div class="d-flex gap-3">
+                    <div class="card flex-fill">
+                        <div class="card-body">
+                            <h5 class="card-title">Book a Lab Session</h5>
+                            <p class="card-text">Schedule a lab session for your class.</p>
+                            <a href="{% url 'lecturer_booking' %}" class="btn btn-primary">Book Session</a>
+                        </div>
+                    </div>
+                    
+                    <div class="card flex-fill">
+                        <div class="card-body">
+                            <h5 class="card-title">Book a Recurring Lab Session</h5>
+                            <p class="card-text">Schedule a recurring lab session for your class.</p>
+                            <a href="{% url 'recurring_booking' %}" class="btn btn-primary">Book Session</a>
+                        </div>
                     </div>
                 </div>
             {% endif %}
         </div>
+        
         <div class="col-md-6 mb-3">
             {% if user.is_admin %}
                 <div class="card">

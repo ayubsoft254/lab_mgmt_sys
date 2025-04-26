@@ -1,31 +1,31 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mx-auto p-6">
-    <h1 class="text-3xl font-bold mb-6">Cancel Recurring Session</h1>
+<div class="container mx-auto p-6 animate-fade-in">
+    <h1 class="text-3xl font-bold text-ttu-dark mb-6">Cancel Recurring Session</h1>
 
-    <div class="bg-white shadow-md rounded p-6">
-        <h2 class="text-xl font-semibold mb-4">Are you sure you want to cancel this recurring session?</h2>
+    <div class="glass-card p-6">
+        <h2 class="text-2xl font-semibold text-ttu-dark mb-4">Are you sure you want to cancel this recurring session?</h2>
 
-        <div class="mb-4">
+        <div class="mb-4 text-ttu-dark">
             <p><strong>Lab:</strong> {{ recurring_session.lab.name }}</p>
             <p><strong>Title:</strong> {{ recurring_session.title }}</p>
             <p><strong>Recurrence:</strong> {{ recurring_session.get_recurrence_type_display }}</p>
-            <p><strong>Start Date:</strong> {{ recurring_session.start_date }}</p>
-            <p><strong>End Date:</strong> {{ recurring_session.end_date }}</p>
+            <p><strong>Start Date:</strong> {{ recurring_session.start_date|date:"F j, Y" }}</p>
+            <p><strong>End Date:</strong> {{ recurring_session.end_date|date:"F j, Y" }}</p>
         </div>
 
-        <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4" role="alert">
-            <p>Warning: This will delete all future sessions associated with this recurring booking.</p>
+        <div class="bg-ttu-light border-l-4 border-ttu-yellow text-ttu-dark p-4 mb-4 rounded">
+            <p><strong>Warning:</strong> This will delete all future sessions associated with this recurring booking.</p>
         </div>
 
         <form method="post">
             {% csrf_token %}
             <div class="flex items-center">
-                <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mr-4">
+                <button type="submit" class="btn-danger mr-4">
                     Confirm Cancel
                 </button>
-                <a href="{% url 'recurring_sessions_list' %}" class="text-gray-600 hover:text-gray-800">
+                <a href="{% url 'recurring_sessions_list' %}" class="btn-outline-ttu">
                     Back to Recurring Sessions
                 </a>
             </div>

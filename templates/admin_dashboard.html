@@ -3,143 +3,136 @@
 {% block title %}Admin Dashboard{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h1>Admin Dashboard</h1>
+<div class="container mx-auto px-4 mt-6">
+    <h1 class="text-2xl font-bold mb-6">Admin Dashboard</h1>
     
     <!-- Stats Overview -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card text-white bg-primary mb-3">
-                <div class="card-header">Labs</div>
-                <div class="card-body">
-                    <h5 class="card-title">{{ stats.total_labs }}</h5>
-                </div>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-blue-600 text-white rounded-lg shadow overflow-hidden">
+            <div class="px-4 py-2 bg-blue-700">Labs</div>
+            <div class="px-4 py-4">
+                <h5 class="text-xl font-semibold">{{ stats.total_labs }}</h5>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-success mb-3">
-                <div class="card-header">Available Computers</div>
-                <div class="card-body">
-                    <h5 class="card-title">{{ stats.available_computers }} / {{ stats.total_computers }}</h5>
-                </div>
+        <div class="bg-green-600 text-white rounded-lg shadow overflow-hidden">
+            <div class="px-4 py-2 bg-green-700">Available Computers</div>
+            <div class="px-4 py-4">
+                <h5 class="text-xl font-semibold">{{ stats.available_computers }} / {{ stats.total_computers }}</h5>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-warning mb-3">
-                <div class="card-header">Maintenance</div>
-                <div class="card-body">
-                    <h5 class="card-title">{{ stats.maintenance_computers }}</h5>
-                </div>
+        <div class="bg-yellow-500 text-white rounded-lg shadow overflow-hidden">
+            <div class="px-4 py-2 bg-yellow-600">Maintenance</div>
+            <div class="px-4 py-4">
+                <h5 class="text-xl font-semibold">{{ stats.maintenance_computers }}</h5>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-danger mb-3">
-                <div class="card-header">Pending Approvals</div>
-                <div class="card-body">
-                    <h5 class="card-title">{{ stats.total_pending_approvals }}</h5>
-                </div>
+        <div class="bg-red-600 text-white rounded-lg shadow overflow-hidden">
+            <div class="px-4 py-2 bg-red-700">Pending Approvals</div>
+            <div class="px-4 py-4">
+                <h5 class="text-xl font-semibold">{{ stats.total_pending_approvals }}</h5>
             </div>
         </div>
     </div>
 
     <!-- Nav tabs for different sections -->
-    <ul class="nav nav-tabs mb-3" id="adminTabs" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" 
-                    data-bs-target="#pending" type="button" role="tab">Pending Approvals</button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="upcoming-tab" data-bs-toggle="tab" 
-                    data-bs-target="#upcoming" type="button" role="tab">Upcoming</button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="past-tab" data-bs-toggle="tab" 
-                    data-bs-target="#past" type="button" role="tab">Past</button>
-        </li>
-    </ul>
+    <div class="border-b border-gray-200 mb-6">
+        <ul class="flex flex-wrap -mb-px" id="adminTabs" role="tablist">
+            <li class="mr-2" role="presentation">
+                <button class="inline-block py-3 px-4 font-medium text-center border-b-2 border-blue-500 text-blue-600 rounded-t-lg" 
+                        id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab" 
+                        aria-selected="true">Pending Approvals</button>
+            </li>
+            <li class="mr-2" role="presentation">
+                <button class="inline-block py-3 px-4 font-medium text-center border-b-2 border-transparent hover:border-gray-300 hover:text-gray-600 rounded-t-lg" 
+                        id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming" type="button" role="tab" 
+                        aria-selected="false">Upcoming</button>
+            </li>
+            <li class="mr-2" role="presentation">
+                <button class="inline-block py-3 px-4 font-medium text-center border-b-2 border-transparent hover:border-gray-300 hover:text-gray-600 rounded-t-lg" 
+                        id="past-tab" data-bs-toggle="tab" data-bs-target="#past" type="button" role="tab" 
+                        aria-selected="false">Past</button>
+            </li>
+        </ul>
+    </div>
     
     <!-- Tab content -->
     <div class="tab-content" id="adminTabsContent">
         <!-- Pending Approvals Tab -->
         <div class="tab-pane fade show active" id="pending" role="tabpanel">
-            <div class="row">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Pending Computer Bookings -->
-                <div class="col-md-6">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h4>Pending Computer Bookings</h4>
-                        </div>
-                        <div class="card-body">
-                            {% if pending_computer_bookings %}
-                                <div class="table-responsive">
-                                    <table class="table table-striped">
-                                        <thead>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="bg-gray-100 px-4 py-3 border-b border-gray-200">
+                        <h4 class="font-semibold text-lg">Pending Computer Bookings</h4>
+                    </div>
+                    <div class="p-4">
+                        {% if pending_computer_bookings %}
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Computer</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        {% for booking in pending_computer_bookings %}
                                             <tr>
-                                                <th>Computer</th>
-                                                <th>Student</th>
-                                                <th>Time</th>
-                                                <th>Actions</th>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ booking.computer }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ booking.student.username }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ booking.start_time|date:"M d, H:i" }} - {{ booking.end_time|date:"H:i" }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <a href="{% url 'approve_booking' booking.id %}" class="text-white bg-green-500 hover:bg-green-600 font-medium rounded-md text-sm px-4 py-2">Approve</a>
+                                                </td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for booking in pending_computer_bookings %}
-                                                <tr>
-                                                    <td>{{ booking.computer }}</td>
-                                                    <td>{{ booking.student.username }}</td>
-                                                    <td>{{ booking.start_time|date:"M d, H:i" }} - {{ booking.end_time|date:"H:i" }}</td>
-                                                    <td>
-                                                        <a href="{% url 'approve_booking' booking.id %}" class="btn btn-sm btn-success">Approve</a>
-                                                    </td>
-                                                </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            {% else %}
-                                <p>No pending computer bookings.</p>
-                            {% endif %}
-                        </div>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-gray-600">No pending computer bookings.</p>
+                        {% endif %}
                     </div>
                 </div>
                 
                 <!-- Pending Lab Sessions -->
-                <div class="col-md-6">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h4>Pending Lab Sessions</h4>
-                        </div>
-                        <div class="card-body">
-                            {% if pending_lab_sessions %}
-                                <div class="table-responsive">
-                                    <table class="table table-striped">
-                                        <thead>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="bg-gray-100 px-4 py-3 border-b border-gray-200">
+                        <h4 class="font-semibold text-lg">Pending Lab Sessions</h4>
+                    </div>
+                    <div class="p-4">
+                        {% if pending_lab_sessions %}
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lab</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lecturer</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        {% for session in pending_lab_sessions %}
                                             <tr>
-                                                <th>Lab</th>
-                                                <th>Lecturer</th>
-                                                <th>Title</th>
-                                                <th>Time</th>
-                                                <th>Actions</th>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ session.lab.name }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ session.lecturer.username }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ session.title }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ session.start_time|date:"M d, H:i" }} - {{ session.end_time|date:"H:i" }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <a href="{% url 'approve_session' session.id %}" class="text-white bg-green-500 hover:bg-green-600 font-medium rounded-md text-sm px-4 py-2">Approve</a>
+                                                </td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for session in pending_lab_sessions %}
-                                                <tr>
-                                                    <td>{{ session.lab.name }}</td>
-                                                    <td>{{ session.lecturer.username }}</td>
-                                                    <td>{{ session.title }}</td>
-                                                    <td>{{ session.start_time|date:"M d, H:i" }} - {{ session.end_time|date:"H:i" }}</td>
-                                                    <td>
-                                                        <a href="{% url 'approve_session' session.id %}" class="btn btn-sm btn-success">Approve</a>
-                                                    </td>
-                                                </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            {% else %}
-                                <p>No pending lab sessions.</p>
-                            {% endif %}
-                        </div>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-gray-600">No pending lab sessions.</p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -148,104 +141,102 @@
         <!-- Upcoming Tab -->
         <div class="tab-pane fade" id="upcoming" role="tabpanel">
             <!-- Date Filter -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h4>Filter by Date</h4>
+            <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                <div class="bg-gray-100 px-4 py-3 border-b border-gray-200">
+                    <h4 class="font-semibold text-lg">Filter by Date</h4>
                 </div>
-                <div class="card-body">
-                    <form method="get" class="row g-3">
-                        <div class="col-md-4">
-                            <label for="date_from" class="form-label">From</label>
-                            <input type="date" class="form-control" id="date_from" name="date_from" 
-                                   value="{{ date_from|date:'Y-m-d' }}">
+                <div class="p-4">
+                    <form method="get" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label for="date_from" class="block text-sm font-medium text-gray-700 mb-1">From</label>
+                            <input type="date" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" 
+                                   id="date_from" name="date_from" value="{{ date_from|date:'Y-m-d' }}">
                         </div>
-                        <div class="col-md-4">
-                            <label for="date_to" class="form-label">To</label>
-                            <input type="date" class="form-control" id="date_to" name="date_to"
-                                   value="{{ date_to|date:'Y-m-d' }}">
+                        <div>
+                            <label for="date_to" class="block text-sm font-medium text-gray-700 mb-1">To</label>
+                            <input type="date" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" 
+                                   id="date_to" name="date_to" value="{{ date_to|date:'Y-m-d' }}">
                         </div>
-                        <div class="col-md-4 d-flex align-items-end">
-                            <button type="submit" class="btn btn-primary">Apply Filter</button>
-                            <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary ms-2">Reset</a>
+                        <div class="flex items-end">
+                            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md mr-2">Apply Filter</button>
+                            <a href="{% url 'admin_dashboard' %}" class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-md">Reset</a>
                         </div>
                     </form>
                 </div>
             </div>
             
-            <div class="row">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Upcoming Computer Bookings -->
-                <div class="col-md-6">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h4>Upcoming Computer Bookings</h4>
-                        </div>
-                        <div class="card-body">
-                            {% if upcoming_computer_bookings %}
-                                <div class="table-responsive">
-                                    <table class="table table-striped">
-                                        <thead>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="bg-gray-100 px-4 py-3 border-b border-gray-200">
+                        <h4 class="font-semibold text-lg">Upcoming Computer Bookings</h4>
+                    </div>
+                    <div class="p-4">
+                        {% if upcoming_computer_bookings %}
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Computer</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        {% for booking in upcoming_computer_bookings %}
                                             <tr>
-                                                <th>Computer</th>
-                                                <th>Student</th>
-                                                <th>Time</th>
-                                                <th>Status</th>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ booking.computer }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ booking.student.username }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ booking.start_time|date:"M d, H:i" }} - {{ booking.end_time|date:"H:i" }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                        Approved
+                                                    </span>
+                                                </td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for booking in upcoming_computer_bookings %}
-                                                <tr>
-                                                    <td>{{ booking.computer }}</td>
-                                                    <td>{{ booking.student.username }}</td>
-                                                    <td>{{ booking.start_time|date:"M d, H:i" }} - {{ booking.end_time|date:"H:i" }}</td>
-                                                    <td>
-                                                        <span class="badge bg-success">Approved</span>
-                                                    </td>
-                                                </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            {% else %}
-                                <p>No upcoming computer bookings{% if date_from and date_to %} for the selected date range{% endif %}.</p>
-                            {% endif %}
-                        </div>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-gray-600">No upcoming computer bookings{% if date_from and date_to %} for the selected date range{% endif %}.</p>
+                        {% endif %}
                     </div>
                 </div>
                 
                 <!-- Upcoming Lab Sessions -->
-                <div class="col-md-6">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h4>Upcoming Lab Sessions</h4>
-                        </div>
-                        <div class="card-body">
-                            {% if upcoming_lab_sessions %}
-                                <div class="table-responsive">
-                                    <table class="table table-striped">
-                                        <thead>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="bg-gray-100 px-4 py-3 border-b border-gray-200">
+                        <h4 class="font-semibold text-lg">Upcoming Lab Sessions</h4>
+                    </div>
+                    <div class="p-4">
+                        {% if upcoming_lab_sessions %}
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lab</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lecturer</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        {% for session in upcoming_lab_sessions %}
                                             <tr>
-                                                <th>Lab</th>
-                                                <th>Lecturer</th>
-                                                <th>Title</th>
-                                                <th>Time</th>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ session.lab.name }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ session.lecturer.username }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ session.title }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ session.start_time|date:"M d, H:i" }} - {{ session.end_time|date:"H:i" }}</td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for session in upcoming_lab_sessions %}
-                                                <tr>
-                                                    <td>{{ session.lab.name }}</td>
-                                                    <td>{{ session.lecturer.username }}</td>
-                                                    <td>{{ session.title }}</td>
-                                                    <td>{{ session.start_time|date:"M d, H:i" }} - {{ session.end_time|date:"H:i" }}</td>
-                                                </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            {% else %}
-                                <p>No upcoming lab sessions{% if date_from and date_to %} for the selected date range{% endif %}.</p>
-                            {% endif %}
-                        </div>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-gray-600">No upcoming lab sessions{% if date_from and date_to %} for the selected date range{% endif %}.</p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -254,120 +245,160 @@
         <!-- Past Tab -->
         <div class="tab-pane fade" id="past" role="tabpanel">
             <!-- Date Filter -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h4>Filter by Date</h4>
+            <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                <div class="bg-gray-100 px-4 py-3 border-b border-gray-200">
+                    <h4 class="font-semibold text-lg">Filter by Date</h4>
                 </div>
-                <div class="card-body">
-                    <form method="get" class="row g-3">
-                        <div class="col-md-4">
-                            <label for="date_from" class="form-label">From</label>
-                            <input type="date" class="form-control" id="date_from" name="date_from" 
-                                   value="{{ date_from|date:'Y-m-d' }}">
+                <div class="p-4">
+                    <form method="get" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label for="date_from" class="block text-sm font-medium text-gray-700 mb-1">From</label>
+                            <input type="date" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" 
+                                   id="date_from" name="date_from" value="{{ date_from|date:'Y-m-d' }}">
                         </div>
-                        <div class="col-md-4">
-                            <label for="date_to" class="form-label">To</label>
-                            <input type="date" class="form-control" id="date_to" name="date_to"
-                                   value="{{ date_to|date:'Y-m-d' }}">
+                        <div>
+                            <label for="date_to" class="block text-sm font-medium text-gray-700 mb-1">To</label>
+                            <input type="date" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" 
+                                   id="date_to" name="date_to" value="{{ date_to|date:'Y-m-d' }}">
                         </div>
-                        <div class="col-md-4 d-flex align-items-end">
-                            <button type="submit" class="btn btn-primary">Apply Filter</button>
-                            <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary ms-2">Reset</a>
+                        <div class="flex items-end">
+                            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md mr-2">Apply Filter</button>
+                            <a href="{% url 'admin_dashboard' %}" class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-md">Reset</a>
                         </div>
                     </form>
                 </div>
             </div>
             
-            <div class="row">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Past Computer Bookings -->
-                <div class="col-md-6">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h4>Past Computer Bookings</h4>
-                        </div>
-                        <div class="card-body">
-                            {% if past_computer_bookings %}
-                                <div class="table-responsive">
-                                    <table class="table table-striped">
-                                        <thead>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="bg-gray-100 px-4 py-3 border-b border-gray-200">
+                        <h4 class="font-semibold text-lg">Past Computer Bookings</h4>
+                    </div>
+                    <div class="p-4">
+                        {% if past_computer_bookings %}
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Computer</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        {% for booking in past_computer_bookings %}
                                             <tr>
-                                                <th>Computer</th>
-                                                <th>Student</th>
-                                                <th>Time</th>
-                                                <th>Status</th>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ booking.computer }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ booking.student.username }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ booking.start_time|date:"M d, H:i" }} - {{ booking.end_time|date:"H:i" }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    {% if booking.is_cancelled %}
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                            Cancelled
+                                                        </span>
+                                                    {% elif booking.is_approved %}
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                            Completed
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                            Not Approved
+                                                        </span>
+                                                    {% endif %}
+                                                </td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for booking in past_computer_bookings %}
-                                                <tr>
-                                                    <td>{{ booking.computer }}</td>
-                                                    <td>{{ booking.student.username }}</td>
-                                                    <td>{{ booking.start_time|date:"M d, H:i" }} - {{ booking.end_time|date:"H:i" }}</td>
-                                                    <td>
-                                                        {% if booking.is_cancelled %}
-                                                            <span class="badge bg-danger">Cancelled</span>
-                                                        {% elif booking.is_approved %}
-                                                            <span class="badge bg-success">Completed</span>
-                                                        {% else %}
-                                                            <span class="badge bg-warning">Not Approved</span>
-                                                        {% endif %}
-                                                    </td>
-                                                </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                {% if not date_from and not date_to %}
-                                    <p class="text-muted"><small>Showing only the 20 most recent past bookings. Use date filter for more.</small></p>
-                                {% endif %}
-                            {% else %}
-                                <p>No past computer bookings found{% if date_from and date_to %} for the selected date range{% endif %}.</p>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% if not date_from and not date_to %}
+                                <p class="text-gray-500 text-sm mt-2">Showing only the 20 most recent past bookings. Use date filter for more.</p>
                             {% endif %}
-                        </div>
+                        {% else %}
+                            <p class="text-gray-600">No past computer bookings found{% if date_from and date_to %} for the selected date range{% endif %}.</p>
+                        {% endif %}
                     </div>
                 </div>
                 
                 <!-- Past Lab Sessions -->
-                <div class="col-md-6">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h4>Past Lab Sessions</h4>
-                        </div>
-                        <div class="card-body">
-                            {% if past_lab_sessions %}
-                                <div class="table-responsive">
-                                    <table class="table table-striped">
-                                        <thead>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="bg-gray-100 px-4 py-3 border-b border-gray-200">
+                        <h4 class="font-semibold text-lg">Past Lab Sessions</h4>
+                    </div>
+                    <div class="p-4">
+                        {% if past_lab_sessions %}
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lab</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lecturer</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        {% for session in past_lab_sessions %}
                                             <tr>
-                                                <th>Lab</th>
-                                                <th>Lecturer</th>
-                                                <th>Title</th>
-                                                <th>Time</th>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ session.lab.name }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ session.lecturer.username }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ session.title }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ session.start_time|date:"M d, H:i" }} - {{ session.end_time|date:"H:i" }}</td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for session in past_lab_sessions %}
-                                                <tr>
-                                                    <td>{{ session.lab.name }}</td>
-                                                    <td>{{ session.lecturer.username }}</td>
-                                                    <td>{{ session.title }}</td>
-                                                    <td>{{ session.start_time|date:"M d, H:i" }} - {{ session.end_time|date:"H:i" }}</td>
-                                                </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                {% if not date_from and not date_to %}
-                                    <p class="text-muted"><small>Showing only the 20 most recent past sessions. Use date filter for more.</small></p>
-                                {% endif %}
-                            {% else %}
-                                <p>No past lab sessions found{% if date_from and date_to %} for the selected date range{% endif %}.</p>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% if not date_from and not date_to %}
+                                <p class="text-gray-500 text-sm mt-2">Showing only the 20 most recent past sessions. Use date filter for more.</p>
                             {% endif %}
-                        </div>
+                        {% else %}
+                            <p class="text-gray-600">No past lab sessions found{% if date_from and date_to %} for the selected date range{% endif %}.</p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    // Tab functionality - needed since we're not using Bootstrap's JS anymore
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabs = document.querySelectorAll('[data-bs-toggle="tab"]');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remove active classes from all tabs
+                tabs.forEach(t => {
+                    t.classList.remove('border-blue-500', 'text-blue-600');
+                    t.classList.add('border-transparent', 'hover:border-gray-300', 'hover:text-gray-600');
+                    t.setAttribute('aria-selected', 'false');
+                });
+                
+                // Add active class to clicked tab
+                this.classList.remove('border-transparent', 'hover:border-gray-300', 'hover:text-gray-600');
+                this.classList.add('border-blue-500', 'text-blue-600');
+                this.setAttribute('aria-selected', 'true');
+                
+                // Hide all tab panes
+                const tabPanes = document.querySelectorAll('.tab-pane');
+                tabPanes.forEach(pane => {
+                    pane.classList.remove('show', 'active');
+                    pane.classList.add('hidden');
+                });
+                
+                // Show the selected tab pane
+                const targetId = this.getAttribute('data-bs-target');
+                const targetPane = document.querySelector(targetId);
+                targetPane.classList.remove('hidden');
+                targetPane.classList.add('block');
+            });
+        });
+    });
+</script>
 {% endblock %}

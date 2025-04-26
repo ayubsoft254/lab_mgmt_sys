@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mx-auto p-4">
-    <h1 class="text-2xl font-bold mb-4">
+<div class="container mx-auto p-6 animate-fade-in">
+    <h1 class="text-3xl font-bold text-ttu-dark mb-6">
         {% if computer %}
             Free Time Slots for {{ computer.lab.name }} - Computer #{{ computer.computer_number }}
         {% else %}
@@ -11,36 +11,38 @@
     </h1>
 
     {% if error %}
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <div class="bg-ttu-light border-l-4 border-ttu-red text-ttu-dark p-4 mb-4 rounded">
             {{ error }}
         </div>
     {% else %}
-        <table class="w-full border-collapse">
-            <thead>
-                <tr>
-                    <th class="border p-2">Date</th>
-                    <th class="border p-2">Time Slot</th>
-                    <th class="border p-2">Availability</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for slot in time_slots %}
+        <div class="glass-card overflow-x-auto">
+            <table class="min-w-full table-auto">
+                <thead class="bg-ttu-light text-ttu-dark">
                     <tr>
-                        <td class="border p-2">{{ slot.date|date:"D, M d" }}</td>
-                        <td class="border p-2">
-                            {{ slot.start_time|date:"H:i" }} - {{ slot.end_time|date:"H:i" }}
-                        </td>
-                        <td class="border p-2">
-                            {% if slot.is_free %}
-                                <span class="text-green-600 font-bold">Available</span>
-                            {% else %}
-                                <span class="text-red-600 font-bold">Booked</span>
-                            {% endif %}
-                        </td>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Time Slot</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Availability</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200 text-ttu-dark">
+                    {% for slot in time_slots %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ slot.date|date:"D, M d" }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {{ slot.start_time|date:"h:i A" }} - {{ slot.end_time|date:"h:i A" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if slot.is_free %}
+                                    <span class="text-green-600 font-semibold">Available</span>
+                                {% else %}
+                                    <span class="text-red-600 font-semibold">Booked</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     {% endif %}
 </div>
 {% endblock %}
