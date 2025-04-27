@@ -179,6 +179,11 @@ def admin_dashboard_view(request):
         is_approved=False,
         end_time__gte=now
     ).order_by('start_time')
+
+    pending_reccuring_sessions = RecurringSession.objects.filter(
+        is_approved=False,        
+        end_time__gte=now
+    ).order_by('start_time')
     
     # Upcoming (approved) bookings and sessions
     upcoming_computer_bookings = ComputerBooking.objects.filter(
@@ -248,14 +253,15 @@ def admin_dashboard_view(request):
         'maintenance_computers': Computer.objects.filter(status='maintenance').count(),
         'pending_bookings_count': pending_computer_bookings.count(),
         'pending_sessions_count': pending_lab_sessions.count(),
+        'pending_recurring_sessions': RecurringSession.objects.filter(is_approved=False,).count(),
         'total_pending_approvals': pending_computer_bookings.count() + pending_lab_sessions.count(),
     }
     
-    labs = Lab.objects.all()
+    labs = Lab.objects.all()    
     
     return render(request, 'admin_dashboard.html', {
-        'pending_computer_bookings': pending_computer_bookings,
-        'pending_lab_sessions': pending_lab_sessions,
+        'pending_computer_bookings': pending_computer_bookings,        
+        'pending_lab_sessions': pending_lab_sessions,              
         'upcoming_computer_bookings': upcoming_computer_bookings,
         'upcoming_lab_sessions': upcoming_lab_sessions,
         'past_computer_bookings': past_computer_bookings,
