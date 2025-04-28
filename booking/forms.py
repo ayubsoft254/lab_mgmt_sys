@@ -180,12 +180,7 @@ class CustomUserCreationForm(forms.ModelForm):
         """
         user = self.save()
         return (user, None)
-
-    # ===== Fix for 'by_passkey' Error =====
+    
     @property
-    def by_passkey(self):
-        """
-        Workaround for allauth passkey support.
-        If you're not using passkeys, return False.
-        """
+    def by_passkey(self):        
         return False
