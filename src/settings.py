@@ -44,7 +44,7 @@ SECRET_KEY = config("DJANGO_SECRET_KEY")
 DEBUG = False
 BASE_URL = config("BASE_URL", default=None)
 
-ALLOWED_HOSTS = ["ttulabs.ayubsoft-inc.systems",]
+ALLOWED_HOSTS = ["*",]
 
 
 # Application definition
