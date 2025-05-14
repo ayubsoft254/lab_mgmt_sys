@@ -167,6 +167,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 CSRF_TRUSTED_ORIGINS = [
     'https://labs.ttu.ac.ke',
+    'ttulabs.ayubsoft-inc.systems',
+    '41.89.130.21',
     # add other trusted origins if necessary
 ]
 
