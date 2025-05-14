@@ -184,16 +184,10 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
-
 STATIC_URL = "static/"
-STATICFILES_BASE_DIR = BASE_DIR / "staticfiles"
-STATICFILES_BASE_DIR.mkdir(exist_ok=True, parents=True)
 
-
-# source(s) for python manage.py collectstatic 
-STATICFILES_DIRS = [
-    STATICFILES_BASE_DIR
-]
+# Where collectstatic will gather all static files
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
