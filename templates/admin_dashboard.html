@@ -3,69 +3,84 @@
 {% block title %}Admin Dashboard{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 mt-6">
-    <h1 class="text-2xl font-bold mb-6">Admin Dashboard</h1>
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">Admin Dashboard</h1>
     
     <!-- Stats Overview -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div class="bg-blue-600 text-white rounded-lg shadow overflow-hidden">
-            <div class="px-4 py-2 bg-blue-700">Labs</div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-md overflow-hidden">
+            <div class="px-4 py-3 bg-blue-600 bg-opacity-30 text-white font-medium">Labs</div>
             <div class="px-4 py-4">
-                <h5 class="text-xl font-semibold">{{ stats.total_labs }}</h5>
+                <h5 class="text-3xl font-bold text-white">{{ stats.total_labs }}</h5>
             </div>
         </div>
-        <div class="bg-green-600 text-white rounded-lg shadow overflow-hidden">
-            <div class="px-4 py-2 bg-green-700">Available Computers</div>
+        
+        <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-md overflow-hidden">
+            <div class="px-4 py-3 bg-green-600 bg-opacity-30 text-white font-medium">Available Computers</div>
             <div class="px-4 py-4">
-                <h5 class="text-xl font-semibold">{{ stats.available_computers }} / {{ stats.total_computers }}</h5>
+                <h5 class="text-3xl font-bold text-white">{{ stats.available_computers }} / {{ stats.total_computers }}</h5>
             </div>
         </div>
-        <div class="bg-yellow-500 text-white rounded-lg shadow overflow-hidden">
-            <div class="px-4 py-2 bg-yellow-600">Maintenance</div>
+        
+        <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-lg shadow-md overflow-hidden">
+            <div class="px-4 py-3 bg-yellow-600 bg-opacity-30 text-white font-medium">Maintenance</div>
             <div class="px-4 py-4">
-                <h5 class="text-xl font-semibold">{{ stats.maintenance_computers }}</h5>
+                <h5 class="text-3xl font-bold text-white">{{ stats.maintenance_computers }}</h5>
             </div>
         </div>
-        <div class="bg-red-600 text-white rounded-lg shadow overflow-hidden">
-            <div class="px-4 py-2 bg-red-700">Pending Approvals</div>
+        
+        <div class="bg-gradient-to-r from-red-500 to-red-600 rounded-lg shadow-md overflow-hidden">
+            <div class="px-4 py-3 bg-red-600 bg-opacity-30 text-white font-medium">Pending Approvals</div>
             <div class="px-4 py-4">
-                <h5 class="text-xl font-semibold">{{ stats.total_pending_approvals }}</h5>
+                <h5 class="text-3xl font-bold text-white">{{ stats.pending_bookings_count|add:stats.pending_sessions_count }}</h5>
             </div>
         </div>
     </div>
 
-    <!-- Nav tabs for different sections -->
+    <!-- Tab Navigation -->
     <div class="border-b border-gray-200 mb-6">
         <ul class="flex flex-wrap -mb-px" id="adminTabs" role="tablist">
             <li class="mr-2" role="presentation">
-                <button class="inline-block py-3 px-4 font-medium text-center border-b-2 border-blue-500 text-blue-600 rounded-t-lg" 
-                        id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab" 
-                        aria-selected="true">Pending Approvals</button>
+                <button class="inline-block py-3 px-4 text-sm font-medium text-center border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 active-tab" 
+                        id="pending-tab" 
+                        data-tab-target="pending" 
+                        type="button" 
+                        role="tab">
+                    Pending Approvals
+                </button>
             </li>
             <li class="mr-2" role="presentation">
-                <button class="inline-block py-3 px-4 font-medium text-center border-b-2 border-transparent hover:border-gray-300 hover:text-gray-600 rounded-t-lg" 
-                        id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming" type="button" role="tab" 
-                        aria-selected="false">Upcoming</button>
+                <button class="inline-block py-3 px-4 text-sm font-medium text-center border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" 
+                        id="upcoming-tab" 
+                        data-tab-target="upcoming" 
+                        type="button" 
+                        role="tab">
+                    Upcoming
+                </button>
             </li>
             <li class="mr-2" role="presentation">
-                <button class="inline-block py-3 px-4 font-medium text-center border-b-2 border-transparent hover:border-gray-300 hover:text-gray-600 rounded-t-lg" 
-                        id="past-tab" data-bs-toggle="tab" data-bs-target="#past" type="button" role="tab" 
-                        aria-selected="false">Past</button>
+                <button class="inline-block py-3 px-4 text-sm font-medium text-center border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" 
+                        id="past-tab" 
+                        data-tab-target="past" 
+                        type="button" 
+                        role="tab">
+                    Past
+                </button>
             </li>
         </ul>
     </div>
     
     <!-- Tab content -->
-    <div class="tab-content" id="adminTabsContent">
+    <div class="tab-content">
         <!-- Pending Approvals Tab -->
-        <div class="tab-pane fade show active" id="pending" role="tabpanel">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="tab-pane active" id="pending" role="tabpanel">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Pending Computer Bookings -->
                 <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <div class="bg-gray-100 px-4 py-3 border-b border-gray-200">
-                        <h4 class="font-semibold text-lg">Pending Computer Bookings</h4>
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h4 class="text-lg font-semibold text-gray-800">Pending Computer Bookings</h4>
                     </div>
-                    <div class="p-4">
+                    <div class="p-6">
                         {% if pending_computer_bookings %}
                             <div class="overflow-x-auto">
                                 <table class="min-w-full divide-y divide-gray-200">
@@ -79,12 +94,14 @@
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-200">
                                         {% for booking in pending_computer_bookings %}
-                                            <tr>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ booking.computer }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ booking.student.username }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ booking.start_time|date:"M d, H:i" }} - {{ booking.end_time|date:"H:i" }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap">
-                                                    <a href="{% url 'approve_booking' booking.id %}" class="text-white bg-green-500 hover:bg-green-600 font-medium rounded-md text-sm px-4 py-2">Approve</a>
+                                            <tr class="hover:bg-gray-50">
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ booking.computer }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ booking.student.username }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ booking.start_time|date:"M d, H:i" }} - {{ booking.end_time|date:"H:i" }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                                    <a href="{% url 'approve_booking' booking.id %}" class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                                        Approve
+                                                    </a>
                                                 </td>
                                             </tr>
                                         {% endfor %}
@@ -92,17 +109,17 @@
                                 </table>
                             </div>
                         {% else %}
-                            <p class="text-gray-600">No pending computer bookings.</p>
+                            <p class="text-gray-500">No pending computer bookings.</p>
                         {% endif %}
                     </div>
                 </div>
                 
                 <!-- Pending Lab Sessions -->
                 <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <div class="bg-gray-100 px-4 py-3 border-b border-gray-200">
-                        <h4 class="font-semibold text-lg">Pending Lab Sessions</h4>
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h4 class="text-lg font-semibold text-gray-800">Pending Lab Sessions</h4>
                     </div>
-                    <div class="p-4">
+                    <div class="p-6">
                         {% if pending_lab_sessions %}
                             <div class="overflow-x-auto">
                                 <table class="min-w-full divide-y divide-gray-200">
@@ -117,13 +134,15 @@
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-200">
                                         {% for session in pending_lab_sessions %}
-                                            <tr>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ session.lab.name }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ session.lecturer.username }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ session.title }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ session.start_time|date:"M d, H:i" }} - {{ session.end_time|date:"H:i" }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap">
-                                                    <a href="{% url 'approve_session' session.id %}" class="text-white bg-green-500 hover:bg-green-600 font-medium rounded-md text-sm px-4 py-2">Approve</a>
+                                            <tr class="hover:bg-gray-50">
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ session.lab.name }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ session.lecturer.username }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ session.title }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ session.start_time|date:"M d, H:i" }} - {{ session.end_time|date:"H:i" }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                                    <a href="{% url 'approve_session' session.id %}" class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                                        Approve
+                                                    </a>
                                                 </td>
                                             </tr>
                                         {% endfor %}
@@ -131,7 +150,7 @@
                                 </table>
                             </div>
                         {% else %}
-                            <p class="text-gray-600">No pending lab sessions.</p>
+                            <p class="text-gray-500">No pending lab sessions.</p>
                         {% endif %}
                     </div>
                 </div>
@@ -139,39 +158,14 @@
         </div>
         
         <!-- Upcoming Tab -->
-        <div class="tab-pane fade" id="upcoming" role="tabpanel">
-            <!-- Date Filter -->
-            <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-                <div class="bg-gray-100 px-4 py-3 border-b border-gray-200">
-                    <h4 class="font-semibold text-lg">Filter by Date</h4>
-                </div>
-                <div class="p-4">
-                    <form method="get" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label for="date_from" class="block text-sm font-medium text-gray-700 mb-1">From</label>
-                            <input type="date" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" 
-                                   id="date_from" name="date_from" value="{{ date_from|date:'Y-m-d' }}">
-                        </div>
-                        <div>
-                            <label for="date_to" class="block text-sm font-medium text-gray-700 mb-1">To</label>
-                            <input type="date" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" 
-                                   id="date_to" name="date_to" value="{{ date_to|date:'Y-m-d' }}">
-                        </div>
-                        <div class="flex items-end">
-                            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md mr-2">Apply Filter</button>
-                            <a href="{% url 'admin_dashboard' %}" class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-md">Reset</a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="tab-pane hidden" id="upcoming" role="tabpanel">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Upcoming Computer Bookings -->
                 <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <div class="bg-gray-100 px-4 py-3 border-b border-gray-200">
-                        <h4 class="font-semibold text-lg">Upcoming Computer Bookings</h4>
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h4 class="text-lg font-semibold text-gray-800">Upcoming Computer Bookings</h4>
                     </div>
-                    <div class="p-4">
+                    <div class="p-6">
                         {% if upcoming_computer_bookings %}
                             <div class="overflow-x-auto">
                                 <table class="min-w-full divide-y divide-gray-200">
@@ -185,11 +179,11 @@
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-200">
                                         {% for booking in upcoming_computer_bookings %}
-                                            <tr>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ booking.computer }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ booking.student.username }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ booking.start_time|date:"M d, H:i" }} - {{ booking.end_time|date:"H:i" }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap">
+                                            <tr class="hover:bg-gray-50">
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ booking.computer }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ booking.student.username }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ booking.start_time|date:"M d, H:i" }} - {{ booking.end_time|date:"H:i" }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm">
                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                                         Approved
                                                     </span>
@@ -200,17 +194,17 @@
                                 </table>
                             </div>
                         {% else %}
-                            <p class="text-gray-600">No upcoming computer bookings{% if date_from and date_to %} for the selected date range{% endif %}.</p>
+                            <p class="text-gray-500">No upcoming computer bookings.</p>
                         {% endif %}
                     </div>
                 </div>
                 
                 <!-- Upcoming Lab Sessions -->
                 <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <div class="bg-gray-100 px-4 py-3 border-b border-gray-200">
-                        <h4 class="font-semibold text-lg">Upcoming Lab Sessions</h4>
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h4 class="text-lg font-semibold text-gray-800">Upcoming Lab Sessions</h4>
                     </div>
-                    <div class="p-4">
+                    <div class="p-6">
                         {% if upcoming_lab_sessions %}
                             <div class="overflow-x-auto">
                                 <table class="min-w-full divide-y divide-gray-200">
@@ -224,18 +218,18 @@
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-200">
                                         {% for session in upcoming_lab_sessions %}
-                                            <tr>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ session.lab.name }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ session.lecturer.username }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ session.title }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ session.start_time|date:"M d, H:i" }} - {{ session.end_time|date:"H:i" }}</td>
+                                            <tr class="hover:bg-gray-50">
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ session.lab.name }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ session.lecturer.username }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ session.title }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ session.start_time|date:"M d, H:i" }} - {{ session.end_time|date:"H:i" }}</td>
                                             </tr>
                                         {% endfor %}
                                     </tbody>
                                 </table>
                             </div>
                         {% else %}
-                            <p class="text-gray-600">No upcoming lab sessions{% if date_from and date_to %} for the selected date range{% endif %}.</p>
+                            <p class="text-gray-500">No upcoming lab sessions.</p>
                         {% endif %}
                     </div>
                 </div>
@@ -243,39 +237,43 @@
         </div>
         
         <!-- Past Tab -->
-        <div class="tab-pane fade" id="past" role="tabpanel">
+        <div class="tab-pane hidden" id="past" role="tabpanel">
             <!-- Date Filter -->
             <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-                <div class="bg-gray-100 px-4 py-3 border-b border-gray-200">
-                    <h4 class="font-semibold text-lg">Filter by Date</h4>
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h4 class="text-lg font-semibold text-gray-800">Filter by Date</h4>
                 </div>
-                <div class="p-4">
-                    <form method="get" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="p-6">
+                    <form method="get" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
                         <div>
                             <label for="date_from" class="block text-sm font-medium text-gray-700 mb-1">From</label>
-                            <input type="date" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" 
+                            <input type="date" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" 
                                    id="date_from" name="date_from" value="{{ date_from|date:'Y-m-d' }}">
                         </div>
                         <div>
                             <label for="date_to" class="block text-sm font-medium text-gray-700 mb-1">To</label>
-                            <input type="date" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" 
+                            <input type="date" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" 
                                    id="date_to" name="date_to" value="{{ date_to|date:'Y-m-d' }}">
                         </div>
-                        <div class="flex items-end">
-                            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md mr-2">Apply Filter</button>
-                            <a href="{% url 'admin_dashboard' %}" class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-md">Reset</a>
+                        <div class="flex space-x-2">
+                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Apply Filter
+                            </button>
+                            <a href="{% url 'admin_dashboard' %}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Reset
+                            </a>
                         </div>
                     </form>
                 </div>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Past Computer Bookings -->
                 <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <div class="bg-gray-100 px-4 py-3 border-b border-gray-200">
-                        <h4 class="font-semibold text-lg">Past Computer Bookings</h4>
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h4 class="text-lg font-semibold text-gray-800">Past Computer Bookings</h4>
                     </div>
-                    <div class="p-4">
+                    <div class="p-6">
                         {% if past_computer_bookings %}
                             <div class="overflow-x-auto">
                                 <table class="min-w-full divide-y divide-gray-200">
@@ -289,11 +287,11 @@
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-200">
                                         {% for booking in past_computer_bookings %}
-                                            <tr>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ booking.computer }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ booking.student.username }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ booking.start_time|date:"M d, H:i" }} - {{ booking.end_time|date:"H:i" }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap">
+                                            <tr class="hover:bg-gray-50">
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ booking.computer }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ booking.student.username }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ booking.start_time|date:"M d, H:i" }} - {{ booking.end_time|date:"H:i" }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm">
                                                     {% if booking.is_cancelled %}
                                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                                                             Cancelled
@@ -314,20 +312,20 @@
                                 </table>
                             </div>
                             {% if not date_from and not date_to %}
-                                <p class="text-gray-500 text-sm mt-2">Showing only the 20 most recent past bookings. Use date filter for more.</p>
+                                <p class="text-sm text-gray-500 mt-4">Showing only the 20 most recent past bookings. Use date filter for more.</p>
                             {% endif %}
                         {% else %}
-                            <p class="text-gray-600">No past computer bookings found{% if date_from and date_to %} for the selected date range{% endif %}.</p>
+                            <p class="text-gray-500">No past computer bookings found{% if date_from and date_to %} for the selected date range{% endif %}.</p>
                         {% endif %}
                     </div>
                 </div>
                 
                 <!-- Past Lab Sessions -->
                 <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <div class="bg-gray-100 px-4 py-3 border-b border-gray-200">
-                        <h4 class="font-semibold text-lg">Past Lab Sessions</h4>
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h4 class="text-lg font-semibold text-gray-800">Past Lab Sessions</h4>
                     </div>
-                    <div class="p-4">
+                    <div class="p-6">
                         {% if past_lab_sessions %}
                             <div class="overflow-x-auto">
                                 <table class="min-w-full divide-y divide-gray-200">
@@ -341,21 +339,21 @@
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-200">
                                         {% for session in past_lab_sessions %}
-                                            <tr>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ session.lab.name }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ session.lecturer.username }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ session.title }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ session.start_time|date:"M d, H:i" }} - {{ session.end_time|date:"H:i" }}</td>
+                                            <tr class="hover:bg-gray-50">
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ session.lab.name }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ session.lecturer.username }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ session.title }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ session.start_time|date:"M d, H:i" }} - {{ session.end_time|date:"H:i" }}</td>
                                             </tr>
                                         {% endfor %}
                                     </tbody>
                                 </table>
                             </div>
                             {% if not date_from and not date_to %}
-                                <p class="text-gray-500 text-sm mt-2">Showing only the 20 most recent past sessions. Use date filter for more.</p>
+                                <p class="text-sm text-gray-500 mt-4">Showing only the 20 most recent past sessions. Use date filter for more.</p>
                             {% endif %}
                         {% else %}
-                            <p class="text-gray-600">No past lab sessions found{% if date_from and date_to %} for the selected date range{% endif %}.</p>
+                            <p class="text-gray-500">No past lab sessions found{% if date_from and date_to %} for the selected date range{% endif %}.</p>
                         {% endif %}
                     </div>
                 </div>
@@ -365,40 +363,43 @@
 </div>
 
 <script>
-    // Tab functionality - needed since we're not using Bootstrap's JS anymore
+    // Tab functionality
     document.addEventListener('DOMContentLoaded', function() {
-        const tabs = document.querySelectorAll('[data-bs-toggle="tab"]');
+        const tabButtons = document.querySelectorAll('[data-tab-target]');
+        const tabPanes = document.querySelectorAll('.tab-pane');
         
-        tabs.forEach(tab => {
-            tab.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                // Remove active classes from all tabs
-                tabs.forEach(t => {
-                    t.classList.remove('border-blue-500', 'text-blue-600');
-                    t.classList.add('border-transparent', 'hover:border-gray-300', 'hover:text-gray-600');
-                    t.setAttribute('aria-selected', 'false');
-                });
-                
-                // Add active class to clicked tab
-                this.classList.remove('border-transparent', 'hover:border-gray-300', 'hover:text-gray-600');
-                this.classList.add('border-blue-500', 'text-blue-600');
-                this.setAttribute('aria-selected', 'true');
-                
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
                 // Hide all tab panes
-                const tabPanes = document.querySelectorAll('.tab-pane');
                 tabPanes.forEach(pane => {
-                    pane.classList.remove('show', 'active');
                     pane.classList.add('hidden');
+                    pane.classList.remove('active');
                 });
                 
-                // Show the selected tab pane
-                const targetId = this.getAttribute('data-bs-target');
-                const targetPane = document.querySelector(targetId);
-                targetPane.classList.remove('hidden');
-                targetPane.classList.add('block');
+                // Remove active class from all buttons
+                tabButtons.forEach(btn => {
+                    btn.classList.remove('border-blue-500', 'text-blue-600');
+                    btn.classList.remove('active-tab');
+                });
+                
+                // Show the current tab pane
+                const target = button.getAttribute('data-tab-target');
+                const pane = document.getElementById(target);
+                pane.classList.remove('hidden');
+                pane.classList.add('active');
+                
+                // Add active class to current button
+                button.classList.add('border-blue-500', 'text-blue-600');
+                button.classList.add('active-tab');
             });
         });
     });
 </script>
+
+<style>
+    .active-tab {
+        border-bottom-color: #3b82f6;
+        color: #2563eb;
+    }
+</style>
 {% endblock %}
