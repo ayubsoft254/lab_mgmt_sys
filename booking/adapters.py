@@ -1,5 +1,6 @@
 from allauth.account.adapter import DefaultAccountAdapter
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 class CustomAccountAdapter(DefaultAccountAdapter):
     def save_user(self, request, user, form, commit=True):
@@ -19,6 +20,29 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         return user
 
     def clean_email(self, email):
-        email = super().clean_email(email)
-        # Add any custom email validation here
+        email = super().clean_email(email).lower().strip()  # Normalize email
+        request = self.request  # Access the request object from the adapter
+        form_data = request.POST if request else {}
+
+        # Get the selected role (from form submission)
+        role = form_data.get('role')
+
+        # Skip validation if role isn't provided (e.g., admin updates)
+        if not role:
+            return email
+
+        # Define allowed domains per role
+        allowed_domains = {
+            'student': '@students.ttu.ac.ke',
+            'lecturer': '@ttu.ac.ke',
+        }
+
+        required_domain = allowed_domains.get(role)
+
+        # If role exists but email doesn't match the required domain
+        if required_domain and not email.endswith(required_domain):
+            raise ValidationError(
+                _(f"Invalid email domain for {role}s. Must use {required_domain}")
+            )
+
         return email
