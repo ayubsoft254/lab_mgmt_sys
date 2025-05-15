@@ -116,7 +116,6 @@ class RecurringSessionForm(forms.ModelForm):
 
 
 User = get_user_model()
-
 class CustomUserCreationForm(forms.ModelForm):
     ROLE_CHOICES = [
         ('student', 'Student'),
@@ -130,38 +129,52 @@ class CustomUserCreationForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ('username', 'email')
+        # Ensure email is required at the form level if not enforced by the model
+        labels = {'email': 'Email (Required)'}
+        help_texts = {'email': ''}
 
     def clean(self):
         cleaned_data = super().clean()
-        email = cleaned_data.get('email')
+        email = cleaned_data.get('email', '').lower().strip()  # Normalize email
         role = cleaned_data.get('role')
 
-        # Check if role is selected and email is provided
-        if role == 'student':
-            if email and not email.endswith('@students.ttu.ac.ke'):
-                self.add_error('email', 'Students must use @students.ttu.ac.ke email.')
-        elif role == 'lecturer':
-            if email and not email.endswith('@ttu.ac.ke'):
-                self.add_error('email', 'Lecturers must use @ttu.ac.ke email.')
+        # Enforce role selection
+        if not role:
+            self.add_error('role', 'Role selection is required.')
+            return cleaned_data
+
+        # Enforce email presence and domain validation
+        if not email:
+            self.add_error('email', 'Email is required for registration.')
+            return cleaned_data
+
+        # Domain validation based on role
+        domain_requirement = {
+            'student': '@students.ttu.ac.ke',
+            'lecturer': '@ttu.ac.ke'
+        }
+        required_domain = domain_requirement.get(role)
         
-        # Ensure email is present if role is selected
-        if role and not email:
-            self.add_error('email', 'Email is required for the selected role.')
-        
-        return cleaned_data  # Correctly return cleaned_data
+        if required_domain and not email.endswith(required_domain):
+            self.add_error(
+                'email',
+                f'Invalid domain for {role}s. Must use {required_domain}'
+            )
+
+        return cleaned_data
 
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
         password2 = self.cleaned_data.get("password2")
         if password1 and password2 and password1 != password2:
-            raise ValidationError("Passwords don't match.")
+            raise ValidationError("Passwords do not match.")
         return password2
 
     def save(self, commit=True):
         user = super().save(commit=False)
         user.set_password(self.cleaned_data["password1"])
         
-        # Assign role-specific attributes
+        # Assign role flags (ensure your User model has these fields)
         role = self.cleaned_data['role']
         user.is_student = (role == 'student')
         user.is_lecturer = (role == 'lecturer')
@@ -169,6 +182,7 @@ class CustomUserCreationForm(forms.ModelForm):
         if commit:
             user.save()
         return user
+    
     # ===== Allauth Compatibility Methods =====
     def custom_signup(self, request, user):
         """Optional: For additional user setup."""
