@@ -120,30 +120,26 @@ User = get_user_model()
 class CustomUserCreationForm(forms.ModelForm):
     ROLE_CHOICES = [
         ('student', 'Student'),
-        ('lecturer', 'Lecturer'),        
+        ('lecturer', 'Lecturer'),
     ]
     
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
-    password2 = forms.CharField(label='Password confirmation', widget=forms.PasswordInput)
+    password2 = forms.CharField(label='Confirm Password', widget=forms.PasswordInput)
     role = forms.ChoiceField(choices=ROLE_CHOICES, widget=forms.RadioSelect)
 
     class Meta:
         model = User
         fields = ('username', 'email')
 
-    def clean_email(self):
-        email = self.cleaned_data.get('email')
-        role = self.cleaned_data.get('role')
+    def clean(self):
+        cleaned_data = super().clean()
+        email = cleaned_data.get('email')
+        role = cleaned_data.get('role')
 
-        if not email or not role:
-            return email
-
-        if role == 'student' and not email.endswith('@students.ttu.ac.ke'):
-            raise ValidationError("Students must use @students.ttu.ac.ke email.")
-        elif role in ['lecturer', 'admin'] and not email.endswith('@ttu.ac.ke'):
-            raise ValidationError("Staff must use @ttu.ac.ke email.")
-
-        return email
+        if role == 'student' and email and not email.endswith('@students.ttu.ac.ke'):
+            self.add_error('email', 'Students must use @students.ttu.ac.ke email.')
+        elif role == 'lecturer' and email and not email.endswith('@ttu.ac.ke'):
+            self.add_error('email', 'Lecturers must use @ttu.ac.ke email.')
 
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
@@ -161,9 +157,6 @@ class CustomUserCreationForm(forms.ModelForm):
             user.is_student = True
         elif role == 'lecturer':
             user.is_lecturer = True
-        elif role == 'admin':
-            user.is_admin = True
-            user.is_staff = True  # Admins should have staff access
 
         if commit:
             user.save()
