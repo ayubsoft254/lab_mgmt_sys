@@ -136,10 +136,19 @@ class CustomUserCreationForm(forms.ModelForm):
         email = cleaned_data.get('email')
         role = cleaned_data.get('role')
 
-        if role == 'student' and email and not email.endswith('@students.ttu.ac.ke'):
-            self.add_error('email', 'Students must use @students.ttu.ac.ke email.')
-        elif role == 'lecturer' and email and not email.endswith('@ttu.ac.ke'):
-            self.add_error('email', 'Lecturers must use @ttu.ac.ke email.')
+        # Check if role is selected and email is provided
+        if role == 'student':
+            if email and not email.endswith('@students.ttu.ac.ke'):
+                self.add_error('email', 'Students must use @students.ttu.ac.ke email.')
+        elif role == 'lecturer':
+            if email and not email.endswith('@ttu.ac.ke'):
+                self.add_error('email', 'Lecturers must use @ttu.ac.ke email.')
+        
+        # Ensure email is present if role is selected
+        if role and not email:
+            self.add_error('email', 'Email is required for the selected role.')
+        
+        return cleaned_data  # Correctly return cleaned_data
 
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
@@ -151,17 +160,15 @@ class CustomUserCreationForm(forms.ModelForm):
     def save(self, commit=True):
         user = super().save(commit=False)
         user.set_password(self.cleaned_data["password1"])
-
+        
+        # Assign role-specific attributes
         role = self.cleaned_data['role']
-        if role == 'student':
-            user.is_student = True
-        elif role == 'lecturer':
-            user.is_lecturer = True
-
+        user.is_student = (role == 'student')
+        user.is_lecturer = (role == 'lecturer')
+        
         if commit:
             user.save()
         return user
-
     # ===== Allauth Compatibility Methods =====
     def custom_signup(self, request, user):
         """Optional: For additional user setup."""
