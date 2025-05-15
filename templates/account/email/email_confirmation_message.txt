@@ -1,0 +1,18 @@
+Hello {{ user.username }},
+
+Thank you for registering with the TTU Lab Management System.
+Please confirm your email address by visiting the link below:
+
+{{ activate_url }}
+
+If you did not initiate this registration, you can safely ignore this email.
+
+Lab Management System
+School of Science and Informatics
+Taita Taveta University
+📧 Email: ictlabs@ttu.ac.ke
+📍 Location: Main Campus, AB6
+🌐 www.ttu.ac.ke
+
+“Streamlining Lab Operations for Smarter Learning”
+This email was sent to {{ user.email }}.

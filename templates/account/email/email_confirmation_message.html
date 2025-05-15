@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Confirm Your Email</title>
+</head>
+<body style="font-family: Arial, sans-serif; color: #333;">
+    <h2>Hello {{ user.username }},</h2>
+
+    <p>Thank you for registering with the TTU Lab Management System. Please confirm your email address by clicking the link below:</p>
+
+    <p><a href="{{ activate_url }}" style="background-color: #006400; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Confirm Email</a></p>
+
+    <p>If you did not initiate this registration, you may safely ignore this email.</p>
+
+    <hr style="margin: 30px 0;">
+
+    <p style="font-size: 14px;">
+        <strong>Lab Management System</strong><br>
+        School of Science and Informatics<br>
+        Taita Taveta University<br>
+        📧 Email: <a href="mailto:ictlabs@ttu.ac.ke">ictlabs@ttu.ac.ke</a><br>
+        📍 Location: Main Campus, AB6<br>
+        🌐 <a href="https://www.ttu.ac.ke">www.ttu.ac.ke</a><br><br>
+        <em>“Streamlining Lab Operations for Smarter Learning”</em>
+    </p>
+</body>
+</html>
