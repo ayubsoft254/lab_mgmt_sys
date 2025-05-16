@@ -133,33 +133,53 @@ class CustomUserCreationForm(forms.ModelForm):
         labels = {'email': 'Email (Required)'}
         help_texts = {'email': ''}
 
+    def clean_email(self):
+        """Validate email domain based on selected role"""
+        email = self.cleaned_data.get('email', '').lower().strip()
+        role = self.cleaned_data.get('role')
+        
+        if not email:
+            raise ValidationError('Email is required for registration.')
+            
+        # Domain validation mapping
+        domain_requirements = {
+            'student': '@students.ttu.ac.ke',
+            'lecturer': '@ttu.ac.ke'
+        }
+        
+        # If role isn't available yet (form processing order), 
+        # we'll do additional validation in clean()
+        if role and role in domain_requirements:
+            required_domain = domain_requirements[role]
+            if not email.endswith(required_domain):
+                raise ValidationError(
+                    f'Invalid email domain for {role}s. Must use {required_domain}'
+                )
+                
+        return email
+
     def clean(self):
         cleaned_data = super().clean()
-        email = cleaned_data.get('email', '').lower().strip()  # Normalize email
+        email = cleaned_data.get('email', '')
         role = cleaned_data.get('role')
+
+        # If clean_email didn't run yet or role wasn't available then
+        if email and role:
+            domain_requirements = {
+                'student': '@students.ttu.ac.ke',
+                'lecturer': '@ttu.ac.ke'
+            }
+            
+            required_domain = domain_requirements.get(role)
+            if required_domain and not email.endswith(required_domain):
+                self.add_error(
+                    'email',
+                    f'Invalid email domain for {role}s. Must use {required_domain}'
+                )
 
         # Enforce role selection
         if not role:
             self.add_error('role', 'Role selection is required.')
-            return cleaned_data
-
-        # Enforce email presence and domain validation
-        if not email:
-            self.add_error('email', 'Email is required for registration.')
-            return cleaned_data
-
-        # Domain validation based on role
-        domain_requirement = {
-            'student': '@students.ttu.ac.ke',
-            'lecturer': '@ttu.ac.ke'
-        }
-        required_domain = domain_requirement.get(role)
-        
-        if required_domain and not email.endswith(required_domain):
-            self.add_error(
-                'email',
-                f'Invalid domain for {role}s. Must use {required_domain}'
-            )
 
         return cleaned_data
 
