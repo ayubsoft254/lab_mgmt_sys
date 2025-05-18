@@ -1,8 +1,13 @@
 from django import forms
 from django.core.exceptions import ValidationError
+import re
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from .models import Computer, LabSession, RecurringSession, ComputerBooking
+
+# Constants for domain validation
+STUDENT_EMAIL_DOMAIN = 'students.ttu.ac.ke'
+LECTURER_EMAIL_DOMAIN = 'ttu.ac.ke'
 
 class ComputerBookingForm(forms.ModelForm):
     date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
@@ -112,10 +117,19 @@ class RecurringSessionForm(forms.ModelForm):
         if start_time and end_time and start_time >= end_time:
             self.add_error('end_time', 'End time must be after start time')
         
+        # Check if start date is in the past
+        if start_date and start_date < timezone.now().date():
+            self.add_error('start_date', 'Start date cannot be in the past')
+            
+        # Check for reasonable date range (e.g., not scheduling too far in advance)
+        if start_date and end_date and (end_date - start_date).days > 365:
+            self.add_error('end_date', 'Recurring sessions cannot be scheduled more than a year in advance')
+        
         return cleaned_data
 
 
 User = get_user_model()
+
 class CustomUserCreationForm(forms.ModelForm):
     ROLE_CHOICES = [
         ('student', 'Student'),
@@ -129,79 +143,77 @@ class CustomUserCreationForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ('username', 'email')
-        # Ensure email is required at the form level if not enforced by the model
         labels = {'email': 'Email (Required)'}
         help_texts = {'email': ''}
 
     def clean_email(self):
-        """Validate email domain based on selected role"""
         email = self.cleaned_data.get('email', '').lower().strip()
-        role = self.cleaned_data.get('role')
-        
+
         if not email:
             raise ValidationError('Email is required for registration.')
-            
-        # Domain validation mapping
-        domain_requirements = {
-            'student': '@students.ttu.ac.ke',
-            'lecturer': '@ttu.ac.ke'
-        }
-        
-        # If role isn't available yet (form processing order), 
-        # we'll do additional validation in clean()
-        if role and role in domain_requirements:
-            required_domain = domain_requirements[role]
-            if not email.endswith(required_domain):
-                raise ValidationError(
-                    f'Invalid email domain for {role}s. Must use {required_domain}'
-                )
-                
+
+        # Check uniqueness - do case-insensitive comparison
+        if User.objects.filter(email__iexact=email).exists():
+            raise ValidationError("This email is already registered.")
+
         return email
-
-    def clean(self):
-        cleaned_data = super().clean()
-        email = cleaned_data.get('email', '')
-        role = cleaned_data.get('role')
-
-        # If clean_email didn't run yet or role wasn't available then
-        if email and role:
-            domain_requirements = {
-                'student': '@students.ttu.ac.ke',
-                'lecturer': '@ttu.ac.ke'
-            }
-            
-            required_domain = domain_requirements.get(role)
-            if required_domain and not email.endswith(required_domain):
-                self.add_error(
-                    'email',
-                    f'Invalid email domain for {role}s. Must use {required_domain}'
-                )
-
-        # Enforce role selection
-        if not role:
-            self.add_error('role', 'Role selection is required.')
-
-        return cleaned_data
 
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
         password2 = self.cleaned_data.get("password2")
+
         if password1 and password2 and password1 != password2:
             raise ValidationError("Passwords do not match.")
+
         return password2
+
+    def clean(self):
+        cleaned_data = super().clean()
+        email = cleaned_data.get('email', '').lower().strip()
+        role = cleaned_data.get('role')
+
+        # Enforce role selection
+        if not role:
+            self.add_error('role', 'Role selection is required.')
+            return cleaned_data
+
+        # Enforce email presence
+        if not email:
+            self.add_error('email', 'Email is required for registration.')
+            return cleaned_data
+
+        # Domain patterns
+        domain_patterns = {
+            'student': f'^[a-zA-Z0-9._%+-]+@{STUDENT_EMAIL_DOMAIN}$',
+            'lecturer': f'^[a-zA-Z0-9._%+-]+@{LECTURER_EMAIL_DOMAIN}$'
+        }
+
+        pattern = domain_patterns.get(role)
+        if pattern and not re.match(pattern, email):
+            # Custom friendly error message
+            example_email = (
+                f"someone@{STUDENT_EMAIL_DOMAIN}" if role == "student" else f"someone@{LECTURER_EMAIL_DOMAIN}"
+            )
+            self.add_error(
+                'email',
+                f'Invalid email for {role}. Use your institutional email like: {example_email}'
+            )
+
+        return cleaned_data
 
     def save(self, commit=True):
         user = super().save(commit=False)
         user.set_password(self.cleaned_data["password1"])
-        
-        # Assign role flags (ensure your User model has these fields)
+
+        # Assign role flags (your model must have these)
         role = self.cleaned_data['role']
         user.is_student = (role == 'student')
         user.is_lecturer = (role == 'lecturer')
-        
+
         if commit:
             user.save()
-        return user
+
+        return user       
     
     # ===== Allauth Compatibility Methods =====
     def custom_signup(self, request, user):
