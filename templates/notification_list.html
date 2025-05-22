@@ -43,6 +43,23 @@
                                     {% if not notification.is_read %}
                                         <span class="badge bg-info text-dark">New</span>
                                     {% endif %}
+
+                                    <!-- Add links based on notification type -->
+                                    <div>
+                                        {% if notification.notification_type == 'new_booking' and notification.booking %}
+                                            <a href="{% url 'approve_booking' notification.booking.id %}" class="text-blue-600 hover:text-blue-800 text-sm">
+                                                View Booking
+                                            </a>
+                                        {% elif notification.notification_type == 'session_booked' and notification.lab_session %}
+                                            <a href="{% url 'approve_session' notification.lab_session.id %}" class="text-blue-600 hover:text-blue-800 text-sm">
+                                                View Session
+                                            </a>
+                                        {% elif notification.notification_type == 'recurring_session_created' and notification.recurring_session %}
+                                            <a href="{% url 'approve_recurring_session' notification.recurring_session.id %}" class="text-blue-600 hover:text-blue-800 text-sm">
+                                                View Recurring Session
+                                            </a>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             {% endfor %}
                         </div>
