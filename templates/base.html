@@ -115,6 +115,7 @@
                         {% endif %}
                         {% if user.is_admin %}
                             <a href="{% url 'admin_dashboard' %}" class="text-white hover:text-blue-200 text-sm lg:text-base">Admin</a>
+                            <a href="{% url 'analytics_dashboard' %}" class="text-white hover:text-blue-200 text-sm lg:text-base">Analytics</a>
                         {% endif %}
                         <a href="{% url 'notification_list' %}" class="text-white hover:text-blue-200 relative text-sm lg:text-base">
                             Notifications
@@ -143,6 +144,7 @@
                         {% endif %}
                         {% if user.is_admin %}
                             <a href="{% url 'admin_dashboard' %}" class="text-white hover:text-blue-200 block py-1">Admin Dashboard</a>
+                            <a href="{% url 'analytics_dashboard' %}" class="text-white hover:text-blue-200 block py-1">Analytics Dashboard</a>
                         {% endif %}
                         <a href="{% url 'notification_list' %}" class="text-white hover:text-blue-200 flex items-center py-1">
                             Notifications
