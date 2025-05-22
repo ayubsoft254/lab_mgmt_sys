@@ -150,21 +150,66 @@
         </div>
         <div class="col-md-6 mb-3">
             {% if user.is_lecturer %}
-                <div class="d-flex gap-3">
-                    <div class="card flex-fill">
-                        <div class="card-body">
-                            <h5 class="card-title">Book a Lab Session</h5>
-                            <p class="card-text">Schedule a lab session for your class.</p>
-                            <a href="{% url 'lecturer_booking' %}" class="btn btn-primary">Book Session</a>
-                        </div>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800">Your Upcoming Sessions</h3>
                     </div>
-                    
-                    <div class="card flex-fill">
-                        <div class="card-body">
-                            <h5 class="card-title">Book a Recurring Lab Session</h5>
-                            <p class="card-text">Schedule a recurring lab session for your class.</p>
-                            <a href="{% url 'recurring_booking' %}" class="btn btn-primary">Book Session</a>
-                        </div>
+                    <div class="p-6">
+                        {% if upcoming_sessions %}
+                            <div class="space-y-4">
+                                {% for session in upcoming_sessions %}
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <h4 class="font-medium text-gray-900">{{ session.title }}</h4>
+                                        <p class="text-sm text-gray-700 mt-1">{{ session.lab.name }}</p>
+                                        <p class="text-sm text-gray-700">{{ session.start_time|date:"M d, Y H:i" }} - {{ session.end_time|time:"H:i" }}</p>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {% if session.is_approved %}bg-green-100 text-green-800{% else %}bg-yellow-100 text-yellow-800{% endif %} mt-2">
+                                            {% if session.is_approved %}Approved{% else %}Pending Approval{% endif %}
+                                        </span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-gray-500">No upcoming sessions.</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Add Recurring Sessions Section -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800">Your Recurring Sessions</h3>
+                    </div>
+                    <div class="p-6">
+                        {% if recurring_sessions %}
+                            <div class="space-y-4">
+                                {% for session in recurring_sessions %}
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <h4 class="font-medium text-gray-900">{{ session.title }}</h4>
+                                        <p class="text-sm text-gray-700 mt-1">{{ session.lab.name }}</p>
+                                        <p class="text-sm text-gray-700">
+                                            {{ session.get_recurrence_type_display }}: 
+                                            {{ session.start_date|date:"M d" }} - {{ session.end_date|date:"M d" }}, 
+                                            {{ session.start_time|time:"H:i" }} - {{ session.end_time|time:"H:i" }}
+                                        </p>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {% if session.is_approved %}bg-green-100 text-green-800{% else %}bg-yellow-100 text-yellow-800{% endif %} mt-2">
+                                            {% if session.is_approved %}Approved{% else %}Pending Approval{% endif %}
+                                        </span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="mt-4">
+                                <a href="{% url 'recurring_sessions_list' %}" class="text-blue-600 hover:text-blue-800 text-sm">
+                                    View all recurring sessions →
+                                </a>
+                            </div>
+                        {% else %}
+                            <p class="text-gray-500">No recurring sessions.</p>
+                            <div class="mt-4">
+                                <a href="{% url 'recurring_booking' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                                    Create Recurring Session
+                                </a>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             {% endif %}
