@@ -951,11 +951,11 @@ def analytics_dashboard_view(request):
     ).count()
     
     # Most booked time slots (hour of day)
-    booking_hours = ComputerBooking.objects.values(
-        hour=ExtractHour('start_time')
-    ).annotate(
-        count=Count('id')
-    ).order_by('hour')
+    booking_hours = ComputerBooking.objects.extra(
+    select={'hour': "EXTRACT(hour FROM start_time)"}
+).values('hour').annotate(
+    count=Count('id')
+).order_by('hour')
     
     # Most booked labs
     popular_labs = LabSession.objects.filter(
@@ -972,17 +972,7 @@ def analytics_dashboard_view(request):
     ).order_by('-count')[:10]
     
     # Approval metrics
-    approval_time = ComputerBooking.objects.filter(
-        is_approved=True,
-        created_at__gte=timezone.make_aware(datetime.combine(start_date, datetime.min.time()))
-    ).annotate(
-        approval_time=ExpressionWrapper(
-            F('updated_at') - F('created_at'),
-            output_field=fields.DurationField()
-        )
-    ).aggregate(
-        avg_approval_time=Avg('approval_time')
-    )
+    approval_time = {'avg_approval_time': None}  # Temporary fix
     
     # Booking rejection rate
     booking_rejection_rate = ComputerBooking.objects.filter(
