@@ -6,4 +6,4 @@ class AnalyticsConfig(AppConfig):
     name = 'analytics'
 
     def ready(self):
-        import booking.signals
+        import analytics.signals
