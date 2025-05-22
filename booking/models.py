@@ -174,10 +174,18 @@ class Notification(models.Model):
         ('booking_cancelled', 'Booking Cancelled'),
         ('session_booked', 'Session Booked'),
         ('booking_approved', 'Booking Approved'),
-        ('booking_rejected', 'Booking Rejected')
+        ('booking_rejected', 'Booking Rejected'),
+        ('recurring_session_created', 'Recurring Session Created'),
+        ('recurring_session_approved', 'Recurring Session Approved'),
+        ('recurring_session_rejected', 'Recurring Session Rejected')
     ])
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    # Optional references to different entities
+    booking = models.ForeignKey('ComputerBooking', on_delete=models.SET_NULL, null=True, blank=True, related_name='notifications')
+    lab_session = models.ForeignKey('LabSession', on_delete=models.SET_NULL, null=True, blank=True, related_name='notifications')
+    recurring_session = models.ForeignKey('RecurringSession', on_delete=models.SET_NULL, null=True, blank=True, related_name='notifications')
     
     def __str__(self):
         return f"Notification for {self.user.username}: {self.notification_type}"    
