@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Lab, Computer, ComputerBooking, LabSession, Notification, RecurringSession
+from .models import User, Lab, Computer, ComputerBooking, LabSession, Notification, RecurringSession, SystemEvent
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
@@ -40,3 +40,26 @@ class NotificationAdmin(admin.ModelAdmin):
 class RecurringSessionAdmin(admin.ModelAdmin):
     list_display = ('lab', 'lecturer', 'title', 'recurrence_type', 'start_time', 'end_time')
     search_fields = ('lab__name', 'lecturer__username', 'title')
+
+@admin.register(SystemEvent)
+class SystemEventAdmin(admin.ModelAdmin):
+    list_display = ('event_type', 'user', 'timestamp', 'ip_address')
+    list_filter = ('event_type', 'timestamp')
+    search_fields = ('event_type', 'user__username', 'ip_address')
+    readonly_fields = ('user', 'event_type', 'timestamp', 'details', 'ip_address')
+    date_hierarchy = 'timestamp'
+    
+    def has_add_permission(self, request):
+        # Prevent manual creation of system events
+        return False
+    
+    def has_change_permission(self, request, obj=None):
+        # Make system events read-only
+        return False
+    
+    def get_actions(self, request):
+        # Limit available actions
+        actions = super().get_actions(request)
+        if 'delete_selected' in actions:
+            del actions['delete_selected']
+        return actions
