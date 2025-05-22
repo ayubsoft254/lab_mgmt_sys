@@ -43,23 +43,9 @@ class RecurringSessionAdmin(admin.ModelAdmin):
 
 @admin.register(SystemEvent)
 class SystemEventAdmin(admin.ModelAdmin):
-    list_display = ('event_type', 'user', 'timestamp', 'ip_address')
-    list_filter = ('event_type', 'timestamp')
-    search_fields = ('event_type', 'user__username', 'ip_address')
-    readonly_fields = ('user', 'event_type', 'timestamp', 'details', 'ip_address')
-    date_hierarchy = 'timestamp'
+    list_display = ('event_type', 'description', 'created_at')
+    list_filter = ('event_type',)
+    search_fields = ('description',)
+
+
     
-    def has_add_permission(self, request):
-        # Prevent manual creation of system events
-        return False
-    
-    def has_change_permission(self, request, obj=None):
-        # Make system events read-only
-        return False
-    
-    def get_actions(self, request):
-        # Limit available actions
-        actions = super().get_actions(request)
-        if 'delete_selected' in actions:
-            del actions['delete_selected']
-        return actions
