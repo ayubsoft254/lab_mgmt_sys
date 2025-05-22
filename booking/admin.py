@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Lab, Computer, ComputerBooking, LabSession, Notification, RecurringSession, SystemEvent
+from .models import User, Lab, Computer, ComputerBooking, LabSession, Notification, RecurringSession
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
@@ -40,12 +40,6 @@ class NotificationAdmin(admin.ModelAdmin):
 class RecurringSessionAdmin(admin.ModelAdmin):
     list_display = ('lab', 'lecturer', 'title', 'recurrence_type', 'start_time', 'end_time')
     search_fields = ('lab__name', 'lecturer__username', 'title')
-
-@admin.register(SystemEvent)
-class SystemEventAdmin(admin.ModelAdmin):
-    list_display = ('event_type', 'description', 'created_at')
-    list_filter = ('event_type',)
-    search_fields = ('description',)
 
 
     
