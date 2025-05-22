@@ -6,7 +6,8 @@ from django.db.models.functions import TruncDay, TruncWeek
 from django.contrib import messages
 from datetime import timedelta, datetime
 import json
-from .models import User, SystemEvent, ComputerBooking, LabSession, Computer
+from booking.models import ComputerBooking, LabSession, Computer, User
+from .models import SystemEvent
 from django.shortcuts import redirect
 from django.db import models
 from django.db.models import fields
