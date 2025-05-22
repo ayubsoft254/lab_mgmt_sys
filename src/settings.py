@@ -173,10 +173,6 @@ CSRF_TRUSTED_ORIGINS = [
     'https://41.89.130.21',
     # add other trusted origins if necessary
 ]
-
-APPEND_SLASH = True
-
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
