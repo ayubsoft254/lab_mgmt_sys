@@ -8,7 +8,7 @@ from django.db.models import Q, Count, Avg, F, ExpressionWrapper, fields
 from django.db.models.functions import TruncDay, TruncWeek, TruncMonth, ExtractHour
 from django.utils import timezone
 from django.http import HttpResponse
-from .models import Lab, Computer, ComputerBooking, LabSession, Notification, User, RecurringSession, SystemEvent
+from .models import Lab, Computer, ComputerBooking, LabSession, Notification, User, RecurringSession
 from datetime import datetime, timedelta
 from .forms import ComputerBookingForm, LabSessionForm, CustomUserCreationForm, RecurringSessionForm
 import json
