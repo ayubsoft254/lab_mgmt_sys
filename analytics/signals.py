@@ -1,6 +1,7 @@
 from django.contrib.auth.signals import user_logged_in, user_logged_out
 from django.dispatch import receiver
-from ..booking.models import SystemEvent, User
+from .models import SystemEvent
+from django.contrib.auth.models import User
 
 @receiver(user_logged_in)
 def user_logged_in_callback(sender, request, user, **kwargs):
