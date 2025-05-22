@@ -97,13 +97,14 @@ def student_booking_view(request, lab_id, computer_id=None):
             
             booking.save()
             
-            # Notify admin about new booking
+            # Updated notification with proper reference to booking
             admin_users = User.objects.filter(is_admin=True)
             for admin in admin_users:
                 Notification.objects.create(
                     user=admin,
                     message=f"New computer booking: {booking.computer} by {request.user.username}",
-                    notification_type='new_booking'
+                    notification_type='new_booking',
+                    booking=booking  # Add direct reference to booking
                 )
             
             return redirect('booking_success', booking_id=booking.id)
@@ -135,13 +136,14 @@ def lecturer_booking_view(request):
             try:
                 session.save()
                 
-                # Notify admin about new session booking
+                # Updated notification with proper reference to lab session
                 admin_users = User.objects.filter(is_admin=True)
                 for admin in admin_users:
                     Notification.objects.create(
                         user=admin,
                         message=f"New lab session request: {session.lab.name} by {request.user.username}",
-                        notification_type='session_booked'
+                        notification_type='session_booked',
+                        lab_session=session  # Add direct reference to session
                     )
                 
                 messages.success(request, "Lab session request submitted for approval")
@@ -282,11 +284,12 @@ def approve_booking_view(request, booking_id):
     booking.is_approved = True
     booking.save()
     
-    # Notify student about approval
+    # Updated notification with proper reference
     Notification.objects.create(
         user=booking.student,
         message=f"Your booking for {booking.computer} has been approved.",
-        notification_type='booking_approved'
+        notification_type='booking_approved',
+        booking=booking  # Add direct reference
     )
     
     messages.success(request, "Booking approved successfully")
@@ -300,13 +303,14 @@ def approve_session_view(request, session_id):
     
     session = get_object_or_404(LabSession, id=session_id)
     session.is_approved = True
-    session.save()  # This will trigger the save method that handles conflicts
+    session.save()
     
-    # Notify lecturer about approval
+    # Updated notification with proper reference
     Notification.objects.create(
         user=session.lecturer,
         message=f"Your session for {session.lab.name} has been approved.",
-        notification_type='booking_approved'
+        notification_type='booking_approved',
+        lab_session=session  # Add direct reference
     )
     
     messages.success(request, "Lab session approved successfully")
@@ -424,13 +428,14 @@ def recurring_booking_view(request):
             try:
                 recurring_session.save()
                 
-                # Notify admin about new recurring session request
+                # Updated notification with proper type and reference
                 admin_users = User.objects.filter(is_admin=True)
                 for admin in admin_users:
                     Notification.objects.create(
                         user=admin,
                         message=f"New recurring session request: {recurring_session.lab.name} - {recurring_session.title}",
-                        notification_type='recurring_session_booked'
+                        notification_type='recurring_session_created',  # Updated type
+                        recurring_session=recurring_session  # Add direct reference
                     )
                 
                 messages.success(request, "Recurring session request submitted for approval")
@@ -484,9 +489,74 @@ def cancel_recurring_session_view(request, session_id):
         # Delete the recurring session
         recurring_session.delete()
         
+        # Add notification for cancellation
+        if request.user.is_admin:
+            # Admin cancelled a session, notify the lecturer
+            Notification.objects.create(
+                user=recurring_session.lecturer,
+                message=f"Your recurring session '{recurring_session.title}' has been cancelled by an administrator.",
+                notification_type='recurring_session_rejected',
+                recurring_session=recurring_session
+            )
+        elif request.user == recurring_session.lecturer:
+            # Lecturer cancelled their own session, notify admins
+            admin_users = User.objects.filter(is_admin=True)
+            for admin in admin_users:
+                Notification.objects.create(
+                    user=admin,
+                    message=f"Recurring session '{recurring_session.title}' was cancelled by {recurring_session.lecturer.username}.",
+                    notification_type='recurring_session_rejected',
+                    recurring_session=recurring_session
+                )
+        
         messages.success(request, "Recurring session cancelled successfully")
         return redirect('recurring_sessions_list')
     
     return render(request, 'cancel_recurring_session.html', {
         'recurring_session': recurring_session
     })
+
+# NEW FUNCTION: Add approve recurring session view
+@login_required
+def approve_recurring_session_view(request, session_id):
+    if not request.user.is_admin:
+        messages.error(request, "Access denied. Admin privileges required.")
+        return redirect('home')
+    
+    recurring_session = get_object_or_404(RecurringSession, id=session_id)
+    recurring_session.is_approved = True
+    recurring_session.save()
+    
+    # Create notification with direct reference
+    Notification.objects.create(
+        user=recurring_session.lecturer,
+        message=f"Your recurring session '{recurring_session.title}' for {recurring_session.lab.name} has been approved.",
+        notification_type='recurring_session_approved',
+        recurring_session=recurring_session
+    )
+    
+    messages.success(request, "Recurring session approved successfully")
+    return redirect('admin_dashboard')
+
+# NEW FUNCTION: Add reject recurring session view
+@login_required
+def reject_recurring_session_view(request, session_id):
+    if not request.user.is_admin:
+        messages.error(request, "Access denied. Admin privileges required.")
+        return redirect('home')
+    
+    recurring_session = get_object_or_404(RecurringSession, id=session_id)
+    
+    # Create rejection notification before deleting
+    Notification.objects.create(
+        user=recurring_session.lecturer,
+        message=f"Your recurring session request '{recurring_session.title}' for {recurring_session.lab.name} has been rejected.",
+        notification_type='recurring_session_rejected',
+        recurring_session=recurring_session
+    )
+    
+    # Delete the recurring session
+    recurring_session.delete()
+    
+    messages.success(request, "Recurring session rejected successfully")
+    return redirect('admin_dashboard')
