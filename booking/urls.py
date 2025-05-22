@@ -35,7 +35,6 @@ urlpatterns = [
     path('booking/<int:booking_id>/reject/', views.reject_booking_view, name='reject_booking'),
     path('session/<int:session_id>/reject/', views.reject_session_view, name='reject_session'),
     path('booking/<int:booking_id>/cancel/', views.cancel_booking_view, name='cancel_booking'),
-    path('session/<int:session_id>/cancel/', views.cancel_session_view, name='cancel_session'),
-    path('analytics/', views.analytics_dashboard_view, name='analytics_dashboard'),
-    
+    path('session/<int:session_id>/cancel/', views.cancel_session_view, name='cancel_session'),   
+
 ]
