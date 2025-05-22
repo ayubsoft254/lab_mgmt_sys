@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 
 # Create your models here.
 class SystemEvent(models.Model):
@@ -19,7 +19,14 @@ class SystemEvent(models.Model):
         ('system_error', 'System Error'),
     ]
     
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='system_events')
+    # Use settings.AUTH_USER_MODEL instead of the direct User reference
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,  # This points to your custom User model
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='system_events'
+    )
     event_type = models.CharField(max_length=50, choices=EVENT_TYPES)
     timestamp = models.DateTimeField(auto_now_add=True)
     details = models.JSONField(null=True, blank=True)  # Store additional context as JSON

@@ -4,6 +4,8 @@ from .models import SystemEvent
 # Register your models here.
 @admin.register(SystemEvent)
 class SystemEventAdmin(admin.ModelAdmin):
-    list_display = ('event_type', 'description', 'created_at')
-    list_filter = ('event_type',)
-    search_fields = ('description',)
+    list_display = ('user', 'event_type', 'ip_address', 'timestamp')
+    list_filter = ('event_type', 'user')
+    search_fields = ('user__username', 'ip_address')
+    date_hierarchy = 'timestamp'
+    ordering = ('-timestamp',)
