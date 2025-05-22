@@ -1,10 +1,12 @@
 {% extends 'base.html' %}
 
+{% block title %}Create Recurring Session{% endblock %}
+
 {% block content %}
 <div class="container mx-auto p-6">
-    <h1 class="text-3xl font-bold mb-6">Book Recurring Lab Session</h1>
-
-    <form method="post" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">Create Recurring Session</h1>
+    
+    <form method="post" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 max-w-2xl mx-auto">
         {% csrf_token %}
         
         {% if form.non_field_errors %}
@@ -35,7 +37,7 @@
             {% endif %}
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.start_date.id_for_label }}">
                     Start Date
@@ -57,7 +59,7 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.start_time.id_for_label }}">
                     Start Time
@@ -79,9 +81,9 @@
             </div>
         </div>
 
-        <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.recurrence_type.id_for_label }}">
-                Recurrence Type
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2">
+                Recurrence Pattern
             </label>
             {{ form.recurrence_type }}
             {% if form.recurrence_type.errors %}
@@ -91,18 +93,22 @@
 
         <div class="flex items-center justify-between">
             <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
-                Submit Recurring Session Request
+                Create Recurring Session
             </button>
+            <a href="{% url 'home' %}" class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">
+                Cancel
+            </a>
+        </div>
+        
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mt-6">
+            <div class="flex">
+                <div>
+                    <p class="text-sm text-yellow-700">
+                        <strong>Note:</strong> Recurring sessions require admin approval. You'll be notified once your request is processed.
+                    </p>
+                </div>
+            </div>
         </div>
     </form>
-
-    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mt-6" role="alert">
-        <p class="font-bold">Important Notes:</p>
-        <ul class="list-disc pl-5">
-            <li>Recurring sessions are subject to admin approval</li>
-            <li>Conflicts with existing sessions will prevent booking</li>
-            <li>Choose the recurrence type carefully</li>
-        </ul>
-    </div>
 </div>
 {% endblock %}

@@ -1,35 +1,50 @@
 {% extends 'base.html' %}
 
+{% block title %}Cancel Recurring Session{% endblock %}
+
 {% block content %}
-<div class="container mx-auto p-6 animate-fade-in">
-    <h1 class="text-3xl font-bold text-ttu-dark mb-6">Cancel Recurring Session</h1>
-
-    <div class="glass-card p-6">
-        <h2 class="text-2xl font-semibold text-ttu-dark mb-4">Are you sure you want to cancel this recurring session?</h2>
-
-        <div class="mb-4 text-ttu-dark">
-            <p><strong>Lab:</strong> {{ recurring_session.lab.name }}</p>
-            <p><strong>Title:</strong> {{ recurring_session.title }}</p>
-            <p><strong>Recurrence:</strong> {{ recurring_session.get_recurrence_type_display }}</p>
-            <p><strong>Start Date:</strong> {{ recurring_session.start_date|date:"F j, Y" }}</p>
-            <p><strong>End Date:</strong> {{ recurring_session.end_date|date:"F j, Y" }}</p>
+<div class="container mx-auto px-4 py-8 max-w-2xl">
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+            <h1 class="text-xl font-semibold text-gray-800">Cancel Recurring Session</h1>
         </div>
-
-        <div class="bg-ttu-light border-l-4 border-ttu-yellow text-ttu-dark p-4 mb-4 rounded">
-            <p><strong>Warning:</strong> This will delete all future sessions associated with this recurring booking.</p>
-        </div>
-
-        <form method="post">
-            {% csrf_token %}
-            <div class="flex items-center">
-                <button type="submit" class="btn-danger mr-4">
-                    Confirm Cancel
-                </button>
-                <a href="{% url 'recurring_sessions_list' %}" class="btn-outline-ttu">
-                    Back to Recurring Sessions
-                </a>
+        <div class="p-6">
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-yellow-700">
+                            Are you sure you want to cancel this recurring session? This action cannot be undone.
+                        </p>
+                    </div>
+                </div>
             </div>
-        </form>
+            
+            <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                <h3 class="font-medium text-gray-900">{{ recurring_session.title }}</h3>
+                <p class="text-sm text-gray-700 mt-2">{{ recurring_session.lab.name }}</p>
+                <p class="text-sm text-gray-700">
+                    {{ recurring_session.get_recurrence_type_display }}: 
+                    {{ recurring_session.start_date|date:"M d, Y" }} - {{ recurring_session.end_date|date:"M d, Y" }}, 
+                    {{ recurring_session.start_time|time:"H:i" }} - {{ recurring_session.end_time|time:"H:i" }}
+                </p>
+                <p class="text-sm text-gray-700 mt-2">Lecturer: {{ recurring_session.lecturer.username }}</p>
+            </div>
+            
+            <form method="post" class="flex space-x-3">
+                {% csrf_token %}
+                <button type="submit" class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                    Confirm Cancellation
+                </button>
+                <a href="{% url 'recurring_sessions_list' %}" class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Back
+                </a>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}
