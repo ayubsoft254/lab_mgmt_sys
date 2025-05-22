@@ -182,7 +182,7 @@ def admin_dashboard_view(request):
         end_time__gte=now
     ).order_by('start_time')
 
-    pending_reccuring_sessions = RecurringSession.objects.filter(
+    pending_recurring_sessions = RecurringSession.objects.filter(
         is_approved=False,        
         end_time__gte=now
     ).order_by('start_time')
@@ -261,6 +261,11 @@ def admin_dashboard_view(request):
     
     labs = Lab.objects.all()    
     
+    # Get approved recurring sessions for the Recurring Sessions tab
+    approved_recurring_sessions = RecurringSession.objects.filter(
+        is_approved=True
+    ).order_by('start_date')
+    
     return render(request, 'admin_dashboard.html', {
         'pending_computer_bookings': pending_computer_bookings,        
         'pending_lab_sessions': pending_lab_sessions,              
@@ -272,6 +277,8 @@ def admin_dashboard_view(request):
         'labs': labs,
         'date_from': date_from,
         'date_to': date_to,
+        'pending_recurring_sessions': pending_recurring_sessions,
+        'approved_recurring_sessions': approved_recurring_sessions,
     })
 
 @login_required
@@ -560,3 +567,292 @@ def reject_recurring_session_view(request, session_id):
     
     messages.success(request, "Recurring session rejected successfully")
     return redirect('admin_dashboard')
+
+@login_required
+def bulk_approve_bookings_view(request):
+    if not request.user.is_admin:
+        messages.error(request, "Access denied. Admin privileges required.")
+        return redirect('home')
+    
+    if request.method == 'POST':
+        # Approve all pending bookings
+        pending_bookings = ComputerBooking.objects.filter(is_approved=False, is_cancelled=False, end_time__gte=timezone.now())
+        
+        count = 0
+        for booking in pending_bookings:
+            booking.is_approved = True
+            booking.save()
+            
+            # Create notification
+            Notification.objects.create(
+                user=booking.student,
+                message=f"Your booking for {booking.computer} has been approved.",
+                notification_type='booking_approved',
+                booking=booking
+            )
+            count += 1
+        
+        messages.success(request, f"{count} bookings approved successfully")
+    
+    return redirect('admin_dashboard')
+
+@login_required
+def bulk_approve_sessions_view(request):
+    if not request.user.is_admin:
+        messages.error(request, "Access denied. Admin privileges required.")
+        return redirect('home')
+    
+    if request.method == 'POST':
+        # Approve all pending lab sessions
+        pending_sessions = LabSession.objects.filter(is_approved=False, end_time__gte=timezone.now())
+        
+        count = 0
+        for session in pending_sessions:
+            session.is_approved = True
+            session.save()
+            
+            # Create notification
+            Notification.objects.create(
+                user=session.lecturer,
+                message=f"Your session for {session.lab.name} has been approved.",
+                notification_type='booking_approved',
+                lab_session=session
+            )
+            count += 1
+        
+        messages.success(request, f"{count} lab sessions approved successfully")
+    
+    return redirect('admin_dashboard')
+
+@login_required
+def bulk_approve_recurring_sessions_view(request):
+    if not request.user.is_admin:
+        messages.error(request, "Access denied. Admin privileges required.")
+        return redirect('home')
+    
+    if request.method == 'POST':
+        # Approve all pending recurring sessions
+        pending_recurring_sessions = RecurringSession.objects.filter(is_approved=False)
+        
+        count = 0
+        for session in pending_recurring_sessions:
+            session.is_approved = True
+            session.save()
+            
+            # Create notification
+            Notification.objects.create(
+                user=session.lecturer,
+                message=f"Your recurring session '{session.title}' for {session.lab.name} has been approved.",
+                notification_type='recurring_session_approved',
+                recurring_session=session
+            )
+            count += 1
+        
+        messages.success(request, f"{count} recurring sessions approved successfully")
+    
+    return redirect('admin_dashboard')
+
+@login_required
+def bulk_cancel_bookings_view(request):
+    if not request.user.is_admin:
+        messages.error(request, "Access denied. Admin privileges required.")
+        return redirect('home')
+    
+    if request.method == 'POST':
+        # Cancel all upcoming bookings
+        upcoming_bookings = ComputerBooking.objects.filter(
+            is_approved=True,
+            is_cancelled=False,
+            end_time__gte=timezone.now()
+        )
+        
+        count = 0
+        for booking in upcoming_bookings:
+            booking.is_cancelled = True
+            booking.save()
+            
+            # Create notification
+            Notification.objects.create(
+                user=booking.student,
+                message=f"Your booking for {booking.computer} has been cancelled by an administrator.",
+                notification_type='booking_cancelled',
+                booking=booking
+            )
+            count += 1
+        
+        messages.success(request, f"{count} bookings cancelled successfully")
+    
+    return redirect('admin_dashboard')
+
+@login_required
+def bulk_cancel_sessions_view(request):
+    if not request.user.is_admin:
+        messages.error(request, "Access denied. Admin privileges required.")
+        return redirect('home')
+    
+    if request.method == 'POST':
+        # Cancel all upcoming lab sessions
+        upcoming_sessions = LabSession.objects.filter(
+            is_approved=True,
+            end_time__gte=timezone.now()
+        )
+        
+        count = 0
+        for session in upcoming_sessions:
+            # Create notification before deleting
+            Notification.objects.create(
+                user=session.lecturer,
+                message=f"Your session for {session.lab.name} on {session.start_time.strftime('%Y-%m-%d %H:%M')} has been cancelled by an administrator.",
+                notification_type='booking_cancelled',
+                lab_session=session
+            )
+            
+            # Delete the session
+            session.delete()
+            count += 1
+        
+        messages.success(request, f"{count} lab sessions cancelled successfully")
+    
+    return redirect('admin_dashboard')
+
+@login_required
+def bulk_cancel_recurring_sessions_view(request):
+    if not request.user.is_admin:
+        messages.error(request, "Access denied. Admin privileges required.")
+        return redirect('home')
+    
+    if request.method == 'POST':
+        # Cancel all recurring sessions
+        recurring_sessions = RecurringSession.objects.filter(is_approved=True)
+        
+        count = 0
+        for session in recurring_sessions:
+            # Create notification before deleting
+            Notification.objects.create(
+                user=session.lecturer,
+                message=f"Your recurring session '{session.title}' for {session.lab.name} has been cancelled by an administrator.",
+                notification_type='recurring_session_rejected',
+                recurring_session=session
+            )
+            
+            # Delete all future lab sessions associated with this recurring session
+            LabSession.objects.filter(
+                lab=session.lab,
+                lecturer=session.lecturer,
+                title=session.title,
+                start_time__gte=timezone.now()
+            ).delete()
+            
+            # Delete the recurring session
+            session.delete()
+            count += 1
+        
+        messages.success(request, f"{count} recurring sessions cancelled successfully")
+    
+    return redirect('admin_dashboard')
+
+@login_required
+def reject_booking_view(request, booking_id):
+    if not request.user.is_admin:
+        messages.error(request, "Access denied. Admin privileges required.")
+        return redirect('home')
+    
+    booking = get_object_or_404(ComputerBooking, id=booking_id)
+    
+    # Create notification before cancelling
+    Notification.objects.create(
+        user=booking.student,
+        message=f"Your booking request for {booking.computer} has been rejected.",
+        notification_type='booking_rejected',
+        booking=booking
+    )
+    
+    # Cancel the booking
+    booking.is_cancelled = True
+    booking.save()
+    
+    messages.success(request, "Booking rejected successfully")
+    return redirect('admin_dashboard')
+
+@login_required
+def reject_session_view(request, session_id):
+    if not request.user.is_admin:
+        messages.error(request, "Access denied. Admin privileges required.")
+        return redirect('home')
+    
+    session = get_object_or_404(LabSession, id=session_id)
+    
+    # Create notification before deleting
+    Notification.objects.create(
+        user=session.lecturer,
+        message=f"Your session request for {session.lab.name} has been rejected.",
+        notification_type='booking_rejected',
+        lab_session=session
+    )
+    
+    # Delete the session
+    session.delete()
+    
+    messages.success(request, "Lab session rejected successfully")
+    return redirect('admin_dashboard')
+
+@login_required
+def cancel_booking_view(request, booking_id):
+    if not request.user.is_admin and not request.user == booking.student:
+        messages.error(request, "Access denied.")
+        return redirect('home')
+    
+    booking = get_object_or_404(ComputerBooking, id=booking_id)
+    
+    if request.method == 'POST':
+        booking.is_cancelled = True
+        booking.save()
+        
+        # Create notification
+        if request.user.is_admin:
+            Notification.objects.create(
+                user=booking.student,
+                message=f"Your booking for {booking.computer} has been cancelled by an administrator.",
+                notification_type='booking_cancelled',
+                booking=booking
+            )
+        else:
+            # Notify admins when a student cancels
+            admin_users = User.objects.filter(is_admin=True)
+            for admin in admin_users:
+                Notification.objects.create(
+                    user=admin,
+                    message=f"Booking for {booking.computer} by {booking.student.username} has been cancelled.",
+                    notification_type='booking_cancelled',
+                    booking=booking
+                )
+        
+        messages.success(request, "Booking cancelled successfully")
+        return redirect('home')
+    
+    return render(request, 'cancel_booking.html', {'booking': booking})
+
+@login_required
+def cancel_session_view(request, session_id):
+    if not request.user.is_admin:
+        messages.error(request, "Access denied. Admin privileges required.")
+        return redirect('home')
+    
+    session = get_object_or_404(LabSession, id=session_id)
+    
+    if request.method == 'POST':
+        # Create notification before deleting
+        Notification.objects.create(
+            user=session.lecturer,
+            message=f"Your session for {session.lab.name} has been cancelled by an administrator.",
+            notification_type='booking_cancelled',
+            lab_session=session
+        )
+        
+        # Delete the session
+        session.delete()
+        
+        messages.success(request, "Lab session cancelled successfully")
+        return redirect('admin_dashboard')
+    
+    return render(request, 'cancel_session.html', {'session': session})

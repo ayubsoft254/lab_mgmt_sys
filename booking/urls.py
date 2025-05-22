@@ -22,4 +22,18 @@ urlpatterns = [
     path('recurring-session/<int:session_id>/cancel/', views.cancel_recurring_session_view, name='cancel_recurring_session'),
     path('recurring-session/<int:session_id>/approve/', views.approve_recurring_session_view, name='approve_recurring_session'),
     path('recurring-session/<int:session_id>/reject/', views.reject_recurring_session_view, name='reject_recurring_session'),
+
+    # Bulk actions
+    path('admin/bulk-approve-bookings/', views.bulk_approve_bookings_view, name='bulk_approve_bookings'),
+    path('admin/bulk-approve-sessions/', views.bulk_approve_sessions_view, name='bulk_approve_sessions'),
+    path('admin/bulk-approve-recurring-sessions/', views.bulk_approve_recurring_sessions_view, name='bulk_approve_recurring_sessions'),
+    path('admin/bulk-cancel-bookings/', views.bulk_cancel_bookings_view, name='bulk_cancel_bookings'),
+    path('admin/bulk-cancel-sessions/', views.bulk_cancel_sessions_view, name='bulk_cancel_sessions'),
+    path('admin/bulk-cancel-recurring-sessions/', views.bulk_cancel_recurring_sessions_view, name='bulk_cancel_recurring_sessions'),
+
+    # Individual actions
+    path('booking/<int:booking_id>/reject/', views.reject_booking_view, name='reject_booking'),
+    path('session/<int:session_id>/reject/', views.reject_session_view, name='reject_session'),
+    path('booking/<int:booking_id>/cancel/', views.cancel_booking_view, name='cancel_booking'),
+    path('session/<int:session_id>/cancel/', views.cancel_session_view, name='cancel_session'),
 ]
