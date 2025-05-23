@@ -734,6 +734,245 @@
             });
         });
     });
+    
+    // Session Details Modal
+    document.addEventListener('DOMContentLoaded', function() {
+        // Session modal functionality
+        const sessionModal = document.getElementById('sessionDetailsModal');
+        const sessionContent = document.getElementById('sessionDetailsContent');
+        const openSessionButtons = document.querySelectorAll('.view-session-details');
+        const closeSessionButtons = document.querySelectorAll('.closeSessionModal');
+        
+        openSessionButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const sessionId = button.getAttribute('data-session-id');
+                
+                // Show loading state
+                sessionContent.innerHTML = `
+                    <div class="animate-pulse">
+                        <div class="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+                        <div class="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+                        <div class="h-4 bg-gray-200 rounded w-5/6 mb-4"></div>
+                    </div>
+                `;
+                
+                // Show modal
+                sessionModal.classList.remove('hidden');
+                
+                // Fetch session details
+                fetch(`/api/sessions/${sessionId}/details/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Populate modal with session details
+                        sessionContent.innerHTML = `
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div>
+                                    <h4 class="text-lg font-medium text-gray-900 mb-3">${data.title}</h4>
+                                    <p class="text-sm text-gray-500 mb-1">Lab: ${data.lab_name}</p>
+                                    <p class="text-sm text-gray-500 mb-1">Lecturer: ${data.lecturer_name}</p>
+                                    <p class="text-sm text-gray-500 mb-1">Date: ${data.date}</p>
+                                    <p class="text-sm text-gray-500 mb-1">Time: ${data.start_time} - ${data.end_time}</p>
+                                    <p class="text-sm text-gray-500 mb-4">Status: 
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${data.is_approved ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                                            ${data.is_approved ? 'Approved' : 'Pending'}
+                                        </span>
+                                    </p>
+                                    
+                                    <h5 class="font-medium text-gray-900 mb-2 mt-4">Description</h5>
+                                    <p class="text-sm text-gray-600 mb-4">${data.description || 'No description provided.'}</p>
+                                </div>
+                                
+                                <div>
+                                    <h5 class="font-medium text-gray-900 mb-2">Attending Students</h5>
+                                    <div class="border rounded-md overflow-hidden">
+                                        <table class="min-w-full divide-y divide-gray-200">
+                                            <thead class="bg-gray-50">
+                                                <tr>
+                                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rating</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="bg-white divide-y divide-gray-200">
+                                                ${data.students.map(student => `
+                                                    <tr>
+                                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">${student.name}</td>
+                                                        <td class="px-4 py-2 whitespace-nowrap">
+                                                            <div class="flex items-center">
+                                                                ${getStarRating(student.rating)}
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                `).join('') || `<tr><td colspan="2" class="px-4 py-2 text-sm text-gray-500 text-center">No students attending yet.</td></tr>`}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    })
+                    .catch(error => {
+                        sessionContent.innerHTML = `<p class="text-red-500">Error loading session details. Please try again.</p>`;
+                        console.error('Error:', error);
+                    });
+            });
+        });
+        
+        closeSessionButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                sessionModal.classList.add('hidden');
+            });
+        });
+        
+        // Booking modal functionality
+        const bookingModal = document.getElementById('bookingDetailsModal');
+        const bookingContent = document.getElementById('bookingDetailsContent');
+        const openBookingButtons = document.querySelectorAll('.view-booking-details');
+        const closeBookingButtons = document.querySelectorAll('.closeBookingModal');
+        
+        openBookingButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const bookingId = button.getAttribute('data-booking-id');
+                
+                // Show loading state
+                bookingContent.innerHTML = `
+                    <div class="animate-pulse">
+                        <div class="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+                        <div class="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+                        <div class="h-4 bg-gray-200 rounded w-5/6 mb-4"></div>
+                    </div>
+                `;
+                
+                // Show modal
+                bookingModal.classList.remove('hidden');
+                
+                // Fetch booking details
+                fetch(`/api/bookings/${bookingId}/details/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Populate modal with booking details
+                        bookingContent.innerHTML = `
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <h4 class="text-lg font-medium text-gray-900 mb-4">Booking Information</h4>
+                                    
+                                    <div class="mb-6">
+                                        <p class="text-sm text-gray-500 mb-1">Computer: ${data.computer}</p>
+                                        <p class="text-sm text-gray-500 mb-1">Lab: ${data.lab_name}</p>
+                                        <p class="text-sm text-gray-500 mb-1">Date: ${data.date}</p>
+                                        <p class="text-sm text-gray-500 mb-1">Time: ${data.start_time} - ${data.end_time}</p>
+                                        <p class="text-sm text-gray-500 mb-1">Booking Code: ${data.booking_code}</p>
+                                        <p class="text-sm text-gray-500 mb-1">Status: 
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${data.status_class}">
+                                                ${data.status}
+                                            </span>
+                                        </p>
+                                        <p class="text-sm text-gray-500 mb-4">Created: ${data.created_at}</p>
+                                    </div>
+                                    
+                                    <h5 class="font-medium text-gray-900 mb-2">Purpose</h5>
+                                    <p class="text-sm text-gray-600 mb-4">${data.purpose || 'No purpose specified.'}</p>
+                                </div>
+                                
+                                <div>
+                                    <h4 class="text-lg font-medium text-gray-900 mb-4">Student Information</h4>
+                                    
+                                    <div class="mb-4">
+                                        <p class="text-sm text-gray-500 mb-1">Name: ${data.student.name}</p>
+                                        <p class="text-sm text-gray-500 mb-1">Username: ${data.student.username}</p>
+                                        <p class="text-sm text-gray-500 mb-1">School: ${data.student.school}</p>
+                                        <p class="text-sm text-gray-500 mb-1">Course: ${data.student.course || 'Not specified'}</p>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <h5 class="font-medium text-gray-900 mb-2">Student Rating</h5>
+                                        <div class="flex items-center mb-2">
+                                            ${getStarRating(data.student.rating)}
+                                            <span class="ml-1 text-sm text-gray-600">(${data.student.rating_count} ratings)</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-6">
+                                        <h5 class="font-medium text-gray-900 mb-2">Rate this student</h5>
+                                        <a href="/students/${data.student.id}/rate/booking/${data.id}/" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                                            Rate Student
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    })
+                    .catch(error => {
+                        bookingContent.innerHTML = `<p class="text-red-500">Error loading booking details. Please try again.</p>`;
+                        console.error('Error:', error);
+                    });
+            });
+        });
+        
+        closeBookingButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                bookingModal.classList.add('hidden');
+            });
+        });
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === sessionModal) {
+                sessionModal.classList.add('hidden');
+            }
+            if (e.target === bookingModal) {
+                bookingModal.classList.add('hidden');
+            }
+        });
+        
+        // Helper function for star ratings
+        function getStarRating(rating) {
+            const fullStars = Math.floor(rating);
+            const halfStar = rating % 1 >= 0.5;
+            const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+            
+            let stars = '';
+            
+            // Full stars
+            for (let i = 0; i < fullStars; i++) {
+                stars += '<i class="fas fa-star text-yellow-400"></i>';
+            }
+            
+            // Half star if needed
+            if (halfStar) {
+                stars += '<i class="fas fa-star-half-alt text-yellow-400"></i>';
+            }
+            
+            // Empty stars
+            for (let i = 0; i < emptyStars; i++) {
+                stars += '<i class="far fa-star text-yellow-400"></i>';
+            }
+            
+            return stars;
+        }
+        
+        // Student search functionality
+        const studentSearch = document.getElementById('studentSearch');
+        if (studentSearch) {
+            studentSearch.addEventListener('keyup', function() {
+                const searchValue = this.value.toLowerCase();
+                const rows = document.querySelectorAll('#studentTableBody tr');
+                
+                rows.forEach(row => {
+                    const studentName = row.querySelector('td:nth-child(1)')?.textContent.toLowerCase() || '';
+                    const school = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || '';
+                    const course = row.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || '';
+                    
+                    if (studentName.includes(searchValue) || school.includes(searchValue) || course.includes(searchValue)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        }
+    });
 </script>
 
 <style>
