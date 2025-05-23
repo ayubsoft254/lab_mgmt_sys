@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Rate Student{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="px-6 py-4 bg-ttu-green text-white">
+            <h2 class="text-xl font-bold">Rate Student: {{ student.get_full_name }}</h2>
+        </div>
+        <div class="p-6">
+            {% if session %}
+                <p class="mb-4">Session: {{ session.title }} ({{ session.start_time|date:"M d, Y" }} at {{ session.start_time|date:"H:i" }})</p>
+            {% elif booking %}
+                <p class="mb-4">Booking: {{ booking.computer }} ({{ booking.start_time|date:"M d, Y" }} at {{ booking.start_time|date:"H:i" }})</p>
+            {% endif %}
+            
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-medium mb-2">Rating</label>
+                    <div class="flex space-x-4">
+                        {% for radio in form.score %}
+                            <label class="flex items-center cursor-pointer">
+                                {{ radio.tag }}
+                                <span class="ml-2 text-gray-700">{{ radio.choice_label }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                    {% if form.score.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ form.score.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-6">
+                    <label for="{{ form.comment.id_for_label }}" class="block text-gray-700 font-medium mb-2">Comment (Optional)</label>
+                    {{ form.comment }}
+                    {% if form.comment.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ form.comment.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div class="flex justify-end">
+                    <button type="submit" class="bg-ttu-green text-white py-2 px-4 rounded hover:bg-ttu-dark-green transition-colors">
+                        {% if existing_rating %}Update Rating{% else %}Submit Rating{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

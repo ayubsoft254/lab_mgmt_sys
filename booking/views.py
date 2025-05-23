@@ -8,9 +8,9 @@ from django.db.models import Q, Count, Avg, F, ExpressionWrapper, fields
 from django.db.models.functions import TruncDay, TruncWeek, TruncMonth, ExtractHour
 from django.utils import timezone
 from django.http import HttpResponse
-from .models import Lab, Computer, ComputerBooking, LabSession, Notification, User, RecurringSession
+from .models import Lab, Computer, ComputerBooking, LabSession, Notification, User, RecurringSession, StudentRating
 from datetime import datetime, timedelta
-from .forms import ComputerBookingForm, LabSessionForm, CustomUserCreationForm, RecurringSessionForm
+from .forms import ComputerBookingForm, LabSessionForm, CustomUserCreationForm, RecurringSessionForm, StudentRatingForm
 import json
 
 
@@ -894,3 +894,68 @@ def cancel_session_view(request, session_id):
         return redirect('admin_dashboard')
     
     return render(request, 'cancel_session.html', {'session': session})
+
+@login_required
+def rate_student_view(request, student_id, session_id=None, booking_id=None):
+    if not request.user.is_admin and not request.user.is_super_admin:
+        messages.error(request, "Only administrators can rate students.")
+        return redirect('home')
+    
+    student = get_object_or_404(User, id=student_id, is_student=True)
+    session = get_object_or_404(LabSession, id=session_id) if session_id else None
+    booking = get_object_or_404(ComputerBooking, id=booking_id) if booking_id else None
+    
+    # Check if this admin has already rated this student for this session/booking
+    if session:
+        existing_rating = StudentRating.objects.filter(
+            student=student,
+            rated_by=request.user,
+            session=session
+        ).first()
+    elif booking:
+        existing_rating = StudentRating.objects.filter(
+            student=student,
+            rated_by=request.user,
+            booking=booking
+        ).first()
+    else:
+        messages.error(request, "Either session or booking must be specified.")
+        return redirect('admin_dashboard')
+    
+    if request.method == 'POST':
+        if existing_rating:
+            form = StudentRatingForm(request.POST, instance=existing_rating)
+        else:
+            form = StudentRatingForm(request.POST)
+        
+        if form.is_valid():
+            rating = form.save(commit=False)
+            rating.student = student
+            rating.rated_by = request.user
+            
+            if session:
+                rating.session = session
+            elif booking:
+                rating.booking = booking
+                
+            rating.save()
+            
+            messages.success(request, f"Rating for {student.get_full_name()} submitted successfully.")
+            
+            # Redirect back to the appropriate page
+            if session:
+                return redirect('session_detail', session_id=session.id)
+            elif booking:
+                return redirect('booking_detail', booking_id=booking.id)
+    else:
+        form = StudentRatingForm(instance=existing_rating) if existing_rating else StudentRatingForm()
+    
+    context = {
+        'form': form,
+        'student': student,
+        'session': session,
+        'booking': booking,
+        'existing_rating': existing_rating,
+    }
+    
+    return render(request, 'rate_student.html', context)
