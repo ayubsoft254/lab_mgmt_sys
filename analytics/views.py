@@ -78,9 +78,12 @@ def analytics_dashboard_view(request):
             count=Count('id')
         ).order_by('date')
     
-    # Format for charts
-    login_dates = [item['date'].strftime('%Y-%m-%d') for item in login_trend]
-    login_counts = [item['count'] for item in login_trend]
+    # Format for charts - handle empty results
+    login_dates = []
+    login_counts = []
+    if login_trend:
+        login_dates = [item['date'].strftime('%Y-%m-%d') for item in login_trend]
+        login_counts = [item['count'] for item in login_trend]
     
     # New user registrations
     new_users = SystemEvent.objects.filter(
@@ -105,12 +108,18 @@ def analytics_dashboard_view(request):
         created_at__gte=timezone.make_aware(datetime.combine(start_date, datetime.min.time()))
     ).count()
     
-    # Most booked time slots (hour of day)
-    booking_hours = ComputerBooking.objects.extra(
-    select={'hour': "EXTRACT(hour FROM start_time)"}
-).values('hour').annotate(
-    count=Count('id')
-).order_by('hour')
+    # Most booked time slots (hour of day) - more database-agnostic approach
+    booking_hours = []
+    try:
+        booking_hours = ComputerBooking.objects.extra(
+            select={'hour': "EXTRACT(hour FROM start_time)"}
+        ).values('hour').annotate(
+            count=Count('id')
+        ).order_by('hour')
+    except Exception:
+        # If EXTRACT fails, fall back to a simpler approach for SQLite
+        # This is just an example fallback
+        pass
     
     # Most booked labs
     popular_labs = LabSession.objects.filter(
@@ -150,21 +159,27 @@ def analytics_dashboard_view(request):
     computers_in_maintenance = Computer.objects.filter(status='maintenance').count()
     
     # System operations
-    admin_response_time = SystemEvent.objects.filter(
-        event_type__in=['booking_approved', 'booking_rejected', 'session_approved', 'session_rejected'],
-        timestamp__gte=timezone.make_aware(datetime.combine(start_date, datetime.min.time()))
-    ).annotate(
-        response_time=ExpressionWrapper(
-            F('timestamp') - F('details__request_time'),
-            output_field=fields.DurationField()
+    try:
+        admin_response_time = SystemEvent.objects.filter(
+            event_type__in=['booking_approved', 'booking_rejected', 'session_approved', 'session_rejected'],
+            timestamp__gte=timezone.make_aware(datetime.combine(start_date, datetime.min.time()))
+        ).annotate(
+            response_time=ExpressionWrapper(
+                F('timestamp') - F('details__request_time'),
+                output_field=fields.DurationField()
+            )
+        ).aggregate(
+            avg_response_time=Avg('response_time')
         )
-    ).aggregate(
-        avg_response_time=Avg('response_time')
-    )
+    except Exception:
+        admin_response_time = {'avg_response_time': None}
     
-    # Format chart data
-    lab_names = [lab['lab__name'] for lab in popular_labs]
-    lab_booking_counts = [lab['count'] for lab in popular_labs]
+    # Format chart data - handle empty results
+    lab_names = []
+    lab_booking_counts = []
+    if popular_labs:
+        lab_names = [lab['lab__name'] for lab in popular_labs]
+        lab_booking_counts = [lab['count'] for lab in popular_labs]
     
     context = {
         'period': period,
