@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 import re
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-from .models import Computer, LabSession, RecurringSession, ComputerBooking
+from .models import Computer, LabSession, RecurringSession, ComputerBooking, StudentRating
 
 # Constants for domain validation
 STUDENT_EMAIL_DOMAIN = 'students.ttu.ac.ke'
@@ -272,3 +272,12 @@ class CustomSignupForm(CustomUserCreationForm):
         user.is_lecturer = self.cleaned_data['is_lecturer']
         user.save()
         return user
+
+class StudentRatingForm(forms.ModelForm):
+    class Meta:
+        model = StudentRating
+        fields = ['score', 'comment']
+        widgets = {
+            'score': forms.RadioSelect(),
+            'comment': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Optional comment about the student\'s behavior'}),
+        }
