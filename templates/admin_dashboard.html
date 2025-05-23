@@ -6,6 +6,24 @@
 <div class="container mx-auto px-4 py-8">
     <h1 class="text-3xl font-bold text-gray-800 mb-6">Admin Dashboard</h1>
     
+    <!-- Admin Labs Header -->
+    {% if user.is_super_admin %}
+        <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-4">
+            <p>You are a Super Admin with access to all labs.</p>
+        </div>
+    {% else %}
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4">
+            <p>You are managing the following labs:</p>
+            <ul class="list-disc ml-5 mt-2">
+                {% for lab in user.managed_labs.all %}
+                    <li>{{ lab.name }}</li>
+                {% empty %}
+                    <li>No labs assigned yet</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
     <!-- Stats Overview -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-md overflow-hidden">
