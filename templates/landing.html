@@ -643,15 +643,15 @@
                             {% csrf_token %}
                             <div class="mb-6">
                                 <label for="name" class="block text-gray-700 font-medium mb-2">Your Name</label>
-                                <input type="text" id="name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ttu-green focus:border-transparent" placeholder="John Doe">
+                                <input type="text" id="name" name="name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ttu-green focus:border-transparent" placeholder="John Doe" required>
                             </div>
                             <div class="mb-6">
                                 <label for="email" class="block text-gray-700 font-medium mb-2">Email Address</label>
-                                <input type="email" id="email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ttu-green focus:border-transparent" placeholder="you@example.com">
+                                <input type="email" id="email" name="email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ttu-green focus:border-transparent" placeholder="you@example.com" required>
                             </div>
                             <div class="mb-6">
                                 <label for="subject" class="block text-gray-700 font-medium mb-2">Subject</label>
-                                <select id="subject" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ttu-green focus:border-transparent">
+                                <select id="subject" name="subject" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ttu-green focus:border-transparent" required>
                                     <option>General Inquiry</option>
                                     <option>Technical Support</option>
                                     <option>Booking Assistance</option>
@@ -660,7 +660,7 @@
                             </div>
                             <div class="mb-6">
                                 <label for="message" class="block text-gray-700 font-medium mb-2">Message</label>
-                                <textarea id="message" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ttu-green focus:border-transparent" placeholder="Your message here..."></textarea>
+                                <textarea id="message" name="message" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ttu-green focus:border-transparent" placeholder="Your message here..." required></textarea>
                             </div>
                             <button type="submit" class="w-full bg-ttu-green text-white py-3 px-6 rounded-lg font-semibold hover:bg-ttu-dark transition-colors duration-300">
                                 Send Message <i class="fas fa-paper-plane ml-2"></i>
