@@ -4,8 +4,9 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    list_display = ('username', 'salutation', 'first_name', 'last_name', 'school', 'is_student', 'is_lecturer', 'is_admin')
-    list_filter = ('school', 'salutation', 'is_student', 'is_lecturer', 'is_admin', 'is_active')
+    list_display = ('username', 'email', 'first_name', 'last_name', 'is_student', 
+                    'is_lecturer', 'is_admin', 'is_super_admin')
+    list_filter = ('is_student', 'is_lecturer', 'is_admin', 'is_super_admin', 'school')
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
         ('Personal info', {'fields': ('salutation', 'first_name', 'last_name', 'email')}),
@@ -13,6 +14,7 @@ class UserAdmin(BaseUserAdmin):
         ('Roles', {'fields': ('is_student', 'is_lecturer', 'is_admin')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
+        ('Admin Status', {'fields': ('is_admin', 'is_super_admin', 'managed_labs')}),
     )
     add_fieldsets = (
         (None, {
@@ -22,6 +24,7 @@ class UserAdmin(BaseUserAdmin):
         ),
     )
     search_fields = ('username', 'email', 'first_name', 'last_name', 'course')
+    filter_horizontal = ('managed_labs', 'groups', 'user_permissions')
 
 @admin.register(Lab)
 class LabAdmin(admin.ModelAdmin):
@@ -56,6 +59,13 @@ class NotificationAdmin(admin.ModelAdmin):
 class RecurringSessionAdmin(admin.ModelAdmin):
     list_display = ('lab', 'lecturer', 'title', 'recurrence_type', 'start_time', 'end_time')
     search_fields = ('lab__name', 'lecturer__username', 'title')
+
+@admin.register(LabAdmin)
+class LabAdminModelAdmin(admin.ModelAdmin):
+    list_display = ('admin', 'lab', 'date_assigned')
+    list_filter = ('lab', 'date_assigned')
+    search_fields = ('admin__username', 'lab__name')
+    autocomplete_fields = ['admin', 'lab']
 
 
 
