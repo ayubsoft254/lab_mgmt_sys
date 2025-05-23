@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Lab, Computer, ComputerBooking, LabSession, Notification, RecurringSession
+from .models import User, Lab, Computer, ComputerBooking, LabSession, Notification, RecurringSession, StudentRating
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 @admin.register(User)
@@ -66,6 +66,13 @@ class LabAdminModelAdmin(admin.ModelAdmin):
     list_filter = ('lab', 'date_assigned')
     search_fields = ('admin__username', 'lab__name')
     autocomplete_fields = ['admin', 'lab']
+
+@admin.register(StudentRating)
+class StudentRatingAdmin(admin.ModelAdmin):
+    list_display = ('student', 'rated_by', 'score', 'created_at')
+    list_filter = ('score', 'created_at')
+    search_fields = ('student__username', 'student__first_name', 'student__last_name', 'comment')
+    autocomplete_fields = ['student', 'rated_by', 'session', 'booking']
 
 
 
