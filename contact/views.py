@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .models import ContactSubmission
+from django.core.mail import send_mail
+from django.conf import settings
 
 def contact_submit(request):
     if request.method == 'POST':
@@ -22,8 +24,14 @@ def contact_submit(request):
             message=message
         )
         
-        # Send notification email to admin (optional)
-        # send_mail(...)
+        # Send notification email to admin
+        send_mail(
+            subject=f'New Contact Form Submission: {subject}',
+            message=f'Name: {name}\nEmail: {email}\nSubject: {subject}\n\nMessage:\n{message}',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[settings.ADMIN_EMAIL],  # Add ADMIN_EMAIL in settings.py
+            fail_silently=False,
+        )
         
         # Show success message
         messages.success(request, "Your message has been sent. We'll get back to you soon!")
