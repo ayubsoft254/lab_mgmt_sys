@@ -365,3 +365,42 @@ class LabAdmin(models.Model):
     
     def __str__(self):
         return f"{self.admin.username} - {self.lab.name} Admin"
+
+class StudentRating(models.Model):
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ratings_received')
+    rated_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ratings_given')
+    score = models.PositiveSmallIntegerField(choices=[
+        (1, '1 Star'),
+        (2, '2 Stars'),
+        (3, '3 Stars'),
+        (4, '4 Stars'),
+        (5, '5 Stars'),
+    ])
+    session = models.ForeignKey('LabSession', on_delete=models.CASCADE, related_name='student_ratings', null=True, blank=True)
+    booking = models.ForeignKey('ComputerBooking', on_delete=models.CASCADE, related_name='student_ratings', null=True, blank=True)
+    comment = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = [
+            ('student', 'rated_by', 'session'),
+            ('student', 'rated_by', 'booking'),
+        ]
+        # Ensure either session or booking is provided, but not both
+        constraints = [
+            models.CheckConstraint(
+                check=(
+                    models.Q(session__isnull=False, booking__isnull=True) | 
+                    models.Q(session__isnull=True, booking__isnull=False)
+                ),
+                name='rating_has_either_session_or_booking'
+            )
+        ]
+    
+    def __str__(self):
+        return f"{self.student.username} - {self.score} stars by {self.rated_by.username}"
+    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # Update the student's average rating
+        self.student.update_average_rating()
