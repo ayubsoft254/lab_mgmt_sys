@@ -144,6 +144,9 @@
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ booking.start_time|date:"M d, H:i" }} - {{ booking.end_time|date:"H:i" }}</td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm">
                                                     <div class="flex space-x-2">
+                                                        <a href="#" class="view-booking-details text-indigo-600 hover:text-indigo-900" data-booking-id="{{ booking.id }}">
+                                                            View Details
+                                                        </a>
                                                         <a href="{% url 'approve_booking' booking.id %}" class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                                                             Approve
                                                         </a>
@@ -198,6 +201,9 @@
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ session.start_time|date:"M d, H:i" }} - {{ session.end_time|date:"H:i" }}</td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm">
                                                     <div class="flex space-x-2">
+                                                        <a href="#" class="view-session-details text-indigo-600 hover:text-indigo-900" data-session-id="{{ session.id }}">
+                                                            View Details
+                                                        </a>
                                                         <a href="{% url 'approve_session' session.id %}" class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                                                             Approve
                                                         </a>
