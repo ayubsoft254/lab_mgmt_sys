@@ -327,3 +327,16 @@ class RecurringSession(models.Model):
     
     def __str__(self):
         return f"{self.title} - {self.recurrence_type.capitalize()} from {self.start_date} to {self.end_date}"
+
+class LabAdmin(models.Model):
+    admin = models.ForeignKey(User, on_delete=models.CASCADE, related_name='lab_admin_roles')
+    lab = models.ForeignKey(Lab, on_delete=models.CASCADE, related_name='admin_assignments')
+    date_assigned = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('admin', 'lab')
+        verbose_name = 'Lab Administrator'
+        verbose_name_plural = 'Lab Administrators'
+    
+    def __str__(self):
+        return f"{self.admin.username} - {self.lab.name} Admin"
