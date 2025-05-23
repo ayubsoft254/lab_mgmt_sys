@@ -124,34 +124,40 @@ class LabSession(models.Model):
             raise ValidationError('Cannot book lab session when more than 10 computers are already booked')
     
     def save(self, *args, **kwargs):
+        is_new = self.pk is None
         self.clean()
         super(LabSession, self).save(*args, **kwargs)
         
-        # If the lab has 5 or more booked computers and the session is approved,
-        # cancel existing computer bookings
-        if self.is_approved:
-            lab_computers_count = self.lab.computers.count()
-            if lab_computers_count >= 5:
-                conflicting_bookings = ComputerBooking.objects.filter(
-                    computer__lab=self.lab,
-                    is_approved=True,
-                    start_time__lt=self.end_time,
-                    end_time__gt=self.start_time
+        # If new lab session is created, notify relevant admins
+        if is_new:
+            # Get admins specifically assigned to this lab
+            lab_admins = User.objects.filter(
+                is_admin=True, 
+                managed_labs=self.lab
+            )
+            
+            # Get super admins
+            super_admins = User.objects.filter(is_super_admin=True)
+            
+            # Create notifications for lab-specific admins
+            for admin in lab_admins:
+                Notification.objects.create(
+                    user=admin,
+                    message=f"New lab session: {self.title} in {self.lab.name} by {self.lecturer.username}",
+                    notification_type='session_booked',
+                    lab_session=self
                 )
-                
-                # Create notifications for affected students
-                for booking in conflicting_bookings:
-                    Notification.objects.create(
-                        user=booking.student,
-                        message=f"Your booking for {booking.computer} has been cancelled due to a lab session scheduled by a lecturer. Please rebook.",
-                        notification_type='booking_cancelled'
-                    )
-                
-                # Cancel the conflicting bookings
-                conflicting_bookings.update(is_cancelled=True)
-    
-    def __str__(self):
-        return f"{self.lab.name} Session: {self.title} ({self.start_time.strftime('%Y-%m-%d %H:%M')} - {self.end_time.strftime('%H:%M')})"
+            
+            # Create notifications for super admins (if they're not already notified as lab admins)
+            for admin in super_admins.exclude(id__in=lab_admins.values_list('id', flat=True)):
+                Notification.objects.create(
+                    user=admin,
+                    message=f"New lab session: {self.title} in {self.lab.name} by {self.lecturer.username}",
+                    notification_type='session_booked',
+                    lab_session=self
+                )
+        
+        # Rest of existing logic...
 
 class ComputerBooking(models.Model):
     computer = models.ForeignKey(Computer, on_delete=models.CASCADE, related_name='bookings')
