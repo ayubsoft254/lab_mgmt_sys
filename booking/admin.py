@@ -1,6 +1,8 @@
 from django.contrib import admin
 from .models import User, Lab, Computer, ComputerBooking, LabSession, Notification, RecurringSession, StudentRating
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
@@ -73,6 +75,20 @@ class StudentRatingAdmin(admin.ModelAdmin):
     list_filter = ('score', 'created_at')
     search_fields = ('student__username', 'student__first_name', 'student__last_name', 'comment')
     autocomplete_fields = ['student', 'rated_by', 'session', 'booking']
+
+@login_required
+def admin_dashboard_view(request):
+    # Existing code...
+    
+    # Get all students for the students tab
+    students = User.objects.filter(is_student=True).order_by('last_name', 'first_name')
+    
+    context = {
+        # Existing context variables...
+        'students': students,
+    }
+    
+    return render(request, 'admin_dashboard.html', context)
 
 
 
