@@ -230,3 +230,45 @@ class CustomUserCreationForm(forms.ModelForm):
     @property
     def by_passkey(self):        
         return False
+
+class CustomSignupForm(CustomUserCreationForm):
+    salutation = forms.ChoiceField(
+        choices=User.SALUTATION_CHOICES, 
+        label='Salutation', 
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    first_name = forms.CharField(max_length=30, label='First Name')
+    last_name = forms.CharField(max_length=30, label='Last Name')
+    course = forms.CharField(max_length=100, label='Course/Program', required=False)
+    school = forms.ChoiceField(choices=User.SCHOOL_CHOICES, label='School')
+    
+    is_student = forms.BooleanField(required=False, label='Register as Student')
+    is_lecturer = forms.BooleanField(required=False, label='Register as Lecturer')
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        is_student = cleaned_data.get('is_student')
+        is_lecturer = cleaned_data.get('is_lecturer')
+        
+        # Ensure at least one role is selected
+        if not is_student and not is_lecturer:
+            raise forms.ValidationError("Please select at least one role: Student or Lecturer")
+            
+        # Lecturer shouldn't need to specify a course
+        if is_lecturer and not is_student and cleaned_data.get('course'):
+            cleaned_data['course'] = None
+            
+        return cleaned_data
+    
+    def save(self, request):
+        user = super().save(request)
+        user.salutation = self.cleaned_data['salutation']
+        user.first_name = self.cleaned_data['first_name']
+        user.last_name = self.cleaned_data['last_name']
+        user.course = self.cleaned_data['course']
+        user.school = self.cleaned_data['school']
+        user.is_student = self.cleaned_data['is_student']
+        user.is_lecturer = self.cleaned_data['is_lecturer']
+        user.save()
+        return user
