@@ -94,6 +94,15 @@
                     Recurring Sessions
                 </button>
             </li>
+            <li class="mr-2" role="presentation">
+                <button class="inline-block py-3 px-4 text-sm font-medium text-center border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" 
+                        id="students-tab" 
+                        data-tab-target="students" 
+                        type="button" 
+                        role="tab">
+                    Students
+                </button>
+            </li>
         </ul>
     </div>
     
@@ -551,6 +560,107 @@
                         <p class="text-gray-500">No approved recurring sessions found.</p>
                     {% endif %}
                 </div>
+            </div>
+        </div>
+
+        <!-- Students Tab -->
+        <div class="tab-pane hidden" id="students" role="tabpanel">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex justify-between">
+                    <h4 class="text-lg font-semibold text-gray-800">Student Management</h4>
+                    <div>
+                        <input type="text" id="studentSearch" placeholder="Search students..." class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">School</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rating</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="studentTableBody">
+                                {% for student in students %}
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div>
+                                                    <div class="text-sm font-medium text-gray-900">
+                                                        {% if student.salutation %}{{ student.salutation }} {% endif %}{{ student.first_name }} {{ student.last_name }}
+                                                    </div>
+                                                    <div class="text-sm text-gray-500">{{ student.username }}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-900">{{ student.get_school_display|default:"-" }}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-900">{{ student.course|default:"-" }}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                {% for i in "12345"|make_list %}
+                                                    {% if forloop.counter <= student.average_rating|floatformat:"0" %}
+                                                        <i class="fas fa-star text-yellow-400"></i>
+                                                    {% elif forloop.counter <= student.average_rating|add:0.5|floatformat:"0" %}
+                                                        <i class="fas fa-star-half-alt text-yellow-400"></i>
+                                                    {% else %}
+                                                        <i class="far fa-star text-yellow-400"></i>
+                                                    {% endif %}
+                                                {% endfor %}
+                                                <span class="ml-1 text-sm text-gray-600">({{ student.average_rating|floatformat:1 }})</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <a href="{% url 'student_details' student.id %}" class="text-indigo-600 hover:text-indigo-900 mr-3">View Details</a>
+                                            <a href="{% url 'rate_student' student.id %}" class="text-green-600 hover:text-green-900">Rate</a>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">No students found</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add this modal that will be triggered for session details -->
+<div id="sessionDetailsModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="fixed inset-0 bg-black opacity-50"></div>
+        <div class="relative bg-white rounded-lg shadow-xl max-w-3xl w-full mx-auto">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-gray-800">Session Details</h3>
+                <button type="button" class="closeSessionModal text-gray-400 hover:text-gray-500">
+                    <span class="sr-only">Close</span>
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="px-6 py-4" id="sessionDetailsContent">
+                <!-- Session details will be loaded here via AJAX -->
+                <div class="animate-pulse">
+                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+                    <div class="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+                    <div class="h-4 bg-gray-200 rounded w-5/6 mb-4"></div>
+                    <div class="h-4 bg-gray-200 rounded w-2/3 mb-4"></div>
+                </div>
+            </div>
+            <div class="px-6 py-3 bg-gray-50 text-right">
+                <button type="button" class="closeSessionModal inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Close
+                </button>
             </div>
         </div>
     </div>
