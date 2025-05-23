@@ -30,11 +30,13 @@ class User(AbstractUser):
     is_student = models.BooleanField(default=False)
     is_lecturer = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
+    is_super_admin = models.BooleanField(default=False)  # New field for super admins
     
     # Additional fields
     salutation = models.CharField(max_length=10, choices=SALUTATION_CHOICES, blank=True, default='')
     school = models.CharField(max_length=6, choices=SCHOOL_CHOICES, blank=True, null=True)
     course = models.CharField(max_length=100, blank=True, null=True)
+    managed_labs = models.ManyToManyField('Lab', blank=True, related_name='lab_admins')  # Labs managed by this admin
     
     def __str__(self):
         full_name = ""
