@@ -1,8 +1,9 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import User, Lab, Computer, ComputerBooking, LabSession, Notification, RecurringSession, StudentRating, LabAdministrator
 
 @admin.register(User)
-class UserAdmin(admin.UserAdmin):
+class CustomUserAdmin(BaseUserAdmin):
     list_display = ('username', 'email', 'first_name', 'last_name', 'is_student', 
                     'is_lecturer', 'is_admin', 'is_super_admin')
     list_filter = ('is_student', 'is_lecturer', 'is_admin', 'is_super_admin', 'school')
@@ -59,8 +60,8 @@ class RecurringSessionAdmin(admin.ModelAdmin):
     list_display = ('lab', 'lecturer', 'title', 'recurrence_type', 'start_time', 'end_time')
     search_fields = ('lab__name', 'lecturer__username', 'title')
 
-@admin.register(LabAdministrator)  # Using the correct model name
-class LabAdminModelAdmin(admin.ModelAdmin):  # Renamed class to avoid confusion
+@admin.register(LabAdministrator)
+class LabAdministratorAdmin(admin.ModelAdmin):
     list_display = ('admin', 'lab', 'date_assigned')
     list_filter = ('lab', 'date_assigned')
     search_fields = ('admin__username', 'lab__name')
