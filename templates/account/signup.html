@@ -145,6 +145,20 @@ body {
         </div>
       {% endfor %}
 
+      <div class="mb-4">
+        <label for="id_salutation" class="block text-sm font-medium text-gray-700">Salutation</label>
+        <select name="salutation" id="id_salutation" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-ttu-green focus:border-ttu-green">
+            <option value="" selected>None</option>
+            <option value="Mr.">Mr.</option>
+            <option value="Mrs.">Mrs.</option>
+            <option value="Ms.">Ms.</option>
+            <option value="Dr.">Dr.</option>
+            <option value="Prof.">Prof.</option>
+            <option value="Eng.">Eng.</option>
+            <option value="Hon.">Hon.</option>
+        </select>
+      </div>
+
       <button type="submit" class="submit-button">
         {% trans "Create Account" %}
       </button>

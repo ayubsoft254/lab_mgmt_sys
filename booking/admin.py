@@ -1,11 +1,27 @@
 from django.contrib import admin
 from .models import User, Lab, Computer, ComputerBooking, LabSession, Notification, RecurringSession
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 @admin.register(User)
-class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'email', 'is_student', 'is_lecturer', 'is_admin')
-    list_filter = ('is_student', 'is_lecturer', 'is_admin')
-    search_fields = ('username', 'email')
+class UserAdmin(BaseUserAdmin):
+    list_display = ('username', 'salutation', 'first_name', 'last_name', 'school', 'is_student', 'is_lecturer', 'is_admin')
+    list_filter = ('school', 'salutation', 'is_student', 'is_lecturer', 'is_admin', 'is_active')
+    fieldsets = (
+        (None, {'fields': ('username', 'password')}),
+        ('Personal info', {'fields': ('salutation', 'first_name', 'last_name', 'email')}),
+        ('TTU information', {'fields': ('school', 'course')}),
+        ('Roles', {'fields': ('is_student', 'is_lecturer', 'is_admin')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Important dates', {'fields': ('last_login', 'date_joined')}),
+    )
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('username', 'email', 'password1', 'password2', 'salutation', 'first_name', 'last_name', 
+                       'school', 'course', 'is_student', 'is_lecturer', 'is_admin')}
+        ),
+    )
+    search_fields = ('username', 'email', 'first_name', 'last_name', 'course')
 
 @admin.register(Lab)
 class LabAdmin(admin.ModelAdmin):
@@ -42,4 +58,4 @@ class RecurringSessionAdmin(admin.ModelAdmin):
     search_fields = ('lab__name', 'lecturer__username', 'title')
 
 
-    
+
