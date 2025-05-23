@@ -1,8 +1,6 @@
 from django.contrib import admin
-from .models import User, Lab, Computer, ComputerBooking, LabSession, Notification, RecurringSession, StudentRating
+from .models import User, Lab, Computer, ComputerBooking, LabSession, Notification, RecurringSession, StudentRating, LabAdmin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
@@ -13,10 +11,10 @@ class UserAdmin(BaseUserAdmin):
         (None, {'fields': ('username', 'password')}),
         ('Personal info', {'fields': ('salutation', 'first_name', 'last_name', 'email')}),
         ('TTU information', {'fields': ('school', 'course')}),
-        ('Roles', {'fields': ('is_student', 'is_lecturer', 'is_admin')}),
+        ('Roles', {'fields': ('is_student', 'is_lecturer')}),
+        ('Admin Status', {'fields': ('is_admin', 'is_super_admin', 'managed_labs')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
-        ('Admin Status', {'fields': ('is_admin', 'is_super_admin', 'managed_labs')}),
     )
     add_fieldsets = (
         (None, {
@@ -63,7 +61,7 @@ class RecurringSessionAdmin(admin.ModelAdmin):
     search_fields = ('lab__name', 'lecturer__username', 'title')
 
 @admin.register(LabAdmin)
-class LabAdminModelAdmin(admin.ModelAdmin):
+class LabAdministratorAdmin(admin.ModelAdmin):  # Renamed to avoid confusion
     list_display = ('admin', 'lab', 'date_assigned')
     list_filter = ('lab', 'date_assigned')
     search_fields = ('admin__username', 'lab__name')
@@ -75,20 +73,3 @@ class StudentRatingAdmin(admin.ModelAdmin):
     list_filter = ('score', 'created_at')
     search_fields = ('student__username', 'student__first_name', 'student__last_name', 'comment')
     autocomplete_fields = ['student', 'rated_by', 'session', 'booking']
-
-@login_required
-def admin_dashboard_view(request):
-    # Existing code...
-    
-    # Get all students for the students tab
-    students = User.objects.filter(is_student=True).order_by('last_name', 'first_name')
-    
-    context = {
-        # Existing context variables...
-        'students': students,
-    }
-    
-    return render(request, 'admin_dashboard.html', context)
-
-
-
