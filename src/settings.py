@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     # My apps
     'booking',
     'analytics',
+    'contact',
 ]
 
 SITE_ID = 1
