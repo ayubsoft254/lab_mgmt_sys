@@ -166,9 +166,45 @@ def booking_success_view(request, booking_id):
 
 @login_required
 def admin_dashboard_view(request):
-    if not request.user.is_admin:
-        messages.error(request, "Access denied. Admin privileges required.")
+    if not request.user.is_admin and not request.user.is_super_admin:
+        messages.error(request, "You do not have permission to access the admin dashboard.")
         return redirect('home')
+    
+    # For super admins, show all bookings
+    if request.user.is_super_admin:
+        pending_computer_bookings = ComputerBooking.objects.filter(
+            is_approved=False, 
+            is_cancelled=False
+        ).order_by('start_time')
+        
+        pending_lab_sessions = LabSession.objects.filter(
+            is_approved=False
+        ).order_by('start_time')
+        
+        pending_recurring_sessions = RecurringSession.objects.filter(
+            is_approved=False
+        ).order_by('start_date')
+    else:
+        # For lab-specific admins, only show bookings for their managed labs
+        managed_labs = request.user.managed_labs.all()
+        
+        pending_computer_bookings = ComputerBooking.objects.filter(
+            computer__lab__in=managed_labs,
+            is_approved=False, 
+            is_cancelled=False
+        ).order_by('start_time')
+        
+        pending_lab_sessions = LabSession.objects.filter(
+            lab__in=managed_labs,
+            is_approved=False
+        ).order_by('start_time')
+        
+        pending_recurring_sessions = RecurringSession.objects.filter(
+            lab__in=managed_labs,
+            is_approved=False
+        ).order_by('start_date')
+    
+    # Continue with rest of the view logic...
     
     now = timezone.now()
     
