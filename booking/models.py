@@ -3,20 +3,62 @@ from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 import uuid
-from django.utils import timezone
-from django.core.exceptions import ValidationError
-from django.db.models import Q
-import uuid
 from dateutil.rrule import rrule, DAILY, WEEKLY, MONTHLY
 from dateutil.parser import parse
+from django.db.models import Q
 
 class User(AbstractUser):
+    SCHOOL_CHOICES = [
+        ('SSI', 'School of Science and Informatics'),
+        ('SBAESS', 'School of Business Administration and Economic Social Sciences'),
+        ('SME', 'School of Mining and Engineering'),
+        ('SoE', 'School of Education'),
+        ('SAEES', 'School of Agriculture, Environment and Earth Sciences'),
+    ]
+    
+    SALUTATION_CHOICES = [
+        ('Mr.', 'Mr.'),
+        ('Mrs.', 'Mrs.'),
+        ('Ms.', 'Ms.'),
+        ('Dr.', 'Dr.'),
+        ('Prof.', 'Prof.'),
+        ('Eng.', 'Eng.'),
+        ('Hon.', 'Hon.'),
+        ('', 'None')
+    ]
+    
     is_student = models.BooleanField(default=False)
     is_lecturer = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
     
+    # Additional fields
+    salutation = models.CharField(max_length=10, choices=SALUTATION_CHOICES, blank=True, default='')
+    school = models.CharField(max_length=6, choices=SCHOOL_CHOICES, blank=True, null=True)
+    course = models.CharField(max_length=100, blank=True, null=True)
+    
     def __str__(self):
+        full_name = ""
+        if self.salutation:
+            full_name += f"{self.salutation} "
+        
+        if self.first_name and self.last_name:
+            full_name += f"{self.first_name} {self.last_name}"
+            return f"{full_name} ({self.username})"
+        
         return self.username
+    
+    def get_full_name(self):
+        """
+        Return the full name with salutation if available
+        """
+        if self.salutation and self.first_name and self.last_name:
+            return f"{self.salutation} {self.first_name} {self.last_name}"
+        elif self.first_name and self.last_name:
+            return f"{self.first_name} {self.last_name}"
+        return self.username
+    
+    class Meta:
+        ordering = ['username']
 
 class Lab(models.Model):
     name = models.CharField(max_length=100)
