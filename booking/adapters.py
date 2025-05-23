@@ -14,6 +14,10 @@ class CustomAccountAdapter(DefaultAccountAdapter):
             user.is_lecturer = True
         elif role == 'admin':
             user.is_admin = True
+            # Note: Lab assignments would typically be handled by a super admin later
+        elif role == 'super_admin':
+            user.is_admin = True
+            user.is_super_admin = True
             
         if commit:
             user.save()
