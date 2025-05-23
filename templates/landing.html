@@ -93,9 +93,10 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 <div class="flex items-center">
+                    <!-- Desktop Navigation Logo (Replace the laptop icon) -->
                     <div class="flex-shrink-0 flex items-center">
-                        <i class="fas fa-laptop-code text-white text-2xl mr-2"></i>
-                        <span class="text-white text-xl font-bold hidden sm:inline">TTU Lab Management</span>
+                        <img src="https://schools.ttu.ac.ke/static/images/logo.jpg" alt="TTU Logo" class="h-10 w-auto mr-2">
+                        <span class="text-white text-xl font-bold hidden sm:inline">Lab Management</span>
                     </div>
                     <div class="hidden lg:block ml-10">
                         <div class="flex items-baseline space-x-8">
@@ -781,8 +782,8 @@
             
             <div class="pt-8 border-t border-green-800 flex flex-col md:flex-row justify-between items-center">
                 <div class="flex items-center mb-4 md:mb-0">
-                    <i class="fas fa-laptop-code text-2xl text-green-300 mr-2"></i>
-                    <span class="text-xl font-bold">TTU Lab Management</span>
+                    <img src="https://schools.ttu.ac.ke/static/images/logo.jpg" alt="TTU Logo" class="h-8 w-auto mr-2">
+                    <span class="text-xl font-bold">Lab Management</span>
                 </div>
                 <p class="text-sm text-green-200">&copy; 2025 Taita Taveta University. All rights reserved.</p>
             </div>
@@ -854,24 +855,33 @@
                 const count = +counter.innerText;
                 const increment = target / speed;
                 
-                if (count < target) {
-                    counter.innerText = Math.ceil(count + increment);
-                    setTimeout(animateCounters, 1);
+                if (count === 0) {
+                    const interval = setInterval(() => {
+                        const newCount = Math.min(Math.ceil(count + increment), target);
+                        counter.innerText = newCount;
+                        
+                        if (newCount === target) {
+                            clearInterval(interval);
+                        }
+                    }, 1);
                 } else {
                     counter.innerText = target;
                 }
             });
         }
-        
-        // Start counters when stats section is in view
-        const statsSection = document.querySelector('section.bg-ttu-green');
-        const observer = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting) {
-                animateCounters();
-                observer.unobserve(statsSection);
-            }
+
+        // Trigger counters on scroll
+        let countersInitialized = false;
+        const statsSection = document.querySelector('section.py-16.bg-ttu-green');
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !countersInitialized) {
+                    animateCounters();
+                    countersInitialized = true;
+                }
+            });
         }, { threshold: 0.5 });
-        
+
         observer.observe(statsSection);
     </script>
 </body>
