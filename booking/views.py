@@ -1032,3 +1032,29 @@ def booking_details_api(request, booking_id):
         return JsonResponse(data)
     except ComputerBooking.DoesNotExist:
         return JsonResponse({'error': 'Booking not found'}, status=404)
+
+@login_required
+def student_details_view(request, student_id):
+    if not request.user.is_admin and not request.user.is_super_admin:
+        messages.error(request, "Access denied. Admin privileges required.")
+        return redirect('home')
+    
+    student = get_object_or_404(User, id=student_id, is_student=True)
+    
+    # Get recent bookings
+    recent_bookings = ComputerBooking.objects.filter(
+        student=student
+    ).order_by('-start_time')[:10]
+    
+    # Get ratings
+    ratings = StudentRating.objects.filter(
+        student=student
+    ).order_by('-created_at')
+    
+    context = {
+        'student': student,
+        'recent_bookings': recent_bookings,
+        'ratings': ratings,
+    }
+    
+    return render(request, 'student_details.html', context)
