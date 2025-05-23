@@ -6,8 +6,6 @@ import uuid
 from dateutil.rrule import rrule, DAILY, WEEKLY, MONTHLY
 from dateutil.parser import parse
 from django.db.models import Q
-from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 class User(AbstractUser):
     SCHOOL_CHOICES = [
@@ -113,6 +111,9 @@ class LabSession(models.Model):
     end_time = models.DateTimeField()
     is_approved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    # Adding attending students relation
+    attending_students = models.ManyToManyField(User, related_name='attending_sessions', blank=True)
+    description = models.TextField(blank=True, null=True)
     
     def clean(self):
         # Check if end time is after start time
@@ -174,8 +175,9 @@ class LabSession(models.Model):
                     notification_type='session_booked',
                     lab_session=self
                 )
-        
-        # Rest of existing logic...
+    
+    def __str__(self):
+        return f"{self.title} - {self.lab.name} ({self.start_time.strftime('%Y-%m-%d %H:%M')})"
 
 class ComputerBooking(models.Model):
     computer = models.ForeignKey(Computer, on_delete=models.CASCADE, related_name='bookings')
@@ -186,6 +188,7 @@ class ComputerBooking(models.Model):
     is_approved = models.BooleanField(default=False)
     is_cancelled = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    purpose = models.TextField(blank=True, null=True)
     
     def clean(self):
         # Check if end time is after start time
@@ -422,75 +425,3 @@ class StudentRating(models.Model):
         super().save(*args, **kwargs)
         # Update the student's average rating
         self.student.update_average_rating()
-
-@admin.register(User)
-class CustomUserAdmin(BaseUserAdmin):
-    list_display = ('username', 'email', 'first_name', 'last_name', 'is_student', 
-                    'is_lecturer', 'is_admin', 'is_super_admin')
-    list_filter = ('is_student', 'is_lecturer', 'is_admin', 'is_super_admin', 'school')
-    fieldsets = (
-        (None, {'fields': ('username', 'password')}),
-        ('Personal info', {'fields': ('salutation', 'first_name', 'last_name', 'email')}),
-        ('TTU information', {'fields': ('school', 'course')}),
-        ('Roles', {'fields': ('is_student', 'is_lecturer')}),
-        ('Admin Status', {'fields': ('is_admin', 'is_super_admin', 'managed_labs')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
-        ('Important dates', {'fields': ('last_login', 'date_joined')}),
-    )
-    add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('username', 'email', 'password1', 'password2', 'salutation', 'first_name', 'last_name', 
-                       'school', 'course', 'is_student', 'is_lecturer', 'is_admin'}
-        ),
-    )
-    search_fields = ('username', 'email', 'first_name', 'last_name', 'course')
-    filter_horizontal = ('managed_labs', 'groups', 'user_permissions')
-
-@admin.register(Lab)
-class LabAdmin(admin.ModelAdmin):
-    list_display = ('name', 'location', 'capacity')
-    search_fields = ('name', 'location')
-
-@admin.register(Computer)
-class ComputerAdmin(admin.ModelAdmin):
-    list_display = ('lab', 'computer_number', 'status')
-    list_filter = ('lab', 'status')
-    search_fields = ('lab__name', 'computer_number')
-
-@admin.register(ComputerBooking)
-class ComputerBookingAdmin(admin.ModelAdmin):
-    list_display = ('computer', 'student', 'start_time', 'end_time', 'is_approved', 'is_cancelled')
-    list_filter = ('is_approved', 'is_cancelled')
-    search_fields = ('computer__lab__name', 'student__username', 'booking_code')
-
-@admin.register(LabSession)
-class LabSessionAdmin(admin.ModelAdmin):
-    list_display = ('lab', 'lecturer', 'title', 'start_time', 'end_time', 'is_approved')
-    list_filter = ('is_approved',)
-    search_fields = ('lab__name', 'lecturer__username', 'title')
-
-@admin.register(Notification)
-class NotificationAdmin(admin.ModelAdmin):
-    list_display = ('user', 'notification_type', 'is_read', 'created_at')
-    list_filter = ('notification_type', 'is_read')
-    search_fields = ('user__username', 'message')
-
-@admin.register(RecurringSession)
-class RecurringSessionAdmin(admin.ModelAdmin):
-    list_display = ('lab', 'lecturer', 'title', 'recurrence_type', 'start_time', 'end_time')
-    search_fields = ('lab__name', 'lecturer__username', 'title')
-
-@admin.register(LabAdministrator)
-class LabAdministratorAdmin(admin.ModelAdmin):
-    list_display = ('admin', 'lab', 'date_assigned')
-    list_filter = ('lab', 'date_assigned')
-    search_fields = ('admin__username', 'lab__name')
-    autocomplete_fields = ['admin', 'lab']
-
-@admin.register(StudentRating)
-class StudentRatingAdmin(admin.ModelAdmin):
-    list_display = ('student', 'rated_by', 'score', 'created_at')
-    list_filter = ('score', 'created_at')
-    search_fields = ('student__username', 'student__first_name', 'student__last_name', 'comment')
-    autocomplete_fields = ['student', 'rated_by', 'session', 'booking']
