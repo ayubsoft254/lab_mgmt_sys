@@ -1,19 +1,14 @@
 from django.forms import ValidationError
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import login, logout
 from django.contrib import messages
-from django.urls import reverse
-from django.db.models import Q, Count, Avg, F, ExpressionWrapper, fields
-from django.db.models.functions import TruncDay, TruncWeek, TruncMonth, ExtractHour
 from django.utils import timezone
-from django.http import HttpResponse
+from django.http import  JsonResponse
+from django.views.decorators.http import require_GET
 from .models import Lab, Computer, ComputerBooking, LabSession, Notification, User, RecurringSession, StudentRating
 from datetime import datetime, timedelta
-from .forms import ComputerBookingForm, LabSessionForm, CustomUserCreationForm, RecurringSessionForm, StudentRatingForm
-import json
-
-
+from .forms import ComputerBookingForm, LabSessionForm,  RecurringSessionForm, StudentRatingForm
+ 
 def landing(request):
     return render(request, 'landing.html')
 
@@ -959,3 +954,81 @@ def rate_student_view(request, student_id, session_id=None, booking_id=None):
     }
     
     return render(request, 'rate_student.html', context)
+
+@login_required
+@require_GET
+def session_details_api(request, session_id):
+    """API endpoint to get session details for the modal"""
+    try:
+        session = LabSession.objects.get(id=session_id)
+        attending_students = []
+        
+        # Get all student bookings for this session
+        students = session.attending_students.all()
+        for student in students:
+            attending_students.append({
+                'id': student.id,
+                'name': f"{student.salutation} {student.first_name} {student.last_name}".strip(),
+                'username': student.username,
+                'rating': float(student.average_rating),
+                'rating_count': student.total_ratings
+            })
+            
+        data = {
+            'id': session.id,
+            'title': session.title,
+            'lab_name': session.lab.name,
+            'lecturer_name': f"{session.lecturer.salutation} {session.lecturer.first_name} {session.lecturer.last_name}".strip(),
+            'date': session.start_time.strftime('%B %d, %Y'),
+            'start_time': session.start_time.strftime('%H:%M'),
+            'end_time': session.end_time.strftime('%H:%M'),
+            'is_approved': session.is_approved,
+            'description': session.description,
+            'students': attending_students
+        }
+        return JsonResponse(data)
+    except LabSession.DoesNotExist:
+        return JsonResponse({'error': 'Session not found'}, status=404)
+
+@login_required
+@require_GET
+def booking_details_api(request, booking_id):
+    """API endpoint to get booking details for the modal"""
+    try:
+        booking = ComputerBooking.objects.get(id=booking_id)
+        
+        status = 'Pending'
+        status_class = 'bg-yellow-100 text-yellow-800'
+        
+        if booking.is_cancelled:
+            status = 'Cancelled'
+            status_class = 'bg-red-100 text-red-800'
+        elif booking.is_approved:
+            status = 'Approved'
+            status_class = 'bg-green-100 text-green-800'
+        
+        data = {
+            'id': booking.id,
+            'computer': str(booking.computer),
+            'lab_name': booking.computer.lab.name,
+            'date': booking.start_time.strftime('%B %d, %Y'),
+            'start_time': booking.start_time.strftime('%H:%M'),
+            'end_time': booking.end_time.strftime('%H:%M'),
+            'booking_code': booking.booking_code,
+            'status': status,
+            'status_class': status_class,
+            'created_at': booking.created_at.strftime('%B %d, %Y %H:%M'),
+            'purpose': booking.purpose,
+            'student': {
+                'id': booking.student.id,
+                'name': f"{booking.student.salutation} {booking.student.first_name} {booking.student.last_name}".strip(),
+                'username': booking.student.username,
+                'school': booking.student.get_school_display() if booking.student.school else 'Not specified',
+                'course': booking.student.course,
+                'rating': float(booking.student.average_rating),
+                'rating_count': booking.student.total_ratings
+            }
+        }
+        return JsonResponse(data)
+    except ComputerBooking.DoesNotExist:
+        return JsonResponse({'error': 'Booking not found'}, status=404)
