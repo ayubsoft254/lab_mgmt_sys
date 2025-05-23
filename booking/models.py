@@ -38,6 +38,10 @@ class User(AbstractUser):
     course = models.CharField(max_length=100, blank=True, null=True)
     managed_labs = models.ManyToManyField('Lab', blank=True, related_name='lab_admins')  # Labs managed by this admin
     
+    # Add average rating field with a default of 5
+    average_rating = models.DecimalField(max_digits=3, decimal_places=2, default=5.00)
+    total_ratings = models.PositiveIntegerField(default=0)
+    
     def __str__(self):
         full_name = ""
         if self.salutation:
@@ -58,6 +62,18 @@ class User(AbstractUser):
         elif self.first_name and self.last_name:
             return f"{self.first_name} {self.last_name}"
         return self.username
+    
+    def update_average_rating(self):
+        """Update the user's average rating based on all ratings received"""
+        ratings = self.ratings_received.all()
+        if ratings.exists():
+            total_score = sum(rating.score for rating in ratings)
+            self.average_rating = round(total_score / ratings.count(), 2)
+            self.total_ratings = ratings.count()
+        else:
+            self.average_rating = 5.00  # Default rating for new users
+            self.total_ratings = 0
+        self.save(update_fields=['average_rating', 'total_ratings'])
     
     class Meta:
         ordering = ['username']
