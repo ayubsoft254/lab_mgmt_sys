@@ -47,7 +47,7 @@ urlpatterns = [
     path('students/<int:student_id>/details/', views.student_details_view, name='student_details'),
     path('students/<int:student_id>/rate/', views.rate_student_view, name='rate_student'),
 
-    # Add this to your existing URLs
+    # Profile and booking management
     path('profile/', views.ProfileView.as_view(), name='profile'),
     path('booking/<int:booking_id>/extend/', views.extend_booking, name='extend_booking'),
 
