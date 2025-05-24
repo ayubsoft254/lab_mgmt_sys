@@ -30,7 +30,7 @@ class AnalyticsView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
         # Key metrics
         context.update({
             'total_events': events_qs.count(),
-            'critical_events': events_qs.filter(severity='CRITICAL').count(),
+            'critical_events': events_qs.filter(severity=SystemEvent.SeverityLevels.CRITICAL).count(),
             'unresolved_events': events_qs.filter(resolved=False).count(),
             'security_events': events_qs.filter(
                 event_type__in=['LOGIN_FAILED', 'UNAUTHORIZED_ACCESS', 'PERMISSION_DENIED']
@@ -65,10 +65,10 @@ class AnalyticsView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
             daily_events.append({
                 'date': day.strftime('%Y-%m-%d'),
                 'total': day_events.count(),
-                'critical': day_events.filter(severity='CRITICAL').count(),
-                'high': day_events.filter(severity='HIGH').count(),
-                'medium': day_events.filter(severity='MEDIUM').count(),
-                'low': day_events.filter(severity='LOW').count(),
+                'critical': day_events.filter(severity=SystemEvent.SeverityLevels.CRITICAL).count(),
+                'high': day_events.filter(severity=SystemEvent.SeverityLevels.HIGH).count(),
+                'medium': day_events.filter(severity=SystemEvent.SeverityLevels.MEDIUM).count(),
+                'low': day_events.filter(severity=SystemEvent.SeverityLevels.LOW).count(),
             })
         
         # Hourly distribution (last 24 hours)
@@ -97,7 +97,7 @@ class AnalyticsView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
         
         # Recent critical events
         recent_critical = list(SystemEvent.objects.filter(
-            severity='CRITICAL'
+            severity=SystemEvent.SeverityLevels.CRITICAL
         ).order_by('-timestamp')[:5].values(
             'id', 'event_type', 'timestamp', 'user__username', 'details', 'resolved'
         ))
