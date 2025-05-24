@@ -52,8 +52,8 @@ urlpatterns = [
     path('booking/<int:booking_id>/extend/', views.extend_booking, name='extend_booking'),
 
     # Check-in URLs
-    path('admin/check-in/', views.admin_check_in_dashboard, name='admin_check_in_dashboard'),
-    path('admin/check-in/booking/<int:booking_id>/', views.computer_booking_check_in, name='computer_booking_check_in'),
-    path('admin/check-in/session/<int:session_id>/', views.lab_session_attendance, name='lab_session_attendance'),
-    path('admin/check-in/quick/<int:booking_id>/', views.quick_check_in, name='quick_check_in'),
+    path('check-in/', views.admin_check_in_dashboard, name='admin_check_in_dashboard'),
+    path('check-in/booking/<int:booking_id>/', views.computer_booking_check_in, name='computer_booking_check_in'),
+    path('check-in/session/<int:session_id>/', views.lab_session_attendance, name='lab_session_attendance'),
+    path('check-in/quick/<int:booking_id>/', views.quick_check_in, name='quick_check_in'),
 ]
