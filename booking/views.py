@@ -1,20 +1,24 @@
 from django.forms import ValidationError
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.utils import timezone
-from django.http import  JsonResponse
-from django.views.decorators.http import require_GET
-from .models import Lab, Computer, ComputerBooking, LabSession, Notification, User, RecurringSession, StudentRating
-from datetime import datetime, timedelta
-from .forms import ComputerBookingForm, LabSessionForm,  RecurringSessionForm, StudentRatingForm
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import  TemplateView
 from django.contrib import messages
-from django.shortcuts import redirect
-from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
-from .forms import UserProfileForm
+from django.contrib.auth.forms import PasswordChangeForm
+from django.utils import timezone
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+from django.views.generic import TemplateView
+from datetime import datetime, timedelta
+
+from .models import (
+    Lab, Computer, ComputerBooking, LabSession, 
+    Notification, User, RecurringSession, StudentRating
+)
+from .forms import (
+    ComputerBookingForm, LabSessionForm, RecurringSessionForm, 
+    StudentRatingForm, UserProfileForm
+)
  
 def landing(request):
     return render(request, 'landing.html')
