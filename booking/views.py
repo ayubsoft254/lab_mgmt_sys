@@ -1068,7 +1068,7 @@ def student_details_view(request, student_id):
 
 class ProfileView(LoginRequiredMixin, TemplateView):
     """View for managing user profile"""
-    template_name = 'profile/profile.html'
+    template_name = 'profile.html'
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
