@@ -1126,3 +1126,19 @@ class ProfileView(LoginRequiredMixin, TemplateView):
         
         # Default fallback
         return redirect('profile')
+
+@login_required
+def extend_booking(request, booking_id):
+    """Extend a booking by 30 minutes"""
+    booking = get_object_or_404(ComputerBooking, pk=booking_id, student=request.user)
+    
+    # Check if booking can be extended
+    if not booking.can_be_extended():
+        messages.error(request, "Sorry, this booking cannot be extended.")
+        return redirect('booking_detail', booking_id=booking.id)
+    
+    # Process extension
+    booking.extend_booking()
+    messages.success(request, f"Your booking has been extended by 30 minutes until {booking.end_time.strftime('%H:%M')}")
+    
+    return redirect('booking_detail', booking_id=booking.id)
