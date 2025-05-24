@@ -6,6 +6,8 @@
     <title>{% block title %}Lab Management System{% endblock %}</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Add FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --ttu-green: #2c6e49;
@@ -25,6 +27,89 @@
         .border-ttu-green { border-color: var(--ttu-green); }
 
         .hover-bg-ttu-dark:hover { background-color: var(--ttu-dark-green); }
+
+        /* Modern navigation styles */
+        .nav-link {
+            position: relative;
+            text-decoration: none;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            transition: all 0.3s ease;
+            margin: 0 0.25rem;
+            font-weight: 500;
+        }
+        
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
+        }
+        
+        .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .nav-link .notification-badge {
+            position: absolute;
+            top: 0.25rem;
+            right: 0.25rem;
+            height: 1.25rem;
+            width: 1.25rem;
+            border-radius: 9999px;
+            background-color: #ef4444;
+            color: white;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        
+        .user-menu {
+            position: relative;
+        }
+        
+        .user-menu-button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .user-menu-button:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+        
+        /* Mobile Nav */
+        .mobile-nav-link {
+            display: block;
+            padding: 0.75rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        
+        .mobile-nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+        
+        .mobile-nav-divider {
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.2);
+            margin: 0.5rem 0;
+        }
+        
+        .brand-logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            text-decoration: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
 
         /* Custom animations */
         @keyframes fadeIn {
@@ -91,80 +176,145 @@
             }
         }
     </style>
+    {% block extra_head %}{% endblock %}
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">
-    <nav class="bg-ttu-green text-white shadow-lg">
+    <!-- Modern Navigation Bar -->
+    <nav class="bg-ttu-green shadow-lg sticky top-0 z-50">
         <div class="container px-4 mx-auto">
-            <div class="flex flex-wrap justify-between items-center py-3">
+            <div class="flex justify-between items-center py-3">
+                <!-- Logo/Brand -->
                 <div class="flex items-center">
-                    <i class="fas fa-laptop-code text-white text-2xl mr-2"></i>
-                    <a href="{% url 'home' %}" class="text-xl font-bold text-white">Lab Management</a>
-                    <button id="mobile-menu-button" class="ml-4 md:hidden p-2 rounded text-white hover:bg-ttu-dark focus:outline-none">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
-                        </svg>
-                    </button>
+                    <a href="{% url 'home' %}" class="brand-logo">
+                        <i class="fas fa-laptop-code text-white text-xl"></i>
+                        <span>Lab Management</span>
+                    </a>
                 </div>
-
+                
                 <!-- Desktop Navigation -->
-                <div class="hidden md:flex space-x-4 items-center">
+                <div class="hidden md:flex items-center space-x-1">
                     {% if user.is_authenticated %}
-                        <a href="{% url 'lab_list' %}" class="text-white hover:text-blue-200 text-sm lg:text-base">Labs</a>
+                        <a href="{% url 'lab_list' %}" class="nav-link text-white">
+                            <i class="fas fa-flask mr-1"></i> Labs
+                        </a>
+                        
                         {% if user.is_lecturer %}
-                            <a href="{% url 'lecturer_booking' %}" class="text-white hover:text-blue-200 text-sm lg:text-base">Book Lab</a>
+                            <a href="{% url 'lecturer_booking' %}" class="nav-link text-white">
+                                <i class="fas fa-calendar-plus mr-1"></i> Book Lab
+                            </a>
                         {% endif %}
+                        
                         {% if user.is_admin %}
-                            <a href="{% url 'admin_dashboard' %}" class="text-white hover:text-blue-200 text-sm lg:text-base">Admin</a>
-                            <a href="{% url 'analytics_dashboard' %}" class="text-white hover:text-blue-200 text-sm lg:text-base">Analytics</a>
+                            <a href="{% url 'admin_dashboard' %}" class="nav-link text-white">
+                                <i class="fas fa-tachometer-alt mr-1"></i> Admin
+                            </a>
+                            <a href="{% url 'analytics_dashboard' %}" class="nav-link text-white">
+                                <i class="fas fa-chart-line mr-1"></i> Analytics
+                            </a>
                         {% endif %}
-                        <a href="{% url 'notification_list' %}" class="text-white hover:text-blue-200 relative text-sm lg:text-base">
-                            Notifications
+                        
+                        <a href="{% url 'notification_list' %}" class="nav-link text-white">
+                            <i class="fas fa-bell mr-1"></i> Notifications
                             {% if unread_notifications_count > 0 %}
-                                <span class="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                                    {{ unread_notifications_count }}
-                                </span>
+                                <span class="notification-badge">{{ unread_notifications_count }}</span>
                             {% endif %}
                         </a>
-                        <a href="{% url 'account_logout' %}" class="text-white hover:text-blue-200 text-sm lg:text-base">Logout</a>
-                        <span class="text-ttu-light text-sm lg:text-base">{{ user.username }}</span>
+                        
+                        <!-- User dropdown -->
+                        <div class="user-menu" x-data="{ open: false }">
+                            <button @click="open = !open" class="user-menu-button text-white">
+                                <span>{{ user.username }}</span>
+                                <i class="fas fa-chevron-down text-xs"></i>
+                            </button>
+                            
+                            <div x-show="open" 
+                                 @click.away="open = false"
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0 scale-95"
+                                 x-transition:enter-end="opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-150"
+                                 x-transition:leave-start="opacity-100 scale-100"
+                                 x-transition:leave-end="opacity-0 scale-95"
+                                 class="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 py-1"
+                                 style="display: none;">
+                                <a href="{% url 'account_profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-user mr-2"></i> My Profile
+                                </a>
+                                <a href="{% url 'account_logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                                </a>
+                            </div>
+                        </div>
                     {% else %}
-                        <a href="{% url 'account_login' %}" class="text-white hover:text-blue-200 text-sm lg:text-base">Login</a>
-                        <a href="{% url 'account_signup' %}" class="text-white hover:text-blue-200 text-sm lg:text-base">Register</a>
+                        <a href="{% url 'account_login' %}" class="nav-link text-white">
+                            <i class="fas fa-sign-in-alt mr-1"></i> Login
+                        </a>
+                        <a href="{% url 'account_signup' %}" class="nav-link text-white">
+                            <i class="fas fa-user-plus mr-1"></i> Register
+                        </a>
                     {% endif %}
                 </div>
+                
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-button" class="md:hidden flex items-center p-2 rounded hover:bg-ttu-dark focus:outline-none" aria-label="Toggle menu">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                    </svg>
+                </button>
             </div>
-
+            
             <!-- Mobile Navigation Menu -->
-            <div id="mobile-menu" class="mobile-menu-hidden w-full py-2 mt-2 border-t border-ttu-green md:hidden">
-                <div class="flex flex-col space-y-3">
-                    {% if user.is_authenticated %}
-                        <a href="{% url 'lab_list' %}" class="text-white hover:text-blue-200 block py-1">Labs</a>
-                        {% if user.is_lecturer %}
-                            <a href="{% url 'lecturer_booking' %}" class="text-white hover:text-blue-200 block py-1">Book Lab Session</a>
-                        {% endif %}
-                        {% if user.is_admin %}
-                            <a href="{% url 'admin_dashboard' %}" class="text-white hover:text-blue-200 block py-1">Admin Dashboard</a>
-                            <a href="{% url 'analytics_dashboard' %}" class="text-white hover:text-blue-200 block py-1">Analytics Dashboard</a>
-                        {% endif %}
-                        <a href="{% url 'notification_list' %}" class="text-white hover:text-blue-200 flex items-center py-1">
-                            Notifications
-                            {% if unread_notifications_count > 0 %}
-                                <span class="ml-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                                    {{ unread_notifications_count }}
-                                </span>
-                            {% endif %}
+            <div id="mobile-menu" class="mobile-menu-hidden py-3 space-y-2 md:hidden">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'lab_list' %}" class="mobile-nav-link text-white">
+                        <i class="fas fa-flask mr-2"></i> Labs
+                    </a>
+                    
+                    {% if user.is_lecturer %}
+                        <a href="{% url 'lecturer_booking' %}" class="mobile-nav-link text-white">
+                            <i class="fas fa-calendar-plus mr-2"></i> Book Lab Session
                         </a>
-                        <div class="flex justify-between items-center py-1">
-                            <span class="text-ttu-light">{{ user.username }}</span>
-                            <a href="{% url 'account_logout' %}" class="text-white hover:text-blue-200">Logout</a>
-                        </div>
-                    {% else %}
-                        <div class="flex space-x-4 py-1">
-                            <a href="{% url 'account_login' %}" class="text-white hover:text-blue-200">Login</a>
-                            <a href="{% url 'account_signup' %}" class="text-white hover:text-blue-200">Register</a>
-                        </div>
                     {% endif %}
-                </div>
+                    
+                    {% if user.is_admin %}
+                        <a href="{% url 'admin_dashboard' %}" class="mobile-nav-link text-white">
+                            <i class="fas fa-tachometer-alt mr-2"></i> Admin Dashboard
+                        </a>
+                        <a href="{% url 'analytics_dashboard' %}" class="mobile-nav-link text-white">
+                            <i class="fas fa-chart-line mr-2"></i> Analytics Dashboard
+                        </a>
+                    {% endif %}
+                    
+                    <a href="{% url 'notification_list' %}" class="mobile-nav-link text-white flex justify-between items-center">
+                        <span><i class="fas fa-bell mr-2"></i> Notifications</span>
+                        {% if unread_notifications_count > 0 %}
+                            <span class="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                {{ unread_notifications_count }}
+                            </span>
+                        {% endif %}
+                    </a>
+                    
+                    <div class="mobile-nav-divider"></div>
+                    
+                    <div class="px-4 py-2 text-white text-sm">
+                        Signed in as <span class="font-semibold">{{ user.username }}</span>
+                    </div>
+                    
+                    <a href="{% url 'account_profile' %}" class="mobile-nav-link text-white">
+                        <i class="fas fa-user mr-2"></i> My Profile
+                    </a>
+                    
+                    <a href="{% url 'account_logout' %}" class="mobile-nav-link text-white">
+                        <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                    </a>
+                {% else %}
+                    <a href="{% url 'account_login' %}" class="mobile-nav-link text-white">
+                        <i class="fas fa-sign-in-alt mr-2"></i> Login
+                    </a>
+                    <a href="{% url 'account_signup' %}" class="mobile-nav-link text-white">
+                        <i class="fas fa-user-plus mr-2"></i> Register
+                    </a>
+                {% endif %}
             </div>
         </div>
     </nav>
@@ -192,12 +342,27 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" 
         integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" 
         crossorigin="anonymous"></script>
+    
+    <!-- Add Alpine.js for dropdown functionality -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
     <script>
         // Mobile menu toggle
         document.getElementById('mobile-menu-button').addEventListener('click', function() {
             const mobileMenu = document.getElementById('mobile-menu');
             mobileMenu.classList.toggle('mobile-menu-hidden');
+        });
+        
+        // Add active class to current page link
+        document.addEventListener("DOMContentLoaded", function() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link, .mobile-nav-link');
+            
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
         });
     </script>
 </body>
