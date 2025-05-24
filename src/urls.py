@@ -4,7 +4,6 @@ from django.conf import settings
 from django.conf.urls.static import static
 from analytics.views import AnalyticsView, AnalyticsApiView
 from contact.views import contact_submit
-from newsletter.views import newsletter_stats_view  # Replace 'your_app' with the actual app name where newsletter_stats_view is defined
 from newsletter import views
 from newsletter.admin import admin_stats_view
 
