@@ -97,6 +97,17 @@ class SystemEvent(models.Model):
         MEDIUM = 2, 'Medium'
         HIGH = 3, 'High'
         CRITICAL = 4, 'Critical'
+
+    timestamp = models.DateTimeField(auto_now_add=True)
+    severity = models.PositiveSmallIntegerField(
+        choices=SeverityLevels.choices,
+        default=SeverityLevels.LOW,
+        db_index=True
+    )
+    message = models.TextField()
+
+    def __str__(self):
+        return f"{self.get_severity_display()} - {self.timestamp}: {self.message}"
     
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
