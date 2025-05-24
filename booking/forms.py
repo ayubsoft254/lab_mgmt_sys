@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 import re
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-from .models import Computer, LabSession, RecurringSession, ComputerBooking, StudentRating
+from .models import Computer, LabSession, RecurringSession, ComputerBooking, StudentRating, User
 
 # Constants for domain validation
 STUDENT_EMAIL_DOMAIN = 'students.ttu.ac.ke'
@@ -281,3 +281,39 @@ class StudentRatingForm(forms.ModelForm):
             'score': forms.RadioSelect(),
             'comment': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Optional comment about the student\'s behavior'}),
         }
+
+class UserProfileForm(forms.ModelForm):
+    """Form for updating user profile information"""
+    
+    class Meta:
+        model = User
+        fields = [
+            'salutation', 
+            'first_name', 
+            'last_name', 
+            'email',
+            'school', 
+            'course'
+        ]
+        widgets = {
+            'salutation': forms.Select(attrs={'class': 'form-control'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'school': forms.Select(attrs={'class': 'form-control'}),
+            'course': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['email'].required = True
+        self.fields['first_name'].required = True
+        self.fields['last_name'].required = True
+        
+        # Add help texts
+        self.fields['school'].help_text = "Select your academic school"
+        self.fields['course'].help_text = "Enter your program or course of study"
+        
+        # Update labels
+        self.fields['first_name'].label = "First Name"
+        self.fields['last_name'].label = "Last Name"
