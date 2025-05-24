@@ -5,6 +5,9 @@ from .models import NewsletterSubscription
 from .utils import send_welcome_email
 from django.http import HttpResponse
 from django.utils import timezone
+from django.contrib import admin
+from django.contrib.auth.models import User
+from .models import EmailCampaign, EmailDelivery
 
 # Create your views here.
 
@@ -127,3 +130,53 @@ def unsubscribe(request, token):
         messages.error(request, "Invalid unsubscription link.")
     
     return redirect('home')
+
+@admin.site.admin_view
+def send_bulk_email(request):
+    if request.method == 'POST':
+        subject = request.POST.get('subject')
+        message = request.POST.get('message')
+        user_ids = request.session.get('selected_user_ids', [])
+        
+        users = User.objects.filter(id__in=user_ids)
+        
+        # Create a campaign
+        campaign = EmailCampaign.objects.create(
+            name=f"Ad hoc email: {subject}",
+            subject=subject,
+            custom_html_content=f"<div>{message}</div>",
+            custom_text_content=message,
+            recipient_type='custom',
+            created_by=request.user,
+            status='sending',
+            started_at=timezone.now()
+        )
+        
+        # Set campaign details
+        campaign.total_recipients = users.count()
+        campaign.save()
+        
+        # Create delivery records
+        deliveries = []
+        for user in users:
+            deliveries.append(EmailDelivery(
+                campaign=campaign,
+                recipient=user,
+                email_address=user.email,
+                status='pending'
+            ))
+        
+        # Bulk create delivery records
+        EmailDelivery.objects.bulk_create(deliveries)
+        
+        # Process the campaign
+        from .tasks import process_email_campaign
+        process_email_campaign(campaign.id)
+        
+        messages.success(request, f"Email is being sent to {users.count()} users.")
+        return redirect('admin:newsletter_emailcampaign_changelist')
+    
+    return render(request, 'admin/send_bulk_email.html', {
+        'title': 'Send Email to Selected Users',
+        'user_count': len(request.session.get('selected_user_ids', [])),
+    })
