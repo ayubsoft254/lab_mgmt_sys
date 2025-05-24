@@ -15,7 +15,7 @@ class NewsletterSubscription(models.Model):
     receive_tips = models.BooleanField(default=False, help_text="Tips and best practices for using labs")
     receive_events = models.BooleanField(default=False, help_text="Lab workshops and special events")
     is_active = models.BooleanField(default=True)
-    unsubscribe_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    unsubscribe_token = models.CharField(max_length=255, null=True, blank=True)
     source = models.CharField(max_length=20, default='main', choices=(
         ('main', 'Main Newsletter Form'),
         ('footer', 'Footer Form'),
