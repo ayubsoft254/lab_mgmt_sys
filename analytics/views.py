@@ -5,8 +5,10 @@ from django.utils import timezone
 from datetime import timedelta
 from django.http import JsonResponse
 from .models import SystemEvent
-from booking.models import ComputerBookingAttendance, SessionAttendance
+from booking.models import ComputerBookingAttendance, SessionAttendance, ComputerBooking, LabSession
 import json
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required, user_passes_test
 
 
 class AnalyticsView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
@@ -225,3 +227,67 @@ class AttendanceAnalyticsView(LoginRequiredMixin, PermissionRequiredMixin, Templ
             context['session_attendance_rate'] = 0
         
         return context
+
+
+@login_required
+@user_passes_test(is_admin)
+def admin_check_in_dashboard(request):
+    """Dashboard for admins to view and manage check-ins"""
+    # Get today's date
+    today = timezone.now().date()
+    
+    # Get today's computer bookings
+    today_bookings = ComputerBooking.objects.filter(
+        start_time__date=today,
+        is_approved=True,
+        is_cancelled=False
+    ).select_related('computer', 'student', 'attendance').order_by('start_time')
+    
+    # Get today's lab sessions
+    today_sessions = LabSession.objects.filter(
+        start_time__date=today,
+        is_approved=True
+    ).select_related('lab', 'lecturer').prefetch_related('attending_students').order_by('start_time')
+    
+    # Count attendance stats
+    booking_attendance = {
+        'total': today_bookings.count(),
+        'checked_in': ComputerBookingAttendance.objects.filter(
+            booking__in=today_bookings,
+            status='present'
+        ).count(),
+        'absent': ComputerBookingAttendance.objects.filter(
+            booking__in=today_bookings,
+            status='absent'
+        ).count(),
+        'late': ComputerBookingAttendance.objects.filter(
+            booking__in=today_bookings,
+            status='late'
+        ).count(),
+    }
+    
+    # Pre-calculate attendance counts for each session
+    session_attendance = {}
+    for session in today_sessions:
+        present_count = SessionAttendance.objects.filter(
+            session=session, 
+            status='present'
+        ).count()
+        session_attendance[session.id] = present_count
+    
+    # If user is lab-specific admin, filter by their labs
+    if request.user.is_admin and not request.user.is_super_admin:
+        managed_labs = request.user.managed_labs.all()
+        today_bookings = today_bookings.filter(computer__lab__in=managed_labs)
+        today_sessions = today_sessions.filter(lab__in=managed_labs)
+    
+    context = {
+        'today_bookings': today_bookings,
+        'today_sessions': today_sessions,
+        'booking_attendance': booking_attendance,
+        'session_attendance': session_attendance,
+        'today': today,
+        'now': timezone.now()
+    }
+    
+    return render(request, 'check_in_dashboard.html', context)
