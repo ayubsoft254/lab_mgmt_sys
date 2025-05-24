@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.utils import timezone
-from django.core.mail import send_mail, EmailMultiAlternatives
+from django.core.mail import EmailMultiAlternatives
 from django.template import Template, Context
 import logging
 import time
