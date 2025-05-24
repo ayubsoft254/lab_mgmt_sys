@@ -1142,3 +1142,25 @@ def extend_booking(request, booking_id):
     messages.success(request, f"Your booking has been extended by 30 minutes until {booking.end_time.strftime('%H:%M')}")
     
     return redirect('booking_detail', booking_id=booking.id)
+
+@login_required
+def unread_notifications_json(request):
+    """Return unread notifications as JSON"""
+    unread = Notification.objects.filter(
+        user=request.user,
+        is_read=False
+    ).order_by('-created_at')
+    
+    notifications = []
+    for notification in unread:
+        notifications.append({
+            'id': notification.id,
+            'message': notification.message,
+            'notification_type': notification.notification_type,
+            'created_at': notification.created_at.strftime('%Y-%m-%d %H:%M:%S')
+        })
+    
+    return JsonResponse({
+        'count': unread.count(),
+        'notifications': notifications
+    })
