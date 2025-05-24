@@ -90,37 +90,34 @@
                                     <td>{{ booking.computer }}</td>
                                     <td>
                                         <div>{{ booking.start_time|time:"H:i" }} - {{ booking.end_time|time:"H:i" }}</div>
-                                        {% now "Y-m-d H:i:s" as current_time %}
-                                        <small class="{% if booking.start_time|stringformat:"Y-m-d H:i:s" < current_time %}text-success{% else %}text-muted{% endif %}">
-                                            {% if booking.start_time|stringformat:"Y-m-d H:i:s" < current_time %}
+                                        {% now "Y-m-d H:i:s" as current_datetime %}
+                                        <small class="{% if booking.start_time <= now %}text-success{% else %}text-muted{% endif %}">
+                                            {% if booking.start_time <= now %}
                                                 Started {{ booking.start_time|timesince }} ago
                                             {% else %}
                                                 Starts in {{ booking.start_time|timeuntil }}
                                             {% endif %}
                                         </small>
-
                                     </td>
                                     <td>
-                                        {% if hasattr booking 'attendance' %}
-                                            {% with attendance=booking.attendance %}
-                                                <span class="badge {% if attendance.status == 'present' %}bg-success{% elif attendance.status == 'late' %}bg-warning{% elif attendance.status == 'excused' %}bg-info{% else %}bg-danger{% endif %}">
-                                                    {{ attendance.get_status_display }}
-                                                </span>
-                                                {% if attendance.check_in_time %}
-                                                    <br>
-                                                    <small class="text-muted">{{ attendance.check_in_time|time:"H:i" }}</small>
-                                                {% endif %}
-                                            {% endwith %}
+                                        {% if booking.attendance %}
+                                            <span class="badge {% if booking.attendance.status == 'present' %}bg-success{% elif booking.attendance.status == 'late' %}bg-warning{% elif booking.attendance.status == 'excused' %}bg-info{% else %}bg-danger{% endif %}">
+                                                {{ booking.attendance.get_status_display }}
+                                            </span>
+                                            {% if booking.attendance.check_in_time %}
+                                                <br>
+                                                <small class="text-muted">{{ booking.attendance.check_in_time|time:"H:i" }}</small>
+                                            {% endif %}
                                         {% else %}
                                             <span class="badge bg-secondary">Not Checked In</span>
                                         {% endif %}
                                     </td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <button type="button" class="btn btn-sm btn-success quick-check-in" data-booking-id="{{ booking.id }}" data-status="present" {% if hasattr booking 'attendance' %}disabled{% endif %}>
+                                            <button type="button" class="btn btn-sm btn-success quick-check-in" data-booking-id="{{ booking.id }}" data-status="present" {% if booking.attendance %}disabled{% endif %}>
                                                 <i class="fas fa-check"></i>
                                             </button>
-                                            <button type="button" class="btn btn-sm btn-warning quick-check-in" data-booking-id="{{ booking.id }}" data-status="late" {% if hasattr booking 'attendance' %}disabled{% endif %}>
+                                            <button type="button" class="btn btn-sm btn-warning quick-check-in" data-booking-id="{{ booking.id }}" data-status="late" {% if booking.attendance %}disabled{% endif %}>
                                                 <i class="fas fa-clock"></i>
                                             </button>
                                             <a href="{% url 'computer_booking_check_in' booking.id %}" class="btn btn-sm btn-primary">
