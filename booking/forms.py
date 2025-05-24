@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 import re
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-from .models import Computer, LabSession, RecurringSession, ComputerBooking, StudentRating, User
+from .models import Computer, LabSession, RecurringSession, ComputerBooking, StudentRating, User, ComputerBookingAttendance
 
 # Constants for domain validation
 STUDENT_EMAIL_DOMAIN = 'students.ttu.ac.ke'
@@ -317,3 +317,19 @@ class UserProfileForm(forms.ModelForm):
         # Update labels
         self.fields['first_name'].label = "First Name"
         self.fields['last_name'].label = "Last Name"
+
+class AttendanceForm(forms.ModelForm):
+    """Form for recording attendance"""
+    class Meta:
+        model = ComputerBookingAttendance
+        fields = ['status', 'notes', 'check_out_time']
+        widgets = {
+            'status': forms.Select(attrs={'class': 'form-control'}),
+            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'check_out_time': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
+        }
+
+class BulkAttendanceForm(forms.Form):
+    """Form for bulk attendance submission"""
+    # This is just a placeholder - the actual form will be built dynamically
+    pass
