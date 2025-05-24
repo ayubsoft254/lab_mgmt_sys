@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to TTU Lab Management System Newsletter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .header {
+            background-color: #0d5c3a;
+            padding: 20px;
+            color: white;
+            text-align: center;
+        }
+        .content {
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            background-color: #f1f1f1;
+        }
+        .button {
+            display: inline-block;
+            background-color: #0d5c3a;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .benefits {
+            background-color: white;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .benefit-item {
+            margin-bottom: 10px;
+        }
+        .logo {
+            max-width: 120px;
+            margin: 0 auto 15px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Welcome to the TTU Lab Management Newsletter!</h1>
+    </div>
+    
+    <div class="content">
+        <p>{{ greeting }}</p>
+        
+        <p>Thank you for subscribing to the TTU Lab Management System newsletter. You're now part of our community and will receive the latest updates about:</p>
+        
+        <div class="benefits">
+            <div class="benefit-item">✓ Lab availability updates</div>
+            <div class="benefit-item">✓ New system features</div>
+            <div class="benefit-item">✓ Scheduled maintenance</div>
+            <div class="benefit-item">✓ Tips for efficient lab booking</div>
+        </div>
+        
+        <p>We're committed to helping you get the most out of our lab resources. If you have any questions or feedback about the system, please don't hesitate to contact us.</p>
+        
+        <p>Start managing your lab bookings right away:</p>
+        
+        <p style="text-align: center;">
+            <a href="https://labs.ttu.edu/login" class="button">Log in to Lab Management System</a>
+        </p>
+    </div>
+    
+    <div class="footer">
+        <p>This email was sent to you because you subscribed to our newsletter.</p>
+        <p>© {% now "Y" %} TTU Lab Management System. All rights reserved.</p>
+        <p>
+            <a href="https://labs.ttu.edu/unsubscribe">Unsubscribe</a> | 
+            <a href="https://labs.ttu.edu/privacy">Privacy Policy</a>
+        </p>
+    </div>
+</body>
+</html>
