@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Booking Details - {{ booking.booking_code }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-desktop me-2"></i>
+                        Computer Booking Details
+                    </h5>
+                    <div>
+                        {% if booking.is_cancelled %}
+                            <span class="badge bg-danger">Cancelled</span>
+                        {% elif booking.is_approved %}
+                            <span class="badge bg-success">Approved</span>
+                        {% else %}
+                            <span class="badge bg-warning">Pending</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Booking Code</h6>
+                            <p class="mb-0">{{ booking.booking_code }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Created On</h6>
+                            <p class="mb-0">{{ booking.created_at|date:"F j, Y, g:i a" }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Computer</h6>
+                            <p class="mb-0">{{ booking.computer }}</p>
+                            <small class="text-muted">{{ booking.computer.lab.name }}</small>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Status</h6>
+                            <p class="mb-0">
+                                {% if booking.is_cancelled %}
+                                    <span class="text-danger">Cancelled</span>
+                                {% elif booking.is_approved %}
+                                    <span class="text-success">Approved</span>
+                                {% else %}
+                                    <span class="text-warning">Awaiting approval</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Date</h6>
+                            <p class="mb-0">{{ booking.start_time|date:"l, F j, Y" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Time</h6>
+                            <p class="mb-0">{{ booking.start_time|time:"g:i a" }} to {{ booking.end_time|time:"g:i a" }}</p>
+                            <small class="text-muted">({{ booking.start_time|timeuntil:booking.end_time }} duration)</small>
+                        </div>
+                    </div>
+
+                    {% if booking.purpose %}
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="text-muted">Purpose</h6>
+                            <p class="mb-0">{{ booking.purpose }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if booking.extension_approved %}
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="alert alert-info mb-0">
+                                <i class="fas fa-clock me-2"></i>
+                                This booking was extended by 30 minutes.
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if booking.is_cancelled %}
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="alert alert-danger mb-0">
+                                <i class="fas fa-times-circle me-2"></i>
+                                This booking was cancelled.
+                                {% if booking.cancellation_reason %}
+                                <p class="mb-0 mt-2"><strong>Reason:</strong> {{ booking.cancellation_reason }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if booking.attendance %}
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="text-muted">Attendance</h6>
+                            <div class="d-flex align-items-center">
+                                <span class="badge {% if booking.attendance.status == 'present' %}bg-success{% elif booking.attendance.status == 'late' %}bg-warning{% elif booking.attendance.status == 'excused' %}bg-info{% else %}bg-danger{% endif %} me-2">
+                                    {{ booking.attendance.get_status_display }}
+                                </span>
+                                {% if booking.attendance.check_in_time %}
+                                <span>Checked in at {{ booking.attendance.check_in_time|time:"g:i a" }}</span>
+                                {% endif %}
+                            </div>
+                            {% if booking.attendance.notes %}
+                            <p class="mt-2 mb-0"><strong>Notes:</strong> {{ booking.attendance.notes }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Timeline Section -->
+                    <h6 class="text-muted mt-4 mb-3">Booking Timeline</h6>
+                    <div class="position-relative ms-4">
+                        <!-- Vertical line -->
+                        <div class="position-absolute top-0 bottom-0 start-0 border-start border-2 ms-2"></div>
+                        
+                        <!-- Timeline events -->
+                        <div class="d-flex mb-3 position-relative">
+                            <div class="position-absolute start-0 translate-middle-x mt-1">
+                                <div class="rounded-circle bg-primary" style="width: 12px; height: 12px;"></div>
+                            </div>
+                            <div class="ms-4">
+                                <p class="mb-0 fw-bold">Booking Created</p>
+                                <p class="text-muted small">{{ booking.created_at|date:"F j, Y, g:i a" }}</p>
+                            </div>
+                        </div>
+                        
+                        {% if booking.is_approved %}
+                        <div class="d-flex mb-3 position-relative">
+                            <div class="position-absolute start-0 translate-middle-x mt-1">
+                                <div class="rounded-circle bg-success" style="width: 12px; height: 12px;"></div>
+                            </div>
+                            <div class="ms-4">
+                                <p class="mb-0 fw-bold">Booking Approved</p>
+                                <p class="text-muted small">{{ booking.approved_at|date:"F j, Y, g:i a" }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if booking.extension_requested %}
+                        <div class="d-flex mb-3 position-relative">
+                            <div class="position-absolute start-0 translate-middle-x mt-1">
+                                <div class="rounded-circle bg-info" style="width: 12px; height: 12px;"></div>
+                            </div>
+                            <div class="ms-4">
+                                <p class="mb-0 fw-bold">Extension Requested</p>
+                                <p class="text-muted small">{{ booking.extension_requested_at|date:"F j, Y, g:i a" }}</p>
+                            </div>
+                        </div>
+                        
+                        {% if booking.extension_approved %}
+                        <div class="d-flex mb-3 position-relative">
+                            <div class="position-absolute start-0 translate-middle-x mt-1">
+                                <div class="rounded-circle bg-success" style="width: 12px; height: 12px;"></div>
+                            </div>
+                            <div class="ms-4">
+                                <p class="mb-0 fw-bold">Extension Approved</p>
+                                <p class="text-muted small">{{ booking.extension_approved_at|date:"F j, Y, g:i a" }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endif %}
+                        
+                        {% if booking.attendance %}
+                        <div class="d-flex mb-3 position-relative">
+                            <div class="position-absolute start-0 translate-middle-x mt-1">
+                                <div class="rounded-circle {% if booking.attendance.status == 'present' %}bg-success{% elif booking.attendance.status == 'late' %}bg-warning{% else %}bg-danger{% endif %}" style="width: 12px; height: 12px;"></div>
+                            </div>
+                            <div class="ms-4">
+                                <p class="mb-0 fw-bold">Attendance Recorded</p>
+                                <p class="text-muted small">{{ booking.attendance.check_in_time|date:"F j, Y, g:i a" }}</p>
+                                <p class="mb-0">Marked as {{ booking.attendance.get_status_display }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if booking.is_cancelled %}
+                        <div class="d-flex mb-3 position-relative">
+                            <div class="position-absolute start-0 translate-middle-x mt-1">
+                                <div class="rounded-circle bg-danger" style="width: 12px; height: 12px;"></div>
+                            </div>
+                            <div class="ms-4">
+                                <p class="mb-0 fw-bold">Booking Cancelled</p>
+                                <p class="text-muted small">{{ booking.cancelled_at|date:"F j, Y, g:i a" }}</p>
+                                {% if booking.cancellation_reason %}
+                                <p class="mb-0">Reason: {{ booking.cancellation_reason }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-white">
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'my_bookings' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Back to My Bookings
+                        </a>
+                        
+                        <div>
+                            {% if booking.is_approved and not booking.is_cancelled %}
+                                {% if booking.start_time <= now and booking.end_time >= now and booking.can_be_extended %}
+                                    <a href="{% url 'extend_booking' booking.id %}" class="btn btn-success me-2">
+                                        <i class="fas fa-clock me-1"></i> Extend Session
+                                    </a>
+                                {% endif %}
+                                
+                                {% if booking.start_time > now_plus_30min %}
+                                    <a href="{% url 'cancel_computer_booking' booking.id %}" class="btn btn-outline-danger">
+                                        <i class="fas fa-times-circle me-1"></i> Cancel Booking
+                                    </a>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Computer Details Card -->
+            <div class="card shadow mt-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Computer Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Computer Name</h6>
+                            <p class="mb-3">{{ booking.computer.name }}</p>
+                            
+                            <h6 class="text-muted">Lab</h6>
+                            <p class="mb-3">{{ booking.computer.lab.name }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Location</h6>
+                            <p class="mb-3">{{ booking.computer.lab.location }}</p>
+                            
+                            <h6 class="text-muted">Specifications</h6>
+                            <p class="mb-0">{{ booking.computer.specifications }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,6 @@
+
+{% if session.is_approved and not session.is_cancelled and session.start_time > now_plus_2hr %}
+    <a href="{% url 'cancel_lab_session' session.id %}" class="btn btn-outline-danger">
+        <i class="fas fa-times-circle me-1"></i> Cancel Session
+    </a>
+{% endif %}
