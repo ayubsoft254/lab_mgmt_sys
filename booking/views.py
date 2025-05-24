@@ -3,6 +3,7 @@ from django.forms import ValidationError
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
+from django.views.generic import TemplateView
 from django.contrib import messages
 from django.utils import timezone
 from django.contrib.auth import update_session_auth_hash
@@ -1107,6 +1108,8 @@ def student_details_view(request, student_id):
     
     return render(request, 'student_details.html', context)
 
+from django.contrib.auth.mixins import LoginRequiredMixin
+
 class ProfileView(LoginRequiredMixin, TemplateView):
     """View for managing user profile"""
     template_name = 'profile.html'
@@ -1202,7 +1205,6 @@ def unread_notifications_json(request):
         'notifications': notifications
     })
 
-# Add to booking/views.py
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
@@ -1269,7 +1271,7 @@ def admin_check_in_dashboard(request):
         'today': today
     }
     
-    return render(request, 'booking/check_in_dashboard.html', context)
+    return render(request, 'check_in_dashboard.html', context)
 
 @login_required
 @user_passes_test(is_admin)
@@ -1326,7 +1328,7 @@ def computer_booking_check_in(request, booking_id):
         'attendance': attendance
     }
     
-    return render(request, 'booking/computer_booking_check_in.html', context)
+    return render(request, 'computer_booking_check_in.html', context)
 
 @login_required
 @user_passes_test(is_admin)
@@ -1397,7 +1399,7 @@ def lab_session_attendance(request, session_id):
         'form': form
     }
     
-    return render(request, 'booking/lab_session_attendance.html', context)
+    return render(request, 'lab_session_attendance.html', context)
 
 @login_required
 @user_passes_test(is_admin)
