@@ -15,7 +15,7 @@
                     </h5>
                     <div>
                         <a href="?date={{ today|date:'Y-m-d' }}" class="btn btn-outline-secondary btn-sm">Today</a>
-                        <a href="?date={{ tomorrow|date:'Y-m-d' }}" class="btn btn-outline-secondary btn-sm">Tomorrow</a>
+                        <a href="?date={% now 'Y-m-d' %}" class="btn btn-outline-secondary btn-sm">Tomorrow</a>
                     </div>
                 </div>
                 <div class="card-body">
@@ -95,7 +95,7 @@
                                             {% if booking.start_time <= now %}
                                                 Started {{ booking.start_time|timesince }} ago
                                             {% else %}
-                                                Starts in {{ booking.start_time|timeuntil }}
+                                                Starts in {{ now|timeuntil:booking.start_time }}
                                             {% endif %}
                                         </small>
                                     </td>
@@ -171,8 +171,8 @@
                                     <td>{{ session.lab.name }}</td>
                                     <td>
                                         <div>{{ session.start_time|time:"H:i" }} - {{ session.end_time|time:"H:i" }}</div>
-                                        <small class="{% if session.start_time < now %}text-success{% else %}text-muted{% endif %}">
-                                            {% if session.start_time < now %}
+                                        <small class="{% if session.start_time <= now %}text-success{% else %}text-muted{% endif %}">
+                                            {% if session.start_time <= now %}
                                                 Started {{ session.start_time|timesince }} ago
                                             {% else %}
                                                 Starts in {{ now|timeuntil:session.start_time }}
@@ -212,6 +212,7 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
 {% block extra_js %}
 <script>
@@ -234,7 +235,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: `status=${status}&notes=Quick check-in via dashboard`
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.status === 'success') {
                     // Update UI
@@ -263,15 +269,28 @@ document.addEventListener('DOMContentLoaded', function() {
                     setTimeout(() => {
                         alert.remove();
                     }, 3000);
+                } else {
+                    throw new Error('Server returned error status');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Failed to record attendance. Please try again.');
+                // Show error message
+                const alert = document.createElement('div');
+                alert.className = 'alert alert-danger alert-dismissible fade show mt-3';
+                alert.innerHTML = `
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    Failed to record attendance. Please try again.
+                `;
+                document.querySelector('.container-fluid').prepend(alert);
+                
+                // Remove alert after 3 seconds
+                setTimeout(() => {
+                    alert.remove();
+                }, 3000);
             });
         });
     });
 });
 </script>
-{% endblock %}
 {% endblock %}
