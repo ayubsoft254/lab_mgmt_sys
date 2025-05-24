@@ -1268,7 +1268,8 @@ def admin_check_in_dashboard(request):
         'today_bookings': today_bookings,
         'today_sessions': today_sessions,
         'booking_attendance': booking_attendance,
-        'today': today
+        'today': today,
+        'now': timezone.now()
     }
     
     return render(request, 'check_in_dashboard.html', context)
