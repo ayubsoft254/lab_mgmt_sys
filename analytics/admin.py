@@ -5,7 +5,7 @@ from django.utils.safestring import mark_safe
 from django.db.models import Count, Q
 from django.utils import timezone
 from datetime import timedelta
-from .models import SystemEvent
+from analytics.models import SystemEvent
 
 
 @admin.register(SystemEvent)
