@@ -1,0 +1,372 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Profile - Lab Management System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Profile Sidebar -->
+        <div class="col-lg-3">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <div class="avatar-circle mx-auto mb-3 bg-ttu-green d-flex align-items-center justify-content-center text-white">
+                        <span class="fs-2">{{ user.first_name.0|default:user.username.0|upper }}{{ user.last_name.0|upper }}</span>
+                    </div>
+                    <h5 class="mb-1">{{ user.get_full_name|default:user.username }}</h5>
+                    <p class="text-muted mb-3">
+                        <span class="badge {% if user.is_student %}bg-primary{% elif user.is_lecturer %}bg-success{% elif user.is_admin %}bg-danger{% else %}bg-secondary{% endif %} mb-2">
+                            {% if user.is_student %}Student{% elif user.is_lecturer %}Lecturer{% elif user.is_admin %}Administrator{% else %}User{% endif %}
+                        </span><br>
+                        {% if user.email %}
+                            <small><i class="fas fa-envelope me-2"></i>{{ user.email }}</small>
+                        {% endif %}
+                    </p>
+                    
+                    <div class="list-group list-group-flush border-top pt-3">
+                        <a href="#profile-info" class="list-group-item list-group-item-action active">
+                            <i class="fas fa-user me-2"></i> Personal Information
+                        </a>
+                        <a href="#password-change" class="list-group-item list-group-item-action">
+                            <i class="fas fa-key me-2"></i> Change Password
+                        </a>
+                        <a href="#activity" class="list-group-item list-group-item-action">
+                            <i class="fas fa-history me-2"></i> Recent Activity
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- User Stats -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">Stats & Ratings</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Bookings</span>
+                        <span class="fw-bold">{{ total_bookings }}</span>
+                    </div>
+                    
+                    {% if user.is_lecturer %}
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Lab Sessions</span>
+                        <span class="fw-bold">{{ total_sessions }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if user.is_student %}
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Rating</span>
+                        <div>
+                            <div class="rating-stars">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= user.average_rating %}
+                                        <i class="fas fa-star text-warning"></i>
+                                    {% elif forloop.counter <= user.average_rating|add:0.5 %}
+                                        <i class="fas fa-star-half-alt text-warning"></i>
+                                    {% else %}
+                                        <i class="far fa-star text-warning"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <small class="text-muted">({{ user.total_ratings }} ratings)</small>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Profile Content -->
+        <div class="col-lg-9">
+            <!-- Messages -->
+            {% if messages %}
+                <div class="mb-4">
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% else %}alert-info{% endif %} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <!-- Profile Information -->
+            <div class="card shadow-sm mb-4" id="profile-info">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Personal Information</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="update_profile">
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <label for="{{ profile_form.salutation.id_for_label }}" class="form-label">Salutation</label>
+                                {{ profile_form.salutation }}
+                                {% if profile_form.salutation.errors %}
+                                    <div class="invalid-feedback d-block">{{ profile_form.salutation.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label for="{{ profile_form.first_name.id_for_label }}" class="form-label">First Name*</label>
+                                {{ profile_form.first_name }}
+                                {% if profile_form.first_name.errors %}
+                                    <div class="invalid-feedback d-block">{{ profile_form.first_name.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-5">
+                                <label for="{{ profile_form.last_name.id_for_label }}" class="form-label">Last Name*</label>
+                                {{ profile_form.last_name }}
+                                {% if profile_form.last_name.errors %}
+                                    <div class="invalid-feedback d-block">{{ profile_form.last_name.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ profile_form.email.id_for_label }}" class="form-label">Email Address*</label>
+                            {{ profile_form.email }}
+                            {% if profile_form.email.errors %}
+                                <div class="invalid-feedback d-block">{{ profile_form.email.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="{{ profile_form.school.id_for_label }}" class="form-label">School</label>
+                                {{ profile_form.school }}
+                                {% if profile_form.school.help_text %}
+                                    <small class="form-text text-muted">{{ profile_form.school.help_text }}</small>
+                                {% endif %}
+                                {% if profile_form.school.errors %}
+                                    <div class="invalid-feedback d-block">{{ profile_form.school.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ profile_form.course.id_for_label }}" class="form-label">Course/Program</label>
+                                {{ profile_form.course }}
+                                {% if profile_form.course.help_text %}
+                                    <small class="form-text text-muted">{{ profile_form.course.help_text }}</small>
+                                {% endif %}
+                                {% if profile_form.course.errors %}
+                                    <div class="invalid-feedback d-block">{{ profile_form.course.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- User Role Information (Read-only) -->
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label class="form-label">User Roles</label>
+                                <div class="d-flex flex-wrap gap-2">
+                                    {% if user.is_student %}
+                                        <span class="badge bg-primary">Student</span>
+                                    {% endif %}
+                                    {% if user.is_lecturer %}
+                                        <span class="badge bg-success">Lecturer</span>
+                                    {% endif %}
+                                    {% if user.is_admin %}
+                                        <span class="badge bg-danger">Administrator</span>
+                                    {% endif %}
+                                    {% if user.is_super_admin %}
+                                        <span class="badge bg-dark">Super Administrator</span>
+                                    {% endif %}
+                                    {% if user.is_staff %}
+                                        <span class="badge bg-info">Staff</span>
+                                    {% endif %}
+                                </div>
+                                <small class="form-text text-muted">Roles can only be changed by system administrators.</small>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3 mt-4 text-end">
+                            <button type="submit" class="btn btn-ttu">
+                                <i class="fas fa-save me-2"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Change Password -->
+            <div class="card shadow-sm mb-4" id="password-change">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Change Password</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="change_password">
+                        
+                        <div class="mb-3">
+                            <label for="{{ password_form.old_password.id_for_label }}" class="form-label">Current Password</label>
+                            {{ password_form.old_password }}
+                            {% if password_form.old_password.errors %}
+                                <div class="invalid-feedback d-block">{{ password_form.old_password.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ password_form.new_password1.id_for_label }}" class="form-label">New Password</label>
+                            {{ password_form.new_password1 }}
+                            {% if password_form.new_password1.help_text %}
+                                <small class="form-text text-muted">{{ password_form.new_password1.help_text }}</small>
+                            {% endif %}
+                            {% if password_form.new_password1.errors %}
+                                <div class="invalid-feedback d-block">{{ password_form.new_password1.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ password_form.new_password2.id_for_label }}" class="form-label">Confirm New Password</label>
+                            {{ password_form.new_password2 }}
+                            {% if password_form.new_password2.errors %}
+                                <div class="invalid-feedback d-block">{{ password_form.new_password2.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3 mt-4 text-end">
+                            <button type="submit" class="btn btn-ttu">
+                                <i class="fas fa-key me-2"></i> Update Password
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Recent Activity -->
+            <div class="card shadow-sm" id="activity">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Recent Activity</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% if user.is_student and user_bookings %}
+                            <h6 class="fw-bold mb-3">Recent Computer Bookings</h6>
+                            {% for booking in user_bookings %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">{{ booking.computer }}</h6>
+                                        <small class="text-muted">
+                                            {{ booking.start_time|date:"M d, Y h:i A" }} - {{ booking.end_time|date:"h:i A" }}
+                                        </small>
+                                    </div>
+                                    <span class="badge {% if booking.is_approved %}bg-success{% elif booking.is_cancelled %}bg-danger{% else %}bg-warning{% endif %}">
+                                        {% if booking.is_approved %}Approved{% elif booking.is_cancelled %}Cancelled{% else %}Pending{% endif %}
+                                    </span>
+                                </li>
+                            {% endfor %}
+                            {% if total_bookings > 5 %}
+                                <li class="list-group-item text-center">
+                                    <a href="{% url 'booking_history' %}" class="text-decoration-none">View all bookings</a>
+                                </li>
+                            {% endif %}
+                        {% elif user.is_lecturer and user_sessions %}
+                            <h6 class="fw-bold mb-3">Recent Lab Sessions</h6>
+                            {% for session in user_sessions %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">{{ session.title }}</h6>
+                                        <small class="text-muted">
+                                            {{ session.lab.name }} | {{ session.start_time|date:"M d, Y h:i A" }} - {{ session.end_time|date:"h:i A" }}
+                                        </small>
+                                    </div>
+                                    <span class="badge {% if session.is_approved %}bg-success{% else %}bg-warning{% endif %}">
+                                        {% if session.is_approved %}Approved{% else %}Pending{% endif %}
+                                    </span>
+                                </li>
+                            {% endfor %}
+                            {% if total_sessions > 5 %}
+                                <li class="list-group-item text-center">
+                                    <a href="{% url 'session_history' %}" class="text-decoration-none">View all sessions</a>
+                                </li>
+                            {% endif %}
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-calendar-alt fa-3x text-muted mb-3"></i>
+                                <p>No recent activity to display.</p>
+                            </div>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        font-size: 24px;
+    }
+    
+    .form-control {
+        border-radius: 0.375rem;
+        border: 1px solid #ced4da;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .card {
+        border-radius: 0.5rem;
+        border: none;
+    }
+    
+    .card-header {
+        border-top-left-radius: 0.5rem !important;
+        border-top-right-radius: 0.5rem !important;
+    }
+    
+    /* Fix for password form display */
+    #id_old_password, #id_new_password1, #id_new_password2 {
+        display: block;
+        width: 100%;
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5;
+        color: #212529;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Scroll to form with errors if any
+    if(document.querySelector('.invalid-feedback')) {
+        const formWithError = document.querySelector('.invalid-feedback').closest('.card');
+        formWithError.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Handle sidebar navigation
+    document.querySelectorAll('.list-group-item-action').forEach(function(item) {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Remove active class from all items
+            document.querySelectorAll('.list-group-item-action').forEach(function(i) {
+                i.classList.remove('active');
+            });
+            
+            // Add active class to clicked item
+            this.classList.add('active');
+            
+            // Scroll to target section
+            const targetId = this.getAttribute('href');
+            document.querySelector(targetId).scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

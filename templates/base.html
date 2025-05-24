@@ -137,14 +137,12 @@
         .btn-ttu {
             background-color: var(--ttu-green);
             color: white;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
         }
 
         .btn-ttu:hover {
             background-color: var(--ttu-dark-green);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            color: white;
         }
 
         .btn-outline-ttu {
@@ -156,6 +154,28 @@
         .btn-outline-ttu:hover {
             background-color: var(--ttu-green);
             color: white;
+        }
+
+        .list-group-item-action.active {
+            background-color: var(--ttu-green);
+            border-color: var(--ttu-green);
+        }
+
+        .rating-stars {
+            display: inline-block;
+        }
+
+        /* Style fixes for Django forms */
+        ul.errorlist {
+            color: #dc3545;
+            padding-left: 0;
+            list-style: none;
+            margin-top: 0.25rem;
+            font-size: 0.875em;
+        }
+
+        .table td, .table th {
+            vertical-align: middle;
         }
 
         /* Responsive typography */
