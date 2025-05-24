@@ -12,7 +12,9 @@ from django.core.mail import send_mail, EmailMultiAlternatives
 from django.template import Template, Context
 from django.contrib.admin.widgets import AdminDateWidget
 from django.db.models import Q, Count
-import json
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 class NewsletterSubscriptionAdminForm(forms.ModelForm):
     """Custom form for NewsletterSubscription admin"""

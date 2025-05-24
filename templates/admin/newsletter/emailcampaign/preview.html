@@ -1,0 +1,145 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrastyle %}
+<style>
+    .preview-container {
+        max-width: 800px;
+        margin: 20px auto;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .preview-toolbar {
+        background: #f8f9fa;
+        padding: 10px 15px;
+        border-bottom: 1px solid #ddd;
+    }
+    .preview-content {
+        padding: 20px;
+    }
+    .preview-info {
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 4px;
+    }
+    .preview-info table {
+        width: 100%;
+    }
+    .preview-info table th {
+        text-align: left;
+        padding: 5px 10px 5px 0;
+        width: 150px;
+        vertical-align: top;
+    }
+    .preview-tabs {
+        margin-bottom: 20px;
+    }
+    .preview-tabs button {
+        padding: 8px 16px;
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+    }
+    .preview-tabs button.active {
+        border-bottom: 2px solid #447e9b;
+        font-weight: bold;
+    }
+    .tab-content {
+        display: none;
+    }
+    .tab-content.active {
+        display: block;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="module">
+    <h1>Email Campaign Preview: {{ campaign.name }}</h1>
+    
+    <div class="preview-info">
+        <table>
+            <tr>
+                <th>Campaign Name:</th>
+                <td>{{ campaign.name }}</td>
+            </tr>
+            <tr>
+                <th>Subject:</th>
+                <td>{{ campaign.subject }}</td>
+            </tr>
+            <tr>
+                <th>Recipients:</th>
+                <td>{{ campaign.get_recipient_type_display }} (Estimated: {{ campaign.get_recipients_queryset.count }} users)</td>
+            </tr>
+            {% if campaign.template %}
+            <tr>
+                <th>Template Used:</th>
+                <td>{{ campaign.template.name }}</td>
+            </tr>
+            {% endif %}
+            {% if campaign.scheduled_time %}
+            <tr>
+                <th>Scheduled Time:</th>
+                <td>{{ campaign.scheduled_time }}</td>
+            </tr>
+            {% endif %}
+        </table>
+    </div>
+    
+    <div class="preview-container">
+        <div class="preview-toolbar">
+            <div class="preview-tabs">
+                <button class="tab-button active" data-tab="html-preview">HTML Preview</button>
+                <button class="tab-button" data-tab="text-preview">Text Preview</button>
+            </div>
+        </div>
+        <div class="preview-content">
+            <div id="html-preview" class="tab-content active">
+                <iframe id="html-frame" style="width: 100%; height: 500px; border: none;"></iframe>
+            </div>
+            <div id="text-preview" class="tab-content">
+                <pre style="white-space: pre-wrap;">{{ campaign.text_content }}</pre>
+            </div>
+        </div>
+    </div>
+    
+    <div style="margin-top: 20px;">
+        <a href="{% url 'admin:newsletter_emailcampaign_change' campaign.id %}" class="button">Back to Edit</a>
+        <a href="{% url 'admin:send_campaign' campaign.id %}" class="button default" onclick="return confirm('Are you sure you want to send this campaign now?');">Send Now</a>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize HTML preview iframe
+    var htmlFrame = document.getElementById('html-frame');
+    var htmlContent = `{{ campaign.html_content|escapejs }}`;
+    
+    var doc = htmlFrame.contentWindow.document;
+    doc.open();
+    doc.write(htmlContent);
+    doc.close();
+    
+    // Tab functionality
+    document.querySelectorAll('.tab-button').forEach(function(button) {
+        button.addEventListener('click', function() {
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab-button').forEach(function(btn) {
+                btn.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-content').forEach(function(content) {
+                content.classList.remove('active');
+            });
+            
+            // Add active class to clicked tab
+            this.classList.add('active');
+            var tabId = this.getAttribute('data-tab');
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
+});
+</script>
+{% endblock %}
