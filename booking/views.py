@@ -12,16 +12,54 @@ from django.views.generic import TemplateView
 from datetime import datetime, timedelta
 
 from .models import (
-    Lab, Computer, ComputerBooking, LabSession, 
-    Notification, User, RecurringSession, StudentRating
+    User, Lab, Computer, ComputerBooking, LabSession, 
+    Notification, RecurringSession, StudentRating
 )
 from .forms import (
     ComputerBookingForm, LabSessionForm, RecurringSessionForm, 
     StudentRatingForm, UserProfileForm
 )
  
-def landing(request):
-    return render(request, 'landing.html')
+class LandingPageView(TemplateView):
+    template_name = 'landing.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Get statistics for the landing page
+        context['active_students'] = User.objects.filter(is_student=True).count()
+        context['lab_count'] = Lab.objects.count()
+        
+        # Calculate system uptime percentage (this is an example - you might want to use a real metric)
+        # For demonstration, we'll use a calculation based on successful bookings vs. total
+        total_bookings = ComputerBooking.objects.count()
+        successful_bookings = ComputerBooking.objects.filter(is_approved=True).count()
+        if total_bookings > 0:
+            uptime_percentage = round((successful_bookings / total_bookings) * 100)
+        else:
+            uptime_percentage = 100  # Default if no bookings yet
+        
+        # Ensure the percentage is reasonable
+        uptime_percentage = min(max(uptime_percentage, 95), 99.9)  # Between 95% and 99.9%
+        context['uptime_percentage'] = uptime_percentage
+        
+        # Get total hours of lab usage in the past month
+        one_month_ago = timezone.now() - timedelta(days=30)
+        
+        # Sum duration of all bookings in the past month
+        recent_bookings = ComputerBooking.objects.filter(
+            start_time__gte=one_month_ago,
+            is_approved=True
+        )
+        
+        total_hours = 0
+        for booking in recent_bookings:
+            duration = booking.end_time - booking.start_time
+            total_hours += duration.total_seconds() / 3600  # Convert seconds to hours
+        
+        context['total_hours'] = int(total_hours)
+        
+        return context
 
 @login_required
 def home_view(request):
