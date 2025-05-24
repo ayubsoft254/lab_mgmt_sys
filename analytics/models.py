@@ -1,7 +1,8 @@
 from django.db import models
-from django.conf import settings
+from django.contrib.auth import get_user_model
 
-# Create your models here.
+User = get_user_model()
+
 class SystemEvent(models.Model):
     EVENT_TYPES = [
         ('login', 'User Login'),
@@ -19,20 +20,16 @@ class SystemEvent(models.Model):
         ('system_error', 'System Error'),
     ]
     
-    # Use settings.AUTH_USER_MODEL instead of the direct User reference
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,  # This points to your custom User model
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True, 
-        related_name='system_events'
-    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='events')
     event_type = models.CharField(max_length=50, choices=EVENT_TYPES)
+    description = models.TextField(blank=True, null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
-    details = models.JSONField(null=True, blank=True)  # Store additional context as JSON
-    ip_address = models.GenericIPAddressField(null=True, blank=True)
-    
+
+    # Store additional data like 'request_time' here as JSON
+    details = models.JSONField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+
     def __str__(self):
-        if self.user:
-            return f"{self.event_type} - {self.user.username} at {self.timestamp}"
-        return f"{self.event_type} at {self.timestamp}"
+        return f"{self.user.username} - {self.event_type} at {self.timestamp.strftime('%Y-%m-%d %H:%M:%S')}"
