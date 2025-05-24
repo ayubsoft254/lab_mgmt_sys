@@ -1,13 +1,18 @@
 from django.contrib import admin
-from .models import NewsletterSubscription
+from .models import NewsletterSubscription, EmailTemplate, EmailCampaign, EmailDelivery
 from django.utils.html import format_html
-from django.urls import reverse
+from django.urls import reverse, path
 from django import forms
 from django.contrib import messages
 import csv
-from django.http import HttpResponse
-from django.shortcuts import redirect
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import redirect, render, get_object_or_404
 from django.utils import timezone
+from django.core.mail import send_mail, EmailMultiAlternatives
+from django.template import Template, Context
+from django.contrib.admin.widgets import AdminDateWidget
+from django.db.models import Q, Count
+import json
 
 class NewsletterSubscriptionAdminForm(forms.ModelForm):
     """Custom form for NewsletterSubscription admin"""
@@ -129,7 +134,6 @@ class NewsletterSubscriptionAdmin(admin.ModelAdmin):
     mark_as_active.short_description = "Mark selected subscribers as active"
     
     def get_urls(self):
-        from django.urls import path
         urls = super().get_urls()
         custom_urls = [
             path(
@@ -175,8 +179,6 @@ class NewsletterSubscriptionAdmin(admin.ModelAdmin):
     
     def newsletter_stats_view(self, request):
         """Display newsletter statistics"""
-        from django.db.models import Count, Q
-        from django.shortcuts import render
         
         context = {
             'title': 'Newsletter Statistics',
@@ -196,3 +198,212 @@ class NewsletterSubscriptionAdmin(admin.ModelAdmin):
         }
         
         return render(request, 'admin/newsletter/newslettersubscription/stats.html', context)
+
+@admin.register(EmailTemplate)
+class EmailTemplateAdmin(admin.ModelAdmin):
+    list_display = ('name', 'subject', 'created_at', 'updated_at')
+    search_fields = ('name', 'subject')
+    readonly_fields = ('created_at', 'updated_at')
+    fieldsets = (
+        ('Template Information', {
+            'fields': ('name', 'subject', 'created_at', 'updated_at')
+        }),
+        ('Content', {
+            'fields': ('html_content', 'text_content')
+        }),
+    )
+    
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                '<int:template_id>/preview/',
+                self.admin_site.admin_view(self.preview_template),
+                name='preview_template',
+            ),
+        ]
+        return custom_urls + urls
+        
+    def preview_template(self, request, template_id):
+        template = get_object_or_404(EmailTemplate, id=template_id)
+        return render(request, 'admin/newsletter/emailtemplate/preview.html', {
+            'template': template,
+        })
+
+class EmailCampaignAdminForm(forms.ModelForm):
+    scheduled_time = forms.SplitDateTimeField(
+        widget=forms.SplitDateTimeWidget(date_attrs={'type': 'date'}, time_attrs={'type': 'time'}),
+        required=False
+    )
+    
+    class Meta:
+        model = EmailCampaign
+        exclude = ['status', 'started_at', 'completed_at', 'total_recipients', 'sent_count', 'open_count', 'click_count']
+
+@admin.register(EmailCampaign)
+class EmailCampaignAdmin(admin.ModelAdmin):
+    form = EmailCampaignAdminForm
+    list_display = ('name', 'subject', 'recipient_type', 'status', 'recipient_count', 'campaign_progress', 'created_at')
+    list_filter = ('status', 'recipient_type', 'created_at')
+    search_fields = ('name', 'subject')
+    readonly_fields = ('created_at', 'started_at', 'completed_at', 'total_recipients', 'sent_count', 'open_count', 'click_count')
+    actions = ['send_campaign_now']
+    
+    def get_fieldsets(self, request, obj=None):
+        if obj:  # Editing existing object
+            return (
+                ('Campaign Information', {
+                    'fields': ('name', 'subject', 'recipient_type', 'created_by', 'created_at')
+                }),
+                ('Content', {
+                    'fields': ('template', 'custom_html_content', 'custom_text_content')
+                }),
+                ('Schedule', {
+                    'fields': ('scheduled_time',)
+                }),
+                ('Status & Statistics', {
+                    'fields': ('status', 'started_at', 'completed_at', 'total_recipients', 'sent_count', 'open_count', 'click_count')
+                }),
+            )
+        return (  # Creating new object
+            ('Campaign Information', {
+                'fields': ('name', 'subject', 'recipient_type')
+            }),
+            ('Content', {
+                'fields': ('template', 'custom_html_content', 'custom_text_content')
+            }),
+            ('Schedule', {
+                'fields': ('scheduled_time',)
+            }),
+        )
+        
+    def save_model(self, request, obj, form, change):
+        if not change:  # Creating new object
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
+    
+    def recipient_count(self, obj):
+        if obj.status == 'draft':
+            return obj.get_recipients_queryset().count()
+        return obj.total_recipients
+    recipient_count.short_description = 'Recipients'
+    
+    def campaign_progress(self, obj):
+        if obj.status in ['draft', 'scheduled']:
+            return '-'
+        return f"{obj.progress_percentage}% ({obj.sent_count}/{obj.total_recipients})"
+    campaign_progress.short_description = 'Progress'
+    
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                '<int:campaign_id>/send/',
+                self.admin_site.admin_view(self.send_campaign),
+                name='send_campaign',
+            ),
+            path(
+                '<int:campaign_id>/preview/',
+                self.admin_site.admin_view(self.preview_campaign),
+                name='preview_campaign',
+            ),
+            path(
+                '<int:campaign_id>/status/',
+                self.admin_site.admin_view(self.campaign_status),
+                name='campaign_status',
+            ),
+        ]
+        return custom_urls + urls
+        
+    def send_campaign_now(self, request, queryset):
+        """Admin action to send selected campaigns immediately"""
+        for campaign in queryset:
+            if campaign.status in ['draft', 'scheduled']:
+                self.process_campaign(campaign)
+                self.message_user(request, f"Campaign '{campaign.name}' has been queued for sending.")
+            else:
+                self.message_user(
+                    request, 
+                    f"Cannot send campaign '{campaign.name}' because it's already {campaign.get_status_display()}.",
+                    level='warning'
+                )
+    send_campaign_now.short_description = "Send selected campaigns now"
+        
+    def send_campaign(self, request, campaign_id):
+        """View for sending a campaign manually"""
+        campaign = get_object_or_404(EmailCampaign, id=campaign_id)
+        if campaign.status in ['draft', 'scheduled']:
+            self.process_campaign(campaign)
+            messages.success(request, f"Campaign '{campaign.name}' has been queued for sending.")
+        else:
+            messages.warning(request, f"Cannot send campaign because it's already {campaign.get_status_display()}.")
+        
+        return redirect('admin:newsletter_emailcampaign_change', campaign_id)
+        
+    def preview_campaign(self, request, campaign_id):
+        """View for previewing a campaign"""
+        campaign = get_object_or_404(EmailCampaign, id=campaign_id)
+        
+        return render(request, 'admin/newsletter/emailcampaign/preview.html', {
+            'campaign': campaign,
+        })
+        
+    def campaign_status(self, request, campaign_id):
+        """API endpoint to check campaign status for AJAX polling"""
+        campaign = get_object_or_404(EmailCampaign, id=campaign_id)
+        
+        data = {
+            'status': campaign.status,
+            'progress': campaign.progress_percentage,
+            'sent_count': campaign.sent_count,
+            'total_recipients': campaign.total_recipients,
+        }
+        
+        return JsonResponse(data)
+    
+    def process_campaign(self, campaign):
+        """Start processing a campaign in the background"""
+        from .tasks import process_email_campaign
+        
+        # Update campaign status
+        campaign.status = 'sending'
+        campaign.started_at = timezone.now()
+        
+        # Get recipients
+        recipients = campaign.get_recipients_queryset()
+        campaign.total_recipients = recipients.count()
+        campaign.save()
+        
+        # Create EmailDelivery records for each recipient
+        batch_size = 1000  # Process in chunks to avoid memory issues
+        recipient_ids = list(recipients.values_list('id', flat=True))
+        
+        for i in range(0, len(recipient_ids), batch_size):
+            batch = recipient_ids[i:i+batch_size]
+            batch_users = User.objects.filter(id__in=batch)
+            
+            deliveries = []
+            for user in batch_users:
+                deliveries.append(EmailDelivery(
+                    campaign=campaign,
+                    recipient=user,
+                    email_address=user.email,
+                    status='pending'
+                ))
+            
+            # Bulk create delivery records
+            EmailDelivery.objects.bulk_create(deliveries)
+        
+        # Queue task to process the campaign
+        process_email_campaign.delay(campaign.id)
+
+@admin.register(EmailDelivery)
+class EmailDeliveryAdmin(admin.ModelAdmin):
+    list_display = ('email_address', 'status', 'campaign', 'sent_at', 'opened_at')
+    list_filter = ('status', 'sent_at', 'opened_at')
+    search_fields = ('email_address', 'recipient__username', 'recipient__first_name', 'recipient__last_name')
+    readonly_fields = ('campaign', 'recipient', 'email_address', 'status', 'tracking_id', 
+                      'sent_at', 'opened_at', 'clicked_at', 'error_message')
+    
+    def has_add_permission(self, request):
+        return False
