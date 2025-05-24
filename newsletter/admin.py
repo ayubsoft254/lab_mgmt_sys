@@ -424,3 +424,6 @@ class UserAdmin(admin.ModelAdmin):
         return redirect('admin:send_bulk_email')
     
     send_email_to_selected_users.short_description = "Send email to selected users"
+
+# Create a reference to the stats view for importing in urls.py
+admin_stats_view = NewsletterSubscriptionAdmin.newsletter_stats_view
