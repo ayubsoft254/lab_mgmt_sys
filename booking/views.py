@@ -1432,3 +1432,55 @@ def quick_check_in(request, booking_id):
             'check_in_time': attendance.check_in_time.strftime('%H:%M')
         }
     })
+
+@login_required
+def cancel_computer_booking(request, booking_id):
+    """View for a student to cancel their computer booking"""
+    booking = get_object_or_404(ComputerBooking, id=booking_id, student=request.user)
+    
+    # Check if booking can be cancelled
+    if not booking.is_approved or booking.is_cancelled:
+        messages.error(request, "This booking cannot be cancelled. It may be already cancelled or not approved yet.")
+        return redirect('booking_detail', booking_id=booking.id)
+        
+    # Check if booking is starting soon (within 30 minutes)
+    if booking.start_time <= (timezone.now() + timedelta(minutes=30)):
+        messages.error(request, "Bookings can only be cancelled at least 30 minutes before the start time.")
+        return redirect('booking_detail', booking_id=booking.id)
+    
+    if request.method == 'POST':
+        cancellation_reason = request.POST.get('reason', '')
+        
+        if booking.cancel_booking(reason=cancellation_reason):
+            messages.success(request, "Your booking has been successfully cancelled.")
+            return redirect('my_bookings')
+        else:
+            messages.error(request, "Could not cancel the booking. Please try again or contact support.")
+    
+    return render(request, 'booking/cancel_booking.html', {'booking': booking})
+
+@login_required
+def cancel_lab_session(request, session_id):
+    """View for a lecturer to cancel their lab session"""
+    session = get_object_or_404(LabSession, id=session_id, lecturer=request.user)
+    
+    # Check if session can be cancelled
+    if not session.is_approved or session.is_cancelled:
+        messages.error(request, "This session cannot be cancelled. It may be already cancelled or not approved yet.")
+        return redirect('session_detail', session_id=session.id)
+        
+    # Check if session is starting soon (within 2 hours)
+    if session.start_time <= (timezone.now() + timedelta(hours=2)):
+        messages.error(request, "Sessions can only be cancelled at least 2 hours before the start time.")
+        return redirect('session_detail', session_id=session.id)
+    
+    if request.method == 'POST':
+        cancellation_reason = request.POST.get('reason', '')
+        
+        if session.cancel_session(reason=cancellation_reason):
+            messages.success(request, "Your lab session has been successfully cancelled.")
+            return redirect('my_sessions')
+        else:
+            messages.error(request, "Could not cancel the session. Please try again or contact support.")
+    
+    return render(request, 'booking/cancel_session.html', {'session': session})
