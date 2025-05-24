@@ -480,3 +480,56 @@ class StudentRating(models.Model):
         super().save(*args, **kwargs)
         # Update the student's average rating
         self.student.update_average_rating()
+
+class Attendance(models.Model):
+    """Base abstract model for attendance tracking"""
+    STATUS_CHOICES = [
+        ('present', 'Present'),
+        ('absent', 'Absent'),
+        ('late', 'Late'),
+        ('excused', 'Excused'),
+    ]
+    
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='absent')
+    check_in_time = models.DateTimeField(null=True, blank=True)
+    check_out_time = models.DateTimeField(null=True, blank=True)
+    notes = models.TextField(blank=True)
+    checked_by = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        related_name='%(class)s_checks'
+    )
+    
+    class Meta:
+        abstract = True
+
+class ComputerBookingAttendance(Attendance):
+    """Track attendance for individual computer bookings"""
+    booking = models.OneToOneField(
+        ComputerBooking, 
+        on_delete=models.CASCADE, 
+        related_name='attendance'
+    )
+    
+    def __str__(self):
+        return f"Attendance for {self.booking} - {self.get_status_display()}"
+    
+class SessionAttendance(Attendance):
+    """Track attendance for lab sessions with multiple students"""
+    session = models.ForeignKey(
+        LabSession, 
+        on_delete=models.CASCADE, 
+        related_name='attendance_records'
+    )
+    student = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE, 
+        related_name='session_attendance'
+    )
+    
+    class Meta:
+        unique_together = ('session', 'student')
+    
+    def __str__(self):
+        return f"Attendance for {self.student} in {self.session} - {self.get_status_display()}"
