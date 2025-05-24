@@ -1457,7 +1457,7 @@ def cancel_computer_booking(request, booking_id):
         else:
             messages.error(request, "Could not cancel the booking. Please try again or contact support.")
     
-    return render(request, 'booking/cancel_booking.html', {'booking': booking})
+    return render(request, 'cancel_booking.html', {'booking': booking})
 
 @login_required
 def cancel_lab_session(request, session_id):
@@ -1483,4 +1483,4 @@ def cancel_lab_session(request, session_id):
         else:
             messages.error(request, "Could not cancel the session. Please try again or contact support.")
     
-    return render(request, 'booking/cancel_session.html', {'session': session})
+    return render(request, 'cancel_session.html', {'session': session})
