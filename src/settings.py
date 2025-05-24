@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/"""
 from decouple import config
 from pathlib import Path
 from dj_database_url import parse as db_url
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -207,3 +208,11 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
+
+# Celery Beat Settings
+CELERY_BEAT_SCHEDULE = {
+    'check-ending-bookings': {
+        'task': 'booking.tasks.check_ending_bookings',
+        'schedule': crontab(minute='*/1'),  # Run every minute
+    },
+}
