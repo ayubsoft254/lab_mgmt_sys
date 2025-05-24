@@ -418,20 +418,20 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid md:grid-cols-4 gap-8 text-center">
                 <div class="p-6">
-                    <div class="text-4xl font-bold mb-2" data-count="1200">0</div>
+                    <div class="text-4xl font-bold mb-2" data-count="{{ active_students|default:'0' }}">0</div>
                     <div class="text-green-200 font-medium">Active Students</div>
                 </div>
                 <div class="p-6">
-                    <div class="text-4xl font-bold mb-2" data-count="4">0</div>
+                    <div class="text-4xl font-bold mb-2" data-count="{{ lab_count|default:'0' }}">0</div>
                     <div class="text-green-200 font-medium">Specialized Labs</div>
                 </div>
                 <div class="p-6">
-                    <div class="text-4xl font-bold mb-2" data-count="98">0</div>
+                    <div class="text-4xl font-bold mb-2" data-count="{{ uptime_percentage|default:'99' }}">0</div>
                     <div class="text-green-200 font-medium">% Uptime</div>
                 </div>
                 <div class="p-6">
-                    <div class="text-4xl font-bold mb-2" data-count="24">0</div>
-                    <div class="text-green-200 font-medium">/7 Support</div>
+                    <div class="text-4xl font-bold mb-2" data-count="{{ total_hours|default:'24' }}">0</div>
+                    <div class="text-green-200 font-medium">Hours Used This Month</div>
                 </div>
             </div>
         </div>
