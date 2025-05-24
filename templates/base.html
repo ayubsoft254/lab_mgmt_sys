@@ -224,12 +224,15 @@
                             </a>
                         {% endif %}
                         
-                        {% if user.is_admin %}
+                        {% if user.is_admin or user.is_super_admin %}
                             <a href="{% url 'admin_dashboard' %}" class="nav-link text-white">
                                 <i class="fas fa-tachometer-alt mr-1"></i> Admin
                             </a>
                             <a href="{% url 'analytics_dashboard' %}" class="nav-link text-white">
                                 <i class="fas fa-chart-line mr-1"></i> Analytics
+                            </a>
+                            <a href="{% url 'admin_check_in_dashboard' %}" class="nav-link text-white">
+                                <i class="fas fa-clipboard-check mr-1"></i> Attendance Check-in
                             </a>
                         {% endif %}
                         
@@ -296,12 +299,15 @@
                         </a>
                     {% endif %}
                     
-                    {% if user.is_admin %}
+                    {% if user.is_admin or user.is_super_admin %}
                         <a href="{% url 'admin_dashboard' %}" class="mobile-nav-link text-white">
                             <i class="fas fa-tachometer-alt mr-2"></i> Admin Dashboard
                         </a>
                         <a href="{% url 'analytics_dashboard' %}" class="mobile-nav-link text-white">
                             <i class="fas fa-chart-line mr-2"></i> Analytics Dashboard
+                        </a>
+                        <a href="{% url 'admin_check_in_dashboard' %}" class="mobile-nav-link text-white">
+                            <i class="fas fa-clipboard-check mr-2"></i> Attendance Check-in
                         </a>
                     {% endif %}
                     
