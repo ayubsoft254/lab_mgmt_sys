@@ -29,7 +29,7 @@ def contact_submit(request):
             subject=f'New Contact Form Submission: {subject}',
             message=f'Name: {name}\nEmail: {email}\nSubject: {subject}\n\nMessage:\n{message}',
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[settings.ADMIN_EMAIL],  # Add ADMIN_EMAIL in settings.py
+            recipient_list=[settings.ADMIN_USER_EMAIL],  # Add ADMIN_EMAIL in settings.py
             fail_silently=False,
         )
         
