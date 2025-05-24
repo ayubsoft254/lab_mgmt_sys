@@ -1,10 +1,11 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic import TemplateView
-from django.db.models import Count
+from django.db.models import Count, Case, When, IntegerField
 from django.utils import timezone
 from datetime import timedelta
 from django.http import JsonResponse
 from .models import SystemEvent
+from booking.models import ComputerBookingAttendance, SessionAttendance
 import json
 
 
@@ -174,3 +175,53 @@ class AnalyticsApiView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView
             return JsonResponse({'data': type_data})
         
         return JsonResponse({'error': 'Invalid metric'}, status=400)
+
+
+class AttendanceAnalyticsView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
+    template_name = 'analytics/attendance.html'
+    permission_required = 'booking.view_computerbookingattendance'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Calculate date ranges
+        end_date = timezone.now().date()
+        start_date = end_date - timedelta(days=30)
+        
+        # Get computer booking attendance stats
+        booking_attendance = ComputerBookingAttendance.objects.filter(
+            booking__start_time__date__range=[start_date, end_date]
+        ).aggregate(
+            total=Count('id'),
+            present=Count(Case(When(status='present', then=1), output_field=IntegerField())),
+            late=Count(Case(When(status='late', then=1), output_field=IntegerField())),
+            absent=Count(Case(When(status='absent', then=1), output_field=IntegerField())),
+            excused=Count(Case(When(status='excused', then=1), output_field=IntegerField())),
+        )
+        
+        # Get session attendance stats
+        session_attendance = SessionAttendance.objects.filter(
+            session__start_time__date__range=[start_date, end_date]
+        ).aggregate(
+            total=Count('id'),
+            present=Count(Case(When(status='present', then=1), output_field=IntegerField())),
+            late=Count(Case(When(status='late', then=1), output_field=IntegerField())),
+            absent=Count(Case(When(status='absent', then=1), output_field=IntegerField())),
+            excused=Count(Case(When(status='excused', then=1), output_field=IntegerField())),
+        )
+        
+        context['booking_attendance'] = booking_attendance
+        context['session_attendance'] = session_attendance
+        
+        # Calculate attendance rates
+        if booking_attendance['total'] > 0:
+            context['booking_attendance_rate'] = (booking_attendance['present'] + booking_attendance['late']) / booking_attendance['total'] * 100
+        else:
+            context['booking_attendance_rate'] = 0
+            
+        if session_attendance['total'] > 0:
+            context['session_attendance_rate'] = (session_attendance['present'] + session_attendance['late']) / session_attendance['total'] * 100
+        else:
+            context['session_attendance_rate'] = 0
+        
+        return context
