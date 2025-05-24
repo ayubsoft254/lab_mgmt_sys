@@ -1484,3 +1484,31 @@ def cancel_lab_session(request, session_id):
             messages.error(request, "Could not cancel the session. Please try again or contact support.")
     
     return render(request, 'cancel_session.html', {'session': session})
+
+def booking_detail(request, booking_id):
+    booking = get_object_or_404(ComputerBooking, id=booking_id)
+    
+    # Add this:
+    now = timezone.now()
+    now_plus_30min = now + timedelta(minutes=30)
+    
+    context = {
+        'booking': booking,
+        'now': now,
+        'now_plus_30min': now_plus_30min,
+    }
+    return render(request, 'booking_detail.html', context)
+
+def session_detail(request, session_id):
+    session = get_object_or_404(LabSession, id=session_id)
+    
+    # Add this:
+    now = timezone.now()
+    now_plus_2hr = now + timedelta(hours=2)
+    
+    context = {
+        'session': session,
+        'now': now,
+        'now_plus_2hr': now_plus_2hr,
+    }
+    return render(request, 'session_detail.html', context)
