@@ -323,6 +323,9 @@ class Notification(models.Model):
         ('booking_ending', 'Booking Ending Soon'),
         ('booking_extended', 'Booking Extended'),
         ('extension_unavailable', 'Extension Unavailable'),
+        ('checkin_reminder', 'Check-in Reminder'),
+        ('attendance_marked', 'Attendance Marked'),
+        ('attendance_updated', 'Attendance Updated'),
     ])
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
