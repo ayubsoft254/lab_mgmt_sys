@@ -1,465 +1,756 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Analytics Dashboard - TTU Lab Management System{% endblock %}
-
-{% block extra_head %}
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<!-- Date Range Picker -->
-<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
-{% endblock %}
+{% block title %}System Analytics - Lab Management System{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-800">Analytics Dashboard</h1>
-        
-        <!-- Time Period Filter -->
-        <div class="flex items-center space-x-2">
-            <span class="text-gray-600 text-sm">Time Period:</span>
-            <form method="get" id="period-form">
-                <select name="period" id="period-select" class="bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" onchange="this.form.submit()">
-                    <option value="week" {% if period == 'week' %}selected{% endif %}>Last 7 Days</option>
-                    <option value="month" {% if period == 'month' %}selected{% endif %}>Last 30 Days</option>
-                    <option value="quarter" {% if period == 'quarter' %}selected{% endif %}>Last 90 Days</option>
-                    <option value="year" {% if period == 'year' %}selected{% endif %}>Last Year</option>
-                </select>
-            </form>
-        </div>
-    </div>
-    
-    <!-- Top Stats Overview -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <div class="px-4 py-5 sm:p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-blue-500 rounded-md p-3">
-                        <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                        </svg>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Total Users</dt>
-                            <dd>
-                                <div class="text-lg font-bold text-gray-900">{{ user_counts.total }}</div>
-                                <div class="text-xs text-gray-500">
-                                    {{ user_counts.students }} Students, {{ user_counts.lecturers }} Lecturers, {{ user_counts.admins }} Admins
-                                </div>
-                            </dd>
-                        </dl>
-                    </div>
-                </div>
+<div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100">
+    <!-- Header Section -->
+    <div class="mb-8">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+            <div class="animate-fade-in">
+                <h1 class="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-ttu-green to-blue-600 bg-clip-text text-transparent mb-2">
+                    System Analytics
+                </h1>
+                <p class="text-gray-600 text-lg">Comprehensive system events monitoring and insights</p>
             </div>
-        </div>
-        
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <div class="px-4 py-5 sm:p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
-                        <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
-                        </svg>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Active Users</dt>
-                            <dd>
-                                <div class="text-lg font-bold text-gray-900">{{ active_users }}</div>
-                                <div class="text-xs text-gray-500">
-                                    {{ new_users }} new registrations
-                                </div>
-                            </dd>
-                        </dl>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <div class="px-4 py-5 sm:p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-yellow-500 rounded-md p-3">
-                        <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Total Bookings</dt>
-                            <dd>
-                                <div class="text-lg font-bold text-gray-900">{{ total_bookings }}</div>
-                                <div class="text-xs text-gray-500">
-                                    {{ booking_rejection_rate.cancelled }} cancelled ({{ booking_rejection_rate.cancelled|floatformat:1 }}%)
-                                </div>
-                            </dd>
-                        </dl>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <div class="px-4 py-5 sm:p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-purple-500 rounded-md p-3">
-                        <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Computer Status</dt>
-                            <dd>
-                                <div class="text-lg font-bold text-gray-900">{{ total_devices }}</div>
-                                <div class="text-xs text-gray-500">
-                                    {{ computers_in_maintenance }} in maintenance
-                                </div>
-                            </dd>
-                        </dl>
-                    </div>
+            
+            <!-- Time Range Filter -->
+            <div class="mt-4 lg:mt-0 animate-fade-in delay-100">
+                <div class="glass-card rounded-xl p-4 shadow-lg">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Time Range</label>
+                    <select id="dateRangeSelect" class="form-select rounded-lg border-gray-300 shadow-sm focus:border-ttu-green focus:ring-ttu-green">
+                        <option value="7" {% if days == 7 %}selected{% endif %}>Last 7 days</option>
+                        <option value="30" {% if days == 30 %}selected{% endif %}>Last 30 days</option>
+                        <option value="90" {% if days == 90 %}selected{% endif %}>Last 90 days</option>
+                        <option value="365" {% if days == 365 %}selected{% endif %}>Last year</option>
+                    </select>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- User Activity Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                <h4 class="text-lg font-semibold text-gray-800">User Login Activity</h4>
-            </div>
-            <div class="p-6">
-                <canvas id="loginTrendChart" height="250"></canvas>
-            </div>
-        </div>
-        
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                <h4 class="text-lg font-semibold text-gray-800">User Role Distribution</h4>
-            </div>
-            <div class="p-6">
-                <canvas id="roleDistributionChart" height="250"></canvas>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Booking Analytics Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                <h4 class="text-lg font-semibold text-gray-800">Most Popular Labs</h4>
-            </div>
-            <div class="p-6">
-                <canvas id="popularLabsChart" height="250"></canvas>
-            </div>
-        </div>
-        
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                <h4 class="text-lg font-semibold text-gray-800">Booking Hours Distribution</h4>
-            </div>
-            <div class="p-6">
-                <canvas id="bookingHoursChart" height="250"></canvas>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Computer Usage Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                <h4 class="text-lg font-semibold text-gray-800">Computer Status Distribution</h4>
-            </div>
-            <div class="p-6">
-                <canvas id="computerStatusChart" height="250"></canvas>
-            </div>
-        </div>
-        
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                <h4 class="text-lg font-semibold text-gray-800">Most Booked Computers</h4>
-            </div>
-            <div class="p-6">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Computer</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lab</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bookings</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            {% for computer in popular_computers %}
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ forloop.counter }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Computer #{{ computer.computer__computer_number }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ computer.computer__lab__name }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ computer.count }}</td>
-                                </tr>
-                            {% empty %}
-                                <tr>
-                                    <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">No data available</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- System Performance Section -->
-    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
-        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-            <h4 class="text-lg font-semibold text-gray-800">System Performance Metrics</h4>
-        </div>
-        <div class="p-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-gray-50 rounded-lg p-4">
-                    <h5 class="text-sm font-medium text-gray-500 mb-2">Average Booking Approval Time</h5>
-                    <p class="text-2xl font-bold text-gray-900">
-                        {% if approval_time.avg_approval_time %}
-                            {{ approval_time.avg_approval_time|timeuntil:0 }}
-                        {% else %}
-                            N/A
-                        {% endif %}
+
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="glass-card rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in delay-100 group">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600 mb-1">Total Events</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ total_events|floatformat:0 }}</p>
+                    <p class="text-xs text-green-600 mt-1">
+                        <i class="fas fa-chart-line mr-1"></i>
+                        Last {{ days }} days
                     </p>
                 </div>
-                
-                <div class="bg-gray-50 rounded-lg p-4">
-                    <h5 class="text-sm font-medium text-gray-500 mb-2">Booking Rejection Rate</h5>
-                    <p class="text-2xl font-bold text-gray-900">
-                        {% if booking_rejection_rate.total > 0 %}
-                            {{ booking_rejection_rate.rejected|floatformat:1 }}%
-                        {% else %}
-                            N/A
-                        {% endif %}
+                <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-chart-bar text-white text-xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in delay-200 group">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600 mb-1">Critical Events</p>
+                    <p class="text-3xl font-bold text-red-600">{{ critical_events|floatformat:0 }}</p>
+                    <p class="text-xs text-red-500 mt-1">
+                        <i class="fas fa-exclamation-triangle mr-1"></i>
+                        Requires attention
                     </p>
                 </div>
-                
-                <div class="bg-gray-50 rounded-lg p-4">
-                    <h5 class="text-sm font-medium text-gray-500 mb-2">Admin Response Time</h5>
-                    <p class="text-2xl font-bold text-gray-900">
-                        {% if admin_response_time.avg_response_time %}
-                            {{ admin_response_time.avg_response_time|timeuntil:0 }}
-                        {% else %}
-                            N/A
-                        {% endif %}
+                <div class="bg-gradient-to-r from-red-500 to-red-600 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-exclamation-circle text-white text-xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in delay-300 group">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600 mb-1">Unresolved</p>
+                    <p class="text-3xl font-bold text-orange-600">{{ unresolved_events|floatformat:0 }}</p>
+                    <p class="text-xs text-orange-500 mt-1">
+                        <i class="fas fa-clock mr-1"></i>
+                        Pending resolution
                     </p>
                 </div>
+                <div class="bg-gradient-to-r from-orange-500 to-orange-600 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-hourglass-half text-white text-xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in delay-400 group">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600 mb-1">Security Events</p>
+                    <p class="text-3xl font-bold text-purple-600">{{ security_events|floatformat:0 }}</p>
+                    <p class="text-xs text-purple-500 mt-1">
+                        <i class="fas fa-shield-alt mr-1"></i>
+                        Security related
+                    </p>
+                </div>
+                <div class="bg-gradient-to-r from-purple-500 to-purple-600 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-shield-alt text-white text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Events Trend Chart -->
+        <div class="glass-card rounded-2xl p-6 shadow-lg animate-fade-in delay-100">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold text-gray-900">Events Trend</h3>
+                <div class="flex space-x-2">
+                    <button class="chart-toggle active" data-chart="total">Total</button>
+                    <button class="chart-toggle" data-chart="critical">Critical</button>
+                    <button class="chart-toggle" data-chart="high">High</button>
+                </div>
+            </div>
+            <div class="h-80">
+                <canvas id="eventsTimeChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Event Types Distribution -->
+        <div class="glass-card rounded-2xl p-6 shadow-lg animate-fade-in delay-200">
+            <h3 class="text-xl font-bold text-gray-900 mb-6">Event Types Distribution</h3>
+            <div class="h-80">
+                <canvas id="eventTypesChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secondary Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        <!-- Severity Distribution -->
+        <div class="glass-card rounded-2xl p-6 shadow-lg animate-fade-in delay-100">
+            <h3 class="text-xl font-bold text-gray-900 mb-6">Severity Levels</h3>
+            <div class="h-64">
+                <canvas id="severityChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Hourly Activity -->
+        <div class="glass-card rounded-2xl p-6 shadow-lg animate-fade-in delay-200">
+            <h3 class="text-xl font-bold text-gray-900 mb-6">24h Activity Pattern</h3>
+            <div class="h-64">
+                <canvas id="hourlyChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Resolution Rate -->
+        <div class="glass-card rounded-2xl p-6 shadow-lg animate-fade-in delay-300">
+            <h3 class="text-xl font-bold text-gray-900 mb-6">Resolution Status</h3>
+            <div class="h-64">
+                <canvas id="resolutionChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Tables Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Top Users -->
+        <div class="glass-card rounded-2xl p-6 shadow-lg animate-fade-in delay-100">
+            <h3 class="text-xl font-bold text-gray-900 mb-6">Top Users by Events</h3>
+            <div class="overflow-hidden">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-gray-200">
+                            <th class="text-left py-3 px-4 font-semibold text-gray-700">User</th>
+                            <th class="text-right py-3 px-4 font-semibold text-gray-700">Events</th>
+                        </tr>
+                    </thead>
+                    <tbody id="topUsersTable">
+                        <!-- Populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Recent Critical Events -->
+        <div class="glass-card rounded-2xl p-6 shadow-lg animate-fade-in delay-200">
+            <h3 class="text-xl font-bold text-gray-900 mb-6">Recent Critical Events</h3>
+            <div class="space-y-4" id="criticalEventsList">
+                <!-- Populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Real-time Updates Indicator -->
+    <div class="fixed bottom-6 right-6 z-50">
+        <div id="updateIndicator" class="glass-card rounded-full p-3 shadow-lg hidden">
+            <div class="flex items-center space-x-2">
+                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span class="text-sm font-medium text-gray-700">Live Updates</span>
             </div>
         </div>
     </div>
 </div>
 
+<style>
+    .chart-toggle {
+        @apply px-3 py-1 text-sm rounded-lg transition-all duration-200 border border-gray-300 text-gray-600 hover:bg-gray-100;
+    }
+    
+    .chart-toggle.active {
+        @apply bg-ttu-green text-white border-ttu-green;
+    }
+    
+    .animate-counter {
+        animation: counter 2s ease-out forwards;
+    }
+    
+    @keyframes counter {
+        from { transform: translateY(20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .hover-lift:hover {
+        transform: translateY(-4px);
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Login Trend Chart
-        const loginTrendChart = new Chart(
-            document.getElementById('loginTrendChart'),
-            {
-                type: 'line',
-                data: {
-                    labels: {{ login_dates|safe }},
-                    datasets: [{
-                        label: 'User Logins',
-                        data: {{ login_counts|safe }},
-                        borderColor: 'rgb(59, 130, 246)',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        tension: 0.1,
-                        fill: true
-                    }]
+    // Data from Django
+    const eventsData = {
+        byType: {{ events_by_type_json|safe }},
+        bySeverity: {{ events_by_severity_json|safe }},
+        daily: {{ daily_events_json|safe }},
+        hourly: {{ hourly_events_json|safe }},
+        topUsers: {{ top_users_json|safe }},
+        recentCritical: {{ recent_critical_json|safe }},
+        unresolvedBySeverity: {{ unresolved_by_severity_json|safe }}
+    };
+
+    // Chart.js default configuration
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.color = '#6B7280';
+    Chart.defaults.borderColor = '#E5E7EB';
+    Chart.defaults.backgroundColor = 'rgba(75, 192, 192, 0.1)';
+
+    // Color schemes
+    const colors = {
+        primary: '#2c6e49',
+        secondary: '#3B82F6',
+        success: '#10B981',
+        warning: '#F59E0B',
+        danger: '#EF4444',
+        info: '#8B5CF6',
+        gradient: ['#2c6e49', '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6']
+    };
+
+    // Events Trend Chart
+    const eventsTimeCtx = document.getElementById('eventsTimeChart').getContext('2d');
+    const eventsTimeChart = new Chart(eventsTimeCtx, {
+        type: 'line',
+        data: {
+            labels: eventsData.daily.map(d => d.date),
+            datasets: [{
+                label: 'Total Events',
+                data: eventsData.daily.map(d => d.total),
+                borderColor: colors.primary,
+                backgroundColor: colors.primary + '20',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: colors.primary,
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
                 },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        },
-                        title: {
-                            display: false
-                        }
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff',
+                    borderColor: colors.primary,
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    displayColors: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: '#F3F4F6'
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                precision: 0
-                            }
-                        }
+                    ticks: {
+                        precision: 0
                     }
-                }
-            }
-        );
-        
-        // Role Distribution Chart
-        const roleDistributionChart = new Chart(
-            document.getElementById('roleDistributionChart'),
-            {
-                type: 'doughnut',
-                data: {
-                    labels: ['Students', 'Lecturers', 'Admins'],
-                    datasets: [{
-                        data: [
-                            {{ user_counts.students }},
-                            {{ user_counts.lecturers }},
-                            {{ user_counts.admins }}
-                        ],
-                        backgroundColor: [
-                            'rgba(59, 130, 246, 0.8)',
-                            'rgba(16, 185, 129, 0.8)',
-                            'rgba(245, 158, 11, 0.8)'
-                        ],
-                        borderColor: [
-                            'rgb(59, 130, 246)',
-                            'rgb(16, 185, 129)',
-                            'rgb(245, 158, 11)'
-                        ],
-                        borderWidth: 1
-                    }]
                 },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                        }
+                x: {
+                    grid: {
+                        display: false
                     }
                 }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
             }
-        );
-        
-        // Popular Labs Chart
-        const popularLabsChart = new Chart(
-            document.getElementById('popularLabsChart'),
-            {
-                type: 'bar',
-                data: {
-                    labels: {{ lab_names|safe }},
-                    datasets: [{
-                        label: 'Number of Bookings',
-                        data: {{ lab_booking_counts|safe }},
-                        backgroundColor: 'rgba(16, 185, 129, 0.8)',
-                        borderColor: 'rgb(16, 185, 129)',
-                        borderWidth: 1
-                    }]
+        }
+    });
+
+    // Event Types Chart
+    const eventTypesCtx = document.getElementById('eventTypesChart').getContext('2d');
+    const eventTypesChart = new Chart(eventTypesCtx, {
+        type: 'doughnut',
+        data: {
+            labels: eventsData.byType.map(d => d.event_type),
+            datasets: [{
+                data: eventsData.byType.map(d => d.count),
+                backgroundColor: colors.gradient,
+                borderWidth: 0,
+                hoverBorderWidth: 3,
+                hoverBorderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
                 },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                precision: 0
-                            }
-                        }
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff',
+                    cornerRadius: 8
+                }
+            },
+            cutout: '60%'
+        }
+    });
+
+    // Severity Chart
+    const severityCtx = document.getElementById('severityChart').getContext('2d');
+    const severityChart = new Chart(severityCtx, {
+        type: 'bar',
+        data: {
+            labels: eventsData.bySeverity.map(d => d.severity),
+            datasets: [{
+                data: eventsData.bySeverity.map(d => d.count),
+                backgroundColor: [
+                    colors.danger,
+                    colors.warning,
+                    colors.secondary,
+                    colors.success
+                ],
+                borderRadius: 8,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: '#F3F4F6'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
                     }
                 }
             }
-        );
+        }
+    });
+
+    // Hourly Activity Chart
+    const hourlyCtx = document.getElementById('hourlyChart').getContext('2d');
+    const hourlyChart = new Chart(hourlyCtx, {
+        type: 'line',
+        data: {
+            labels: eventsData.hourly.map(d => d.hour),
+            datasets: [{
+                label: 'Events',
+                data: eventsData.hourly.map(d => d.count),
+                borderColor: colors.info,
+                backgroundColor: colors.info + '20',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 3,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: '#F3F4F6'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+    // Resolution Status Chart
+    const resolutionCtx = document.getElementById('resolutionChart').getContext('2d');
+    const totalEvents = {{ total_events }};
+    const unresolvedEvents = {{ unresolved_events }};
+    const resolvedEvents = totalEvents - unresolvedEvents;
+
+    const resolutionChart = new Chart(resolutionCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Resolved', 'Unresolved'],
+            datasets: [{
+                data: [resolvedEvents, unresolvedEvents],
+                backgroundColor: [colors.success, colors.warning],
+                borderWidth: 0,
+                hoverBorderWidth: 3,
+                hoverBorderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                }
+            },
+            cutout: '60%'
+        }
+    });
+
+    // Populate Top Users Table
+    function populateTopUsers() {
+        const tbody = document.getElementById('topUsersTable');
+        tbody.innerHTML = '';
         
-        // Booking Hours Chart
-        const hourLabels = [];
-        for (let i = 0; i < 24; i++) {
-            hourLabels.push(i + ':00');
+        eventsData.topUsers.slice(0, 10).forEach((user, index) => {
+            const row = document.createElement('tr');
+            row.className = 'border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200';
+            row.innerHTML = `
+                <td class="py-3 px-4">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold mr-3">
+                            ${index + 1}
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">${user.user__username}</div>
+                            <div class="text-sm text-gray-500">${user.user__email || ''}</div>
+                        </div>
+                    </div>
+                </td>
+                <td class="py-3 px-4 text-right">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        ${user.event_count}
+                    </span>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    // Populate Recent Critical Events
+    function populateRecentCritical() {
+        const container = document.getElementById('criticalEventsList');
+        container.innerHTML = '';
+        
+        eventsData.recentCritical.forEach(event => {
+            const eventEl = document.createElement('div');
+            eventEl.className = 'flex items-start space-x-3 p-3 rounded-lg hover:bg-red-50 transition-colors duration-200';
+            
+            const timeAgo = new Date(event.timestamp).toLocaleString();
+            const statusBadge = event.resolved ? 
+                '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Resolved</span>' :
+                '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Open</span>';
+            
+            eventEl.innerHTML = `
+                <div class="flex-shrink-0">
+                    <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                        <p class="text-sm font-medium text-gray-900">${event.event_type}</p>
+                        ${statusBadge}
+                    </div>
+                    <p class="text-sm text-gray-600 truncate">${event.details || 'No details available'}</p>
+                    <p class="text-xs text-gray-500 mt-1">${timeAgo} • ${event.user__username || 'System'}</p>
+                </div>
+            `;
+            container.appendChild(eventEl);
+        });
+    }
+
+    // Chart Toggle Functionality
+    document.querySelectorAll('.chart-toggle').forEach(button => {
+        button.addEventListener('click', function() {
+            document.querySelectorAll('.chart-toggle').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            const chartType = this.dataset.chart;
+            let data, label, color;
+            
+            switch(chartType) {
+                case 'total':
+                    data = eventsData.daily.map(d => d.total);
+                    label = 'Total Events';
+                    color = colors.primary;
+                    break;
+                case 'critical':
+                    data = eventsData.daily.map(d => d.critical);
+                    label = 'Critical Events';
+                    color = colors.danger;
+                    break;
+                case 'high':
+                    data = eventsData.daily.map(d => d.high);
+                    label = 'High Priority Events';
+                    color = colors.warning;
+                    break;
+            }
+            
+            eventsTimeChart.data.datasets[0].data = data;
+            eventsTimeChart.data.datasets[0].label = label;
+            eventsTimeChart.data.datasets[0].borderColor = color;
+            eventsTimeChart.data.datasets[0].backgroundColor = color + '20';
+            eventsTimeChart.data.datasets[0].pointBackgroundColor = color;
+            eventsTimeChart.update('active');
+        });
+    });
+
+    // Date Range Change Handler
+    document.getElementById('dateRangeSelect').addEventListener('change', function() {
+        const days = this.value;
+        window.location.href = `?days=${days}`;
+    });
+
+    // Real-time Updates (mock)
+    function showUpdateIndicator() {
+        const indicator = document.getElementById('updateIndicator');
+        indicator.classList.remove('hidden');
+        setTimeout(() => {
+            indicator.classList.add('hidden');
+        }, 3000);
+    }
+
+    // Initialize tables
+    populateTopUsers();
+    populateRecentCritical();
+
+    // Animate numbers on load
+    function animateValue(element, start, end, duration) {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            const value = Math.floor(progress * (end - start) + start);
+            element.textContent = value.toLocaleString();
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            }
+        };
+        window.requestAnimationFrame(step);
+    }
+
+    // Animate KPI numbers
+    window.addEventListener('load', () => {
+        const kpiValues = [
+            { element: document.querySelector('.grid .glass-card:nth-child(1) .text-3xl'), value: {{ total_events }} },
+            { element: document.querySelector('.grid .glass-card:nth-child(2) .text-3xl'), value: {{ critical_events }} },
+            { element: document.querySelector('.grid .glass-card:nth-child(3) .text-3xl'), value: {{ unresolved_events }} },
+            { element: document.querySelector('.grid .glass-card:nth-child(4) .text-3xl'), value: {{ security_events }} }
+        ];
+        
+        kpiValues.forEach(({ element, value }) => {
+            if (element) {
+                animateValue(element, 0, value, 2000);
+            }
+        });
+    });
+
+    // Auto-refresh data every 5 minutes
+    setInterval(() => {
+        fetch(`/analytics-api/?metric=events_trend&days={{ days }}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.data) {
+                    eventsTimeChart.data.labels = data.data.map(d => d.date);
+                    eventsTimeChart.data.datasets[0].data = data.data.map(d => d.count);
+                    eventsTimeChart.update('none');
+                    showUpdateIndicator();
+                }
+            })
+            .catch(error => console.error('Error fetching updated data:', error));
+    }, 300000); // 5 minutes
+
+    // Add smooth scroll behavior
+    document.documentElement.style.scrollBehavior = 'smooth';
+
+    // Intersection Observer for animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    // Observe all animated elements
+    document.querySelectorAll('.animate-fade-in').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+        observer.observe(el);
+    });
+
+    // Chart hover effects
+    Chart.defaults.plugins.tooltip.animation = {
+        animateRotate: true,
+        animateScale: true
+    };
+
+    // Responsive chart handling
+    function handleResize() {
+        [eventsTimeChart, eventTypesChart, severityChart, hourlyChart, resolutionChart].forEach(chart => {
+            if (chart) {
+                chart.resize();
+            }
+        });
+    }
+
+    window.addEventListener('resize', debounce(handleResize, 300));
+
+    // Debounce function
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // Add loading states for charts
+    function showChartLoading(chartId) {
+        const canvas = document.getElementById(chartId);
+        const container = canvas.parentElement;
+        container.style.position = 'relative';
+        
+        const loading = document.createElement('div');
+        loading.className = 'absolute inset-0 flex items-center justify-center bg-white bg-opacity-75';
+        loading.innerHTML = `
+            <div class="flex items-center space-x-2">
+                <div class="w-4 h-4 bg-ttu-green rounded-full animate-pulse"></div>
+                <div class="text-sm text-gray-600">Loading...</div>
+            </div>
+        `;
+        container.appendChild(loading);
+        
+        setTimeout(() => {
+            loading.remove();
+        }, 1000);
+    }
+
+    // Export functionality (optional)
+    function exportChartData() {
+        const exportData = {
+            timestamp: new Date().toISOString(),
+            period: '{{ days }} days',
+            kpis: {
+                totalEvents: {{ total_events }},
+                criticalEvents: {{ critical_events }},
+                unresolvedEvents: {{ unresolved_events }},
+                securityEvents: {{ security_events }}
+            },
+            eventsByType: eventsData.byType,
+            eventsBySeverity: eventsData.bySeverity,
+            dailyTrend: eventsData.daily
+        };
+        
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `analytics-export-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // Add keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        // Ctrl/Cmd + E to export data
+        if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+            e.preventDefault();
+            exportChartData();
         }
         
-        const bookingHourData = Array(24).fill(0);
-        {% for hour_data in booking_hours %}
-            bookingHourData[{{ hour_data.hour }}] = {{ hour_data.count }};
-        {% endfor %}
-        
-        const bookingHoursChart = new Chart(
-            document.getElementById('bookingHoursChart'),
-            {
-                type: 'bar',
-                data: {
-                    labels: hourLabels,
-                    datasets: [{
-                        label: 'Bookings by Hour of Day',
-                        data: bookingHourData,
-                        backgroundColor: 'rgba(124, 58, 237, 0.8)',
-                        borderColor: 'rgb(124, 58, 237)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                precision: 0
-                            }
-                        }
-                    }
-                }
-            }
-        );
-        
-        // Computer Status Chart
-        const statusLabels = [];
-        const statusData = [];
-        const statusColors = {
-            'available': 'rgba(16, 185, 129, 0.8)',
-            'maintenance': 'rgba(245, 158, 11, 0.8)',
-            'reserved': 'rgba(239, 68, 68, 0.8)'
-        };
-        const statusBorderColors = {
-            'available': 'rgb(16, 185, 129)',
-            'maintenance': 'rgb(245, 158, 11)',
-            'reserved': 'rgb(239, 68, 68)'
-        };
-        
-        const backgroundColors = [];
-        const borderColors = [];
-        
-        {% for status in computer_status %}
-            statusLabels.push('{{ status.status|capfirst }}');
-            statusData.push({{ status.count }});
-            backgroundColors.push(statusColors['{{ status.status }}']);
-            borderColors.push(statusBorderColors['{{ status.status }}']);
-        {% endfor %}
-        
-        const computerStatusChart = new Chart(
-            document.getElementById('computerStatusChart'),
-            {
-                type: 'pie',
-                data: {
-                    labels: statusLabels,
-                    datasets: [{
-                        data: statusData,
-                        backgroundColor: backgroundColors,
-                        borderColor: borderColors,
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                        }
-                    }
-                }
-            }
-        );
+        // Ctrl/Cmd + R to refresh charts
+        if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+            e.preventDefault();
+            location.reload();
+        }
+    });
+
+    console.log('🚀 Analytics Dashboard Initialized');
+    console.log('📊 Charts loaded:', {
+        eventsTimeChart: !!eventsTimeChart,
+        eventTypesChart: !!eventTypesChart,
+        severityChart: !!severityChart,
+        hourlyChart: !!hourlyChart,
+        resolutionChart: !!resolutionChart
     });
 </script>
+
 {% endblock %}
