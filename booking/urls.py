@@ -36,8 +36,8 @@ urlpatterns = [
     # Individual actions
     path('booking/<int:booking_id>/reject/', views.reject_booking_view, name='reject_booking'),
     path('session/<int:session_id>/reject/', views.reject_session_view, name='reject_session'),
-    path('booking/<int:booking_id>/cancel/', views.cancel_booking_view, name='cancel_booking'),
-    path('session/<int:session_id>/cancel/', views.cancel_session_view, name='cancel_session'),  
+    path('booking/<int:booking_id>/cancel/', views.cancel_computer_booking, name='cancel_computer_booking'),
+    path('session/<int:session_id>/cancel/', views.cancel_lab_session, name='cancel_lab_session'),  
     path('students/<int:student_id>/rate/session/<int:session_id>/', views.rate_student_view, name='rate_student_session'),
     path('students/<int:student_id>/rate/booking/<int:booking_id>/', views.rate_student_view, name='rate_student_booking'),
 
