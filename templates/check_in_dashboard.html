@@ -183,7 +183,7 @@
                                         <div class="d-flex align-items-center">
                                             <div>{{ session.attending_students.count }}</div>
                                             <div class="ms-2">
-                                                {% with present_count=session.attendance_records.filter(status='present').count %}
+                                                {% with present_count=session_attendance|get_item:session.id %}
                                                     {% if present_count > 0 %}
                                                         <span class="badge bg-success">{{ present_count }} present</span>
                                                     {% endif %}
