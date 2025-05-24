@@ -1,176 +1,191 @@
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.views.generic import TemplateView
-from django.db.models import Count, Q
+from django.db import models
+from django.conf import settings
 from django.utils import timezone
-from datetime import timedelta, datetime
-from django.http import JsonResponse
-from .models import SystemEvent
-import json
 
-
-class AnalyticsView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
-    """Enhanced analytics view for system events with comprehensive data"""
-    template_name = 'system_events/analytics.html'
-    permission_required = 'system_events.view_systemevent'
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        
-        # Get date range from request or default to last 30 days
-        days = int(self.request.GET.get('days', 30))
-        end_date = timezone.now()
-        start_date = end_date - timedelta(days=days)
-        
-        # Base queryset for the selected period
-        events_qs = SystemEvent.objects.filter(
-            timestamp__gte=start_date,
-            timestamp__lte=end_date
+class SystemEventQuerySet(models.QuerySet):
+    def with_related(self):
+        """Prefetch related objects to optimize queries"""
+        return self.select_related(
+            'user',
+            'resolved_by',
+            'booking',
+            'session'
         )
-        
-        # Key metrics
-        context.update({
-            'total_events': events_qs.count(),
-            'critical_events': events_qs.filter(severity='CRITICAL').count(),
-            'unresolved_events': events_qs.filter(resolved=False).count(),
-            'security_events': events_qs.filter(
-                event_type__in=['LOGIN_FAILED', 'UNAUTHORIZED_ACCESS', 'PERMISSION_DENIED']
-            ).count(),
-            'days': days,
-            'start_date': start_date,
-            'end_date': end_date,
-        })
-        
-        # Events by type
-        events_by_type = list(events_qs.values('event_type').annotate(
-            count=Count('id')
-        ).order_by('-count'))
-        
-        # Events by severity
-        events_by_severity = list(events_qs.values('severity').annotate(
-            count=Count('id')
-        ).order_by('-count'))
-        
-        # Daily events for the last 30 days
-        daily_events = []
-        for i in range(days):
-            day = start_date + timedelta(days=i)
-            day_start = day.replace(hour=0, minute=0, second=0, microsecond=0)
-            day_end = day_start + timedelta(days=1)
-            
-            day_events = events_qs.filter(
-                timestamp__gte=day_start,
-                timestamp__lt=day_end
-            )
-            
-            daily_events.append({
-                'date': day.strftime('%Y-%m-%d'),
-                'total': day_events.count(),
-                'critical': day_events.filter(severity='CRITICAL').count(),
-                'high': day_events.filter(severity='HIGH').count(),
-                'medium': day_events.filter(severity='MEDIUM').count(),
-                'low': day_events.filter(severity='LOW').count(),
-            })
-        
-        # Hourly distribution (last 24 hours)
-        hourly_events = []
-        last_24h = timezone.now() - timedelta(hours=24)
-        for hour in range(24):
-            hour_start = last_24h.replace(minute=0, second=0, microsecond=0) + timedelta(hours=hour)
-            hour_end = hour_start + timedelta(hours=1)
-            
-            hourly_count = SystemEvent.objects.filter(
-                timestamp__gte=hour_start,
-                timestamp__lt=hour_end
-            ).count()
-            
-            hourly_events.append({
-                'hour': hour_start.strftime('%H:00'),
-                'count': hourly_count
-            })
-        
-        # Top users with most events
-        top_users = list(events_qs.exclude(user__isnull=True).values(
-            'user__username', 'user__email'
-        ).annotate(
-            event_count=Count('id')
-        ).order_by('-event_count')[:10])
-        
-        # Recent critical events
-        recent_critical = list(SystemEvent.objects.filter(
-            severity='CRITICAL'
-        ).order_by('-timestamp')[:5].values(
-            'id', 'event_type', 'timestamp', 'user__username', 'details', 'resolved'
-        ))
-        
-        # Unresolved events by severity
-        unresolved_by_severity = list(SystemEvent.objects.filter(
-            resolved=False
-        ).values('severity').annotate(
-            count=Count('id')
-        ).order_by('-count'))
-        
-        # Convert data to JSON for JavaScript
-        context.update({
-            'events_by_type_json': json.dumps(events_by_type),
-            'events_by_severity_json': json.dumps(events_by_severity),
-            'daily_events_json': json.dumps(daily_events),
-            'hourly_events_json': json.dumps(hourly_events),
-            'top_users_json': json.dumps(top_users),
-            'recent_critical_json': json.dumps(recent_critical, default=str),
-            'unresolved_by_severity_json': json.dumps(unresolved_by_severity),
-        })
-        
-        return context
-
-
-class AnalyticsApiView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
-    """API endpoint for real-time analytics data"""
-    permission_required = 'system_events.view_systemevent'
     
-    def get(self, request, *args, **kwargs):
-        metric = request.GET.get('metric')
-        days = int(request.GET.get('days', 7))
-        
-        end_date = timezone.now()
-        start_date = end_date - timedelta(days=days)
-        
-        events_qs = SystemEvent.objects.filter(
-            timestamp__gte=start_date,
-            timestamp__lte=end_date
+    def unresolved(self):
+        """Get unresolved events"""
+        return self.filter(resolved=False)
+    
+    def critical_events(self):
+        """Get critical severity events"""
+        return self.filter(severity=4)
+    
+    def for_dashboard(self, days=7):
+        """Get events optimized for dashboard display"""
+        cutoff_date = timezone.now() - timezone.timedelta(days=days)
+        return (
+            self.filter(timestamp__gte=cutoff_date)
+            .with_related()
+            .order_by('-severity', '-timestamp')
         )
-        
-        if metric == 'events_trend':
-            # Get daily events for trend chart
-            daily_data = []
-            for i in range(days):
-                day = start_date + timedelta(days=i)
-                day_start = day.replace(hour=0, minute=0, second=0, microsecond=0)
-                day_end = day_start + timedelta(days=1)
-                
-                count = events_qs.filter(
-                    timestamp__gte=day_start,
-                    timestamp__lt=day_end
-                ).count()
-                
-                daily_data.append({
-                    'date': day.strftime('%Y-%m-%d'),
-                    'count': count
-                })
-            
-            return JsonResponse({'data': daily_data})
-        
-        elif metric == 'severity_distribution':
-            severity_data = list(events_qs.values('severity').annotate(
-                count=Count('id')
-            ).order_by('-count'))
-            
-            return JsonResponse({'data': severity_data})
-        
-        elif metric == 'event_types':
-            type_data = list(events_qs.values('event_type').annotate(
-                count=Count('id')
-            ).order_by('-count')[:10])
-            
-            return JsonResponse({'data': type_data})
-        
-        return JsonResponse({'error': 'Invalid metric'}, status=400)
+
+
+class SystemEventManager(models.Manager):
+    def get_queryset(self):
+        return SystemEventQuerySet(self.model, using=self._db)
+    
+    def log_event(self, event_type, user=None, details=None, ip_address=None, 
+                 booking=None, session=None, severity=1, **kwargs):
+        """Create a new system event log entry with additional context"""
+        event_data = {
+            'event_type': event_type,
+            'user': user,
+            'ip_address': ip_address,
+            'booking': booking,
+            'session': session,
+            'severity': severity,
+            'details': details or {}
+        }
+        event_data['details'].update(kwargs)
+        return self.create(**event_data)
+    
+    def get_events_for_user(self, user, days=None):
+        """Get events for a specific user, optionally filtered by time"""
+        queryset = self.filter(user=user)
+        if days:
+            cutoff_date = timezone.now() - timezone.timedelta(days=days)
+            queryset = queryset.filter(timestamp__gte=cutoff_date)
+        return queryset
+    
+    def get_security_events(self, days=30):
+        """Get security-related events"""
+        security_types = [
+            SystemEvent.EventTypes.LOGIN,
+            SystemEvent.EventTypes.LOGOUT,
+            SystemEvent.EventTypes.SECURITY_ALERT,
+            SystemEvent.EventTypes.PASSWORD_CHANGE,
+            SystemEvent.EventTypes.PERMISSION_CHANGE
+        ]
+        cutoff_date = timezone.now() - timezone.timedelta(days=days)
+        return self.filter(
+            event_type__in=security_types,
+            timestamp__gte=cutoff_date
+        )
+
+
+class SystemEvent(models.Model):
+    class EventTypes(models.TextChoices):
+        LOGIN = 'login', 'User Login'
+        LOGOUT = 'logout', 'User Logout'
+        REGISTRATION = 'registration', 'User Registration'
+        BOOKING_CREATED = 'booking_created', 'Booking Created'
+        BOOKING_APPROVED = 'booking_approved', 'Booking Approved'
+        BOOKING_REJECTED = 'booking_rejected', 'Booking Rejected'
+        BOOKING_CANCELLED = 'booking_cancelled', 'Booking Cancelled'
+        SESSION_CREATED = 'session_created', 'Lab Session Created'
+        SESSION_APPROVED = 'session_approved', 'Lab Session Approved'
+        SESSION_REJECTED = 'session_rejected', 'Lab Session Rejected'
+        MAINTENANCE_REQUEST = 'maintenance_request', 'Maintenance Request'
+        MAINTENANCE_RESOLVED = 'maintenance_resolved', 'Maintenance Resolved'
+        SYSTEM_ERROR = 'system_error', 'System Error'
+        SECURITY_ALERT = 'security_alert', 'Security Alert'
+        PASSWORD_CHANGE = 'password_change', 'Password Changed'
+        PERMISSION_CHANGE = 'permission_change', 'Permission Changed'
+    
+    class SeverityLevels(models.IntegerChoices):
+        LOW = 1, 'Low'
+        MEDIUM = 2, 'Medium'
+        HIGH = 3, 'High'
+        CRITICAL = 4, 'Critical'
+    
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='system_events'
+    )
+    event_type = models.CharField(max_length=50, choices=EventTypes.choices)
+    timestamp = models.DateTimeField(auto_now_add=True, db_index=True)
+    details = models.JSONField(null=True, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    severity = models.PositiveSmallIntegerField(
+        choices=SeverityLevels.choices,
+        default=SeverityLevels.LOW,
+        db_index=True
+    )
+    resolved = models.BooleanField(default=False)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    resolved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='resolved_events'
+    )
+    booking = models.ForeignKey(
+        'booking.ComputerBooking', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='system_events'
+    )
+    session = models.ForeignKey(
+        'booking.LabSession', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='system_events'
+    )
+    
+    objects = SystemEventManager()
+    
+    class Meta:
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['event_type', 'timestamp']),
+            models.Index(fields=['user', 'timestamp']),
+            models.Index(fields=['severity', 'resolved']),
+            models.Index(fields=['resolved']),
+        ]
+        verbose_name = 'System Event'
+        verbose_name_plural = 'System Events'
+    
+    def __str__(self):
+        if self.user:
+            return f"{self.get_event_type_display()} - {self.user.username} at {self.timestamp}"
+        return f"{self.get_event_type_display()} at {self.timestamp}"
+    
+    def mark_as_resolved(self, resolved_by):
+        """Mark this event as resolved"""
+        self.resolved = True
+        self.resolved_at = timezone.now()
+        self.resolved_by = resolved_by
+        self.save(update_fields=['resolved', 'resolved_at', 'resolved_by'])
+    
+    def get_event_icon(self):
+        """Get appropriate icon for the event type"""
+        icons = {
+            self.EventTypes.LOGIN: 'fa-sign-in-alt',
+            self.EventTypes.LOGOUT: 'fa-sign-out-alt',
+            self.EventTypes.SECURITY_ALERT: 'fa-shield-alt',
+            self.EventTypes.REGISTRATION: 'fa-user-plus',
+            self.EventTypes.BOOKING_CREATED: 'fa-calendar-plus',
+            self.EventTypes.BOOKING_APPROVED: 'fa-calendar-check',
+            self.EventTypes.BOOKING_REJECTED: 'fa-calendar-times',
+            self.EventTypes.SYSTEM_ERROR: 'fa-exclamation-triangle',
+            self.EventTypes.MAINTENANCE_REQUEST: 'fa-tools',
+            self.EventTypes.PASSWORD_CHANGE: 'fa-key',
+            self.EventTypes.PERMISSION_CHANGE: 'fa-user-cog',
+        }
+        return icons.get(self.event_type, 'fa-info-circle')
+    
+    def is_security_event(self):
+        """Check if this is a security-related event"""
+        return self.event_type in [
+            self.EventTypes.LOGIN,
+            self.EventTypes.LOGOUT,
+            self.EventTypes.SECURITY_ALERT,
+            self.EventTypes.PASSWORD_CHANGE,
+            self.EventTypes.PERMISSION_CHANGE
+        ]

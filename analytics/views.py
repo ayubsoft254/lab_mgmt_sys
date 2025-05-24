@@ -1,197 +1,176 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.views.generic import ListView, DetailView, View
-from django.shortcuts import get_object_or_404, redirect
+from django.views.generic import TemplateView
+from django.db.models import Count, Q
+from django.utils import timezone
+from datetime import timedelta, datetime
 from django.http import JsonResponse
-from django.db.models import Q
-from django.contrib import messages
 from .models import SystemEvent
+import json
 
 
-class SystemEventListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
-    """View for listing system events with filtering capabilities"""
-    model = SystemEvent
-    template_name = 'system_events/list.html'
-    context_object_name = 'events'
+class AnalyticsView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
+    """Enhanced analytics view for system events with comprehensive data"""
+    template_name = 'system_events/analytics.html'
     permission_required = 'system_events.view_systemevent'
-    paginate_by = 25
     
-    def get_queryset(self):
-        queryset = SystemEvent.objects.with_related()
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         
-        # Filter by event type if specified
-        event_type = self.request.GET.get('event_type')
-        if event_type:
-            queryset = queryset.filter(event_type=event_type)
+        # Get date range from request or default to last 30 days
+        days = int(self.request.GET.get('days', 30))
+        end_date = timezone.now()
+        start_date = end_date - timedelta(days=days)
+        
+        # Base queryset for the selected period
+        events_qs = SystemEvent.objects.filter(
+            timestamp__gte=start_date,
+            timestamp__lte=end_date
+        )
+        
+        # Key metrics
+        context.update({
+            'total_events': events_qs.count(),
+            'critical_events': events_qs.filter(severity='CRITICAL').count(),
+            'unresolved_events': events_qs.filter(resolved=False).count(),
+            'security_events': events_qs.filter(
+                event_type__in=['LOGIN_FAILED', 'UNAUTHORIZED_ACCESS', 'PERMISSION_DENIED']
+            ).count(),
+            'days': days,
+            'start_date': start_date,
+            'end_date': end_date,
+        })
+        
+        # Events by type
+        events_by_type = list(events_qs.values('event_type').annotate(
+            count=Count('id')
+        ).order_by('-count'))
+        
+        # Events by severity
+        events_by_severity = list(events_qs.values('severity').annotate(
+            count=Count('id')
+        ).order_by('-count'))
+        
+        # Daily events for the last 30 days
+        daily_events = []
+        for i in range(days):
+            day = start_date + timedelta(days=i)
+            day_start = day.replace(hour=0, minute=0, second=0, microsecond=0)
+            day_end = day_start + timedelta(days=1)
             
-        # Filter by severity if specified
-        severity = self.request.GET.get('severity')
-        if severity:
-            queryset = queryset.filter(severity=severity)
-            
-        # Filter by resolved status if specified
-        resolved = self.request.GET.get('resolved')
-        if resolved == 'true':
-            queryset = queryset.filter(resolved=True)
-        elif resolved == 'false':
-            queryset = queryset.filter(resolved=False)
-            
-        # Filter by user if specified
-        user_id = self.request.GET.get('user_id')
-        if user_id:
-            queryset = queryset.filter(user__id=user_id)
-            
-        # Filter by date range if specified
-        date_from = self.request.GET.get('date_from')
-        date_to = self.request.GET.get('date_to')
-        if date_from:
-            queryset = queryset.filter(timestamp__gte=date_from)
-        if date_to:
-            queryset = queryset.filter(timestamp__lte=date_to)
-            
-        # Search if query is provided
-        search_query = self.request.GET.get('q')
-        if search_query:
-            queryset = queryset.filter(
-                Q(user__username__icontains=search_query) |
-                Q(user__email__icontains=search_query) |
-                Q(details__icontains=search_query) |
-                Q(event_type__icontains=search_query)
+            day_events = events_qs.filter(
+                timestamp__gte=day_start,
+                timestamp__lt=day_end
             )
             
-        return queryset.order_by('-timestamp')
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['event_types'] = SystemEvent.EventTypes.choices
-        context['severity_levels'] = SystemEvent.SeverityLevels.choices
-        return context
-
-
-class SystemEventDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
-    """Detailed view for a single system event"""
-    model = SystemEvent
-    template_name = 'system_events/detail.html'
-    context_object_name = 'event'
-    permission_required = 'system_events.view_systemevent'
-    
-    def get_queryset(self):
-        return SystemEvent.objects.with_related()
-
-
-class DashboardEventsView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
-    """View for displaying recent events on dashboard"""
-    model = SystemEvent
-    template_name = 'system_events/dashboard.html'
-    context_object_name = 'events'
-    permission_required = 'system_events.view_systemevent'
-    
-    def get_queryset(self):
-        days = int(self.request.GET.get('days', 7))
-        return SystemEvent.objects.for_dashboard(days=days)
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['days'] = int(self.request.GET.get('days', 7))
-        return context
-
-
-class UserEventsView(LoginRequiredMixin, ListView):
-    """View for displaying events related to the current user"""
-    model = SystemEvent
-    template_name = 'system_events/user_events.html'
-    context_object_name = 'events'
-    paginate_by = 15
-    
-    def get_queryset(self):
-        days = int(self.request.GET.get('days', 30))
-        return SystemEvent.objects.get_events_for_user(
-            user=self.request.user,
-            days=days
-        ).order_by('-timestamp')
-
-
-class SecurityEventsView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
-    """View for displaying security-related events"""
-    model = SystemEvent
-    template_name = 'system_events/security_events.html'
-    context_object_name = 'events'
-    permission_required = 'system_events.view_systemevent'
-    paginate_by = 25
-    
-    def get_queryset(self):
-        days = int(self.request.GET.get('days', 30))
-        return SystemEvent.objects.get_security_events(days=days)
-
-
-class CriticalEventsView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
-    """View for displaying critical severity events"""
-    model = SystemEvent
-    template_name = 'system_events/critical_events.html'
-    context_object_name = 'events'
-    permission_required = 'system_events.view_systemevent'
-    
-    def get_queryset(self):
-        return SystemEvent.objects.critical_events().unresolved().order_by('-timestamp')
-
-
-class UnresolvedEventsView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
-    """View for displaying unresolved events"""
-    model = SystemEvent
-    template_name = 'system_events/unresolved_events.html'
-    context_object_name = 'events'
-    permission_required = 'system_events.view_systemevent'
-    paginate_by = 25
-    
-    def get_queryset(self):
-        return SystemEvent.objects.unresolved().order_by('-severity', '-timestamp')
-
-
-class ResolveEventView(LoginRequiredMixin, PermissionRequiredMixin, View):
-    """View for marking an event as resolved"""
-    permission_required = 'system_events.change_systemevent'
-    
-    def post(self, request, pk):
-        event = get_object_or_404(SystemEvent, pk=pk)
-        event.mark_as_resolved(request.user)
-        messages.success(request, f"Event #{event.id} has been marked as resolved.")
+            daily_events.append({
+                'date': day.strftime('%Y-%m-%d'),
+                'total': day_events.count(),
+                'critical': day_events.filter(severity='CRITICAL').count(),
+                'high': day_events.filter(severity='HIGH').count(),
+                'medium': day_events.filter(severity='MEDIUM').count(),
+                'low': day_events.filter(severity='LOW').count(),
+            })
         
-        # Return to the appropriate page
-        redirect_to = request.POST.get('redirect_to', 'system_events:list')
-        return redirect(redirect_to)
-
-
-class EventsJsonView(LoginRequiredMixin, PermissionRequiredMixin, View):
-    """JSON API endpoint for events data"""
-    permission_required = 'system_events.view_systemevent'
-    
-    def get(self, request):
-        limit = int(request.GET.get('limit', 10))
-        event_type = request.GET.get('event_type')
-        severity = request.GET.get('severity')
-        
-        queryset = SystemEvent.objects.all()
-        
-        if event_type:
-            queryset = queryset.filter(event_type=event_type)
-        if severity:
-            queryset = queryset.filter(severity=severity)
+        # Hourly distribution (last 24 hours)
+        hourly_events = []
+        last_24h = timezone.now() - timedelta(hours=24)
+        for hour in range(24):
+            hour_start = last_24h.replace(minute=0, second=0, microsecond=0) + timedelta(hours=hour)
+            hour_end = hour_start + timedelta(hours=1)
             
-        events = queryset.order_by('-timestamp')[:limit]
+            hourly_count = SystemEvent.objects.filter(
+                timestamp__gte=hour_start,
+                timestamp__lt=hour_end
+            ).count()
+            
+            hourly_events.append({
+                'hour': hour_start.strftime('%H:00'),
+                'count': hourly_count
+            })
         
-        data = {
-            'events': [
-                {
-                    'id': event.id,
-                    'event_type': event.get_event_type_display(),
-                    'timestamp': event.timestamp.isoformat(),
-                    'user': event.user.username if event.user else None,
-                    'severity': event.get_severity_display(),
-                    'resolved': event.resolved,
-                    'details': event.details,
-                    'icon': event.get_event_icon(),
-                }
-                for event in events
-            ]
-        }
+        # Top users with most events
+        top_users = list(events_qs.exclude(user__isnull=True).values(
+            'user__username', 'user__email'
+        ).annotate(
+            event_count=Count('id')
+        ).order_by('-event_count')[:10])
         
-        return JsonResponse(data)
+        # Recent critical events
+        recent_critical = list(SystemEvent.objects.filter(
+            severity='CRITICAL'
+        ).order_by('-timestamp')[:5].values(
+            'id', 'event_type', 'timestamp', 'user__username', 'details', 'resolved'
+        ))
+        
+        # Unresolved events by severity
+        unresolved_by_severity = list(SystemEvent.objects.filter(
+            resolved=False
+        ).values('severity').annotate(
+            count=Count('id')
+        ).order_by('-count'))
+        
+        # Convert data to JSON for JavaScript
+        context.update({
+            'events_by_type_json': json.dumps(events_by_type),
+            'events_by_severity_json': json.dumps(events_by_severity),
+            'daily_events_json': json.dumps(daily_events),
+            'hourly_events_json': json.dumps(hourly_events),
+            'top_users_json': json.dumps(top_users),
+            'recent_critical_json': json.dumps(recent_critical, default=str),
+            'unresolved_by_severity_json': json.dumps(unresolved_by_severity),
+        })
+        
+        return context
+
+
+class AnalyticsApiView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
+    """API endpoint for real-time analytics data"""
+    permission_required = 'system_events.view_systemevent'
+    
+    def get(self, request, *args, **kwargs):
+        metric = request.GET.get('metric')
+        days = int(request.GET.get('days', 7))
+        
+        end_date = timezone.now()
+        start_date = end_date - timedelta(days=days)
+        
+        events_qs = SystemEvent.objects.filter(
+            timestamp__gte=start_date,
+            timestamp__lte=end_date
+        )
+        
+        if metric == 'events_trend':
+            # Get daily events for trend chart
+            daily_data = []
+            for i in range(days):
+                day = start_date + timedelta(days=i)
+                day_start = day.replace(hour=0, minute=0, second=0, microsecond=0)
+                day_end = day_start + timedelta(days=1)
+                
+                count = events_qs.filter(
+                    timestamp__gte=day_start,
+                    timestamp__lt=day_end
+                ).count()
+                
+                daily_data.append({
+                    'date': day.strftime('%Y-%m-%d'),
+                    'count': count
+                })
+            
+            return JsonResponse({'data': daily_data})
+        
+        elif metric == 'severity_distribution':
+            severity_data = list(events_qs.values('severity').annotate(
+                count=Count('id')
+            ).order_by('-count'))
+            
+            return JsonResponse({'data': severity_data})
+        
+        elif metric == 'event_types':
+            type_data = list(events_qs.values('event_type').annotate(
+                count=Count('id')
+            ).order_by('-count')[:10])
+            
+            return JsonResponse({'data': type_data})
+        
+        return JsonResponse({'error': 'Invalid metric'}, status=400)
