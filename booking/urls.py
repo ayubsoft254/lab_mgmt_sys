@@ -47,4 +47,5 @@ urlpatterns = [
 
     # Add this to your existing URLs
     path('profile/', views.ProfileView.as_view(), name='profile'),
+    path('booking/<int:booking_id>/extend/', views.extend_booking, name='extend_booking'),
 ]
