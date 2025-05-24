@@ -409,3 +409,18 @@ class EmailDeliveryAdmin(admin.ModelAdmin):
     
     def has_add_permission(self, request):
         return False
+
+class UserAdmin(admin.ModelAdmin):
+    actions = ['send_email_to_selected_users']
+    
+    def send_email_to_selected_users(self, request, queryset):
+        # Count the selected users
+        user_count = queryset.count()
+        
+        # Store the selected user IDs in session for the next step
+        request.session['selected_user_ids'] = list(queryset.values_list('id', flat=True))
+        
+        # Redirect to a custom form for composing the email
+        return redirect('admin:send_bulk_email')
+    
+    send_email_to_selected_users.short_description = "Send email to selected users"
