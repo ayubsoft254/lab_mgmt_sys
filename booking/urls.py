@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from .views import LandingPageView
+from newsletter.views import subscribe_newsletter
 
 urlpatterns = [
     path('', LandingPageView.as_view(), name='landing'),
@@ -56,4 +57,6 @@ urlpatterns = [
     path('check-in/booking/<int:booking_id>/', views.computer_booking_check_in, name='computer_booking_check_in'),
     path('check-in/session/<int:session_id>/', views.lab_session_attendance, name='lab_session_attendance'),
     path('check-in/quick/<int:booking_id>/', views.quick_check_in, name='quick_check_in'),
+    # Newsletter subscription
+    path('subscribe/', subscribe_newsletter, name='subscribe_newsletter'),
 ]
