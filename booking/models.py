@@ -6,6 +6,7 @@ import uuid
 from dateutil.rrule import rrule, DAILY, WEEKLY, MONTHLY
 from dateutil.parser import parse
 from django.db.models import Q
+from datetime import timedelta
 
 class User(AbstractUser):
     SCHOOL_CHOICES = [
@@ -190,6 +191,11 @@ class ComputerBooking(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     purpose = models.TextField(blank=True, null=True)
     
+    # Add these new fields
+    reminder_sent = models.BooleanField(default=False)
+    extension_requested = models.BooleanField(default=False)
+    extension_approved = models.BooleanField(default=False)
+    
     def clean(self):
         # Check if end time is after start time
         if self.end_time <= self.start_time:
@@ -255,6 +261,52 @@ class ComputerBooking(models.Model):
     
     def __str__(self):
         return f"Booking {self.booking_code}: {self.computer} - {self.start_time.strftime('%Y-%m-%d %H:%M')} to {self.end_time.strftime('%H:%M')}"
+    
+    def can_be_extended(self):
+        """Check if booking can be extended by 30 minutes"""
+        if self.is_cancelled or not self.is_approved:
+            return False
+            
+        # Calculate potential extended end time
+        extended_end_time = self.end_time + timedelta(minutes=30)
+        
+        # Check if there's another booking for this computer right after
+        next_bookings = ComputerBooking.objects.filter(
+            computer=self.computer,
+            is_approved=True,
+            is_cancelled=False,
+            start_time__gt=self.end_time,
+            start_time__lt=extended_end_time
+        )
+        
+        # Check if there's a lab session during the extended time
+        lab_sessions = LabSession.objects.filter(
+            lab=self.computer.lab,
+            is_approved=True,
+            start_time__lt=extended_end_time,
+            end_time__gt=self.end_time
+        )
+        
+        return not (next_bookings.exists() or lab_sessions.exists())
+    
+    def extend_booking(self):
+        """Extend the booking by 30 minutes if possible"""
+        if not self.can_be_extended():
+            return False
+            
+        self.end_time = self.end_time + timedelta(minutes=30)
+        self.extension_requested = True
+        self.extension_approved = True
+        self.save(update_fields=['end_time', 'extension_requested', 'extension_approved'])
+        
+        # Create notification for the user
+        Notification.objects.create(
+            user=self.student,
+            message=f"Your booking for {self.computer} has been extended by 30 minutes until {self.end_time.strftime('%H:%M')}",
+            notification_type='booking_extended',
+            booking=self
+        )
+        return True
 
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
