@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                {% if notification.notification_type == 'booking_ending' %}
+                <i class="fas fa-clock text-warning me-2"></i>
+                {% elif notification.notification_type == 'booking_extended' %}
+                <i class="fas fa-check-circle text-success me-2"></i>
+                {% elif notification.notification_type == 'extension_unavailable' %}
+                <i class="fas fa-exclamation-circle text-danger me-2"></i>
+                {% else %}
+                <i class="fas fa-bell me-2"></i>
+                {% endif %}
+                {{ notification.get_notification_type_display }}
+            </h5>
+            <span class="text-muted">{{ notification.created_at|date:"M d, Y h:i A" }}</span>
+        </div>
+        <div class="card-body">
+            <p class="mb-4">{{ notification.message }}</p>
+            
+            {% if notification.notification_type == 'booking_ending' and notification.booking %}
+                <div class="d-flex justify-content-end mt-3">
+                    <form method="post" action="{% url 'mark_notification_read' notification.id %}" class="me-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-secondary">
+                            <i class="fas fa-check me-1"></i> Dismiss
+                        </button>
+                    </form>
+                    <a href="{% url 'extend_booking' notification.booking.id %}" class="btn btn-ttu">
+                        <i class="fas fa-clock me-1"></i> Extend Session
+                    </a>
+                </div>
+            {% elif notification.notification_type == 'extension_unavailable' %}
+                <div class="d-flex justify-content-end mt-3">
+                    <form method="post" action="{% url 'mark_notification_read' notification.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-secondary">
+                            <i class="fas fa-check me-1"></i> Acknowledge
+                        </button>
+                    </form>
+                </div>
+            {% else %}
+                <div class="d-flex justify-content-end mt-3">
+                    <form method="post" action="{% url 'mark_notification_read' notification.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-secondary">
+                            <i class="fas fa-check me-1"></i> Mark as Read
+                        </button>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
