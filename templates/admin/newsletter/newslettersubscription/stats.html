@@ -1,0 +1,69 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<div class="module">
+    <h2>Newsletter Statistics Overview</h2>
+    
+    <div style="display: flex; flex-wrap: wrap; margin: 20px 0;">
+        <div style="flex: 1; min-width: 200px; padding: 15px; margin: 10px; background-color: #f9f9f9; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <h3 style="margin-top: 0;">Total Subscribers</h3>
+            <p style="font-size: 24px; font-weight: bold;">{{ total_subscribers }}</p>
+        </div>
+        
+        <div style="flex: 1; min-width: 200px; padding: 15px; margin: 10px; background-color: #f9f9f9; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <h3 style="margin-top: 0;">Active Subscribers</h3>
+            <p style="font-size: 24px; font-weight: bold; color: green;">{{ active_subscribers }}</p>
+        </div>
+        
+        <div style="flex: 1; min-width: 200px; padding: 15px; margin: 10px; background-color: #f9f9f9; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <h3 style="margin-top: 0;">New Today</h3>
+            <p style="font-size: 24px; font-weight: bold; color: blue;">{{ today_subscribers }}</p>
+        </div>
+    </div>
+    
+    <h2>Content Preferences</h2>
+    <div style="display: flex; flex-wrap: wrap; margin: 20px 0;">
+        <div style="flex: 1; min-width: 150px; padding: 15px; margin: 10px; background-color: #f9f9f9; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <h3 style="margin-top: 0;">System Updates</h3>
+            <p style="font-size: 24px; font-weight: bold;">{{ preference_stats.updates }}</p>
+        </div>
+        
+        <div style="flex: 1; min-width: 150px; padding: 15px; margin: 10px; background-color: #f9f9f9; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <h3 style="margin-top: 0;">Lab News</h3>
+            <p style="font-size: 24px; font-weight: bold;">{{ preference_stats.lab_news }}</p>
+        </div>
+        
+        <div style="flex: 1; min-width: 150px; padding: 15px; margin: 10px; background-color: #f9f9f9; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <h3 style="margin-top: 0;">Tips</h3>
+            <p style="font-size: 24px; font-weight: bold;">{{ preference_stats.tips }}</p>
+        </div>
+        
+        <div style="flex: 1; min-width: 150px; padding: 15px; margin: 10px; background-color: #f9f9f9; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <h3 style="margin-top: 0;">Events</h3>
+            <p style="font-size: 24px; font-weight: bold;">{{ preference_stats.events }}</p>
+        </div>
+    </div>
+    
+    <h2>Subscription Sources</h2>
+    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+        <thead>
+            <tr>
+                <th style="text-align: left; padding: 10px; border-bottom: 2px solid #ddd;">Source</th>
+                <th style="text-align: right; padding: 10px; border-bottom: 2px solid #ddd;">Subscribers</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in source_stats %}
+            <tr>
+                <td style="text-align: left; padding: 10px; border-bottom: 1px solid #ddd;">{{ item.source }}</td>
+                <td style="text-align: right; padding: 10px; border-bottom: 1px solid #ddd;">{{ item.count }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div style="margin-top: 30px;">
+        <a href="{% url 'admin:newsletter_newslettersubscription_changelist' %}" class="button">Back to Subscribers List</a>
+    </div>
+</div>
+{% endblock %}
