@@ -308,6 +308,92 @@ class ComputerBooking(models.Model):
         )
         return True
 
+    def mark_attendance(self, status, admin_user, check_in_time=None, check_out_time=None, notes=''):
+        """Mark attendance for this booking"""
+        if check_in_time is None:
+            check_in_time = timezone.now()
+            
+        attendance, created = ComputerBookingAttendance.objects.update_or_create(
+            booking=self,
+            defaults={
+                'status': status,
+                'check_in_time': check_in_time,
+                'check_out_time': check_out_time,
+                'notes': notes,
+                'checked_by': admin_user
+            }
+        )
+        
+        # Create notification for the student
+        Notification.objects.create(
+            user=self.student,
+            message=f"Your attendance for booking at {self.computer} has been marked as {attendance.get_status_display()}",
+            notification_type='attendance_marked',
+            booking=self
+        )
+        
+        return attendance
+
+# Add to LabSession model
+def record_student_attendance(self, student, status, admin_user, check_in_time=None, check_out_time=None, notes=''):
+    """Record attendance for a student in this session"""
+    if check_in_time is None:
+        check_in_time = timezone.now()
+        
+    # Check if student is in attending_students, add if not
+    if student not in self.attending_students.all():
+        self.attending_students.add(student)
+        
+    attendance, created = SessionAttendance.objects.update_or_create(
+        session=self,
+        student=student,
+        defaults={
+            'status': status,
+            'check_in_time': check_in_time,
+            'check_out_time': check_out_time,
+            'notes': notes,
+            'checked_by': admin_user
+        }
+    )
+    
+    # Create notification for the student
+    Notification.objects.create(
+        user=student,
+        message=f"Your attendance for '{self.title}' session has been marked as {attendance.get_status_display()}",
+        notification_type='attendance_marked',
+        lab_session=self
+    )
+    
+    return attendance
+
+def bulk_attendance_check(self, students_data, admin_user):
+    """Record attendance for multiple students at once
+    
+    students_data: list of dicts with keys 'student_id', 'status', and optionally 'notes'
+    """
+    results = []
+    for data in students_data:
+        try:
+            student = User.objects.get(id=data['student_id'])
+            attendance = self.record_student_attendance(
+                student=student,
+                status=data['status'],
+                admin_user=admin_user,
+                notes=data.get('notes', '')
+            )
+            results.append({
+                'student': student.username,
+                'status': 'success',
+                'attendance': attendance.get_status_display()
+            })
+        except User.DoesNotExist:
+            results.append({
+                'student_id': data['student_id'],
+                'status': 'error',
+                'message': 'Student not found'
+            })
+    return results
+
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
     message = models.TextField()
