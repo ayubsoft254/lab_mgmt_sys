@@ -8,6 +8,13 @@ from django.views.decorators.http import require_GET
 from .models import Lab, Computer, ComputerBooking, LabSession, Notification, User, RecurringSession, StudentRating
 from datetime import datetime, timedelta
 from .forms import ComputerBookingForm, LabSessionForm,  RecurringSessionForm, StudentRatingForm
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import  TemplateView
+from django.contrib import messages
+from django.shortcuts import redirect
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
+from .forms import UserProfileForm
  
 def landing(request):
     return render(request, 'landing.html')
@@ -1058,3 +1065,60 @@ def student_details_view(request, student_id):
     }
     
     return render(request, 'student_details.html', context)
+
+class ProfileView(LoginRequiredMixin, TemplateView):
+    """View for managing user profile"""
+    template_name = 'profile/profile.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        
+        # Add forms to context
+        context['profile_form'] = UserProfileForm(instance=user)
+        context['password_form'] = PasswordChangeForm(user)
+        
+        # Add user profile data
+        context['user_bookings'] = user.computer_bookings.all()[:5]
+        context['total_bookings'] = user.computer_bookings.count()
+        
+        if user.is_lecturer:
+            context['user_sessions'] = user.booked_sessions.all()[:5]
+            context['total_sessions'] = user.booked_sessions.count()
+        
+        return context
+    
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        action = request.POST.get('action')
+        
+        if action == 'update_profile':
+            profile_form = UserProfileForm(request.POST, instance=user)
+            
+            if profile_form.is_valid():
+                profile_form.save()
+                messages.success(request, 'Your profile was successfully updated!')
+                return redirect('profile')
+            else:
+                # Return form with errors
+                context = self.get_context_data()
+                context['profile_form'] = profile_form
+                return self.render_to_response(context)
+        
+        elif action == 'change_password':
+            password_form = PasswordChangeForm(user, request.POST)
+            
+            if password_form.is_valid():
+                user = password_form.save()
+                # Keep the user logged in
+                update_session_auth_hash(request, user)
+                messages.success(request, 'Your password was successfully updated!')
+                return redirect('profile')
+            else:
+                # Return form with errors
+                context = self.get_context_data()
+                context['password_form'] = password_form
+                return self.render_to_response(context)
+        
+        # Default fallback
+        return redirect('profile')
