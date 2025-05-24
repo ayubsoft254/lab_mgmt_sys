@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}Cancel Booking{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-times-circle text-danger me-2"></i>
+                        Cancel Computer Booking
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Are you sure you want to cancel your booking? This action cannot be undone.
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6>Booking Details:</h6>
+                        <p><strong>Computer:</strong> {{ booking.computer }}</p>
+                        <p><strong>Date:</strong> {{ booking.start_time|date:"F j, Y" }}</p>
+                        <p><strong>Time:</strong> {{ booking.start_time|time:"H:i" }} - {{ booking.end_time|time:"H:i" }}</p>
+                        <p><strong>Status:</strong> 
+                            {% if booking.is_approved %}
+                                <span class="badge bg-success">Approved</span>
+                            {% else %}
+                                <span class="badge bg-warning">Pending</span>
+                            {% endif %}
+                        </p>
+                        {% if booking.purpose %}
+                            <p><strong>Purpose:</strong> {{ booking.purpose }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="reason" class="form-label">Reason for Cancellation (Optional):</label>
+                            <textarea class="form-control" id="reason" name="reason" rows="3" placeholder="Please provide a reason for cancelling this booking..."></textarea>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'booking_detail' booking.id %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Back
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-times-circle me-1"></i> Cancel Booking
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
