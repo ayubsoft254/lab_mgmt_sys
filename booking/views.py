@@ -1,23 +1,22 @@
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.forms import ValidationError
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET, require_POST
 from django.contrib import messages
+from django.utils import timezone
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
-from django.utils import timezone
-from django.http import JsonResponse
-from django.views.decorators.http import require_GET
-from django.views.generic import TemplateView
 from datetime import datetime, timedelta
 
 from .models import (
     User, Lab, Computer, ComputerBooking, LabSession, 
-    Notification, RecurringSession, StudentRating
+    Notification, RecurringSession, StudentRating, ComputerBookingAttendance, 
+    SessionAttendance
 )
 from .forms import (
     ComputerBookingForm, LabSessionForm, RecurringSessionForm, 
-    StudentRatingForm, UserProfileForm
+    StudentRatingForm, UserProfileForm, AttendanceForm, BulkAttendanceForm
 )
  
 class LandingPageView(TemplateView):
@@ -1201,4 +1200,232 @@ def unread_notifications_json(request):
     return JsonResponse({
         'count': unread.count(),
         'notifications': notifications
+    })
+
+# Add to booking/views.py
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.contrib import messages
+from django.utils import timezone
+from .models import (
+    ComputerBooking, LabSession, ComputerBookingAttendance, 
+    SessionAttendance, User
+)
+from .forms import AttendanceForm, BulkAttendanceForm
+
+def is_admin(user):
+    """Check if user is admin or super admin"""
+    return user.is_authenticated and (user.is_admin or user.is_super_admin)
+
+@login_required
+@user_passes_test(is_admin)
+def admin_check_in_dashboard(request):
+    """Dashboard for admins to view and manage check-ins"""
+    # Get today's date
+    today = timezone.now().date()
+    
+    # Get today's computer bookings
+    today_bookings = ComputerBooking.objects.filter(
+        start_time__date=today,
+        is_approved=True,
+        is_cancelled=False
+    ).order_by('start_time')
+    
+    # Get today's lab sessions
+    today_sessions = LabSession.objects.filter(
+        start_time__date=today,
+        is_approved=True
+    ).order_by('start_time')
+    
+    # Count attendance stats
+    booking_attendance = {
+        'total': today_bookings.count(),
+        'checked_in': ComputerBookingAttendance.objects.filter(
+            booking__in=today_bookings,
+            status='present'
+        ).count(),
+        'absent': ComputerBookingAttendance.objects.filter(
+            booking__in=today_bookings,
+            status='absent'
+        ).count(),
+        'late': ComputerBookingAttendance.objects.filter(
+            booking__in=today_bookings,
+            status='late'
+        ).count(),
+    }
+    
+    # If user is lab-specific admin, filter by their labs
+    if request.user.is_admin and not request.user.is_super_admin:
+        managed_labs = request.user.managed_labs.all()
+        today_bookings = today_bookings.filter(computer__lab__in=managed_labs)
+        today_sessions = today_sessions.filter(lab__in=managed_labs)
+    
+    context = {
+        'today_bookings': today_bookings,
+        'today_sessions': today_sessions,
+        'booking_attendance': booking_attendance,
+        'today': today
+    }
+    
+    return render(request, 'booking/check_in_dashboard.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+def computer_booking_check_in(request, booking_id):
+    """View for checking in a student for a computer booking"""
+    booking = get_object_or_404(ComputerBooking, id=booking_id)
+    
+    # Check if admin has permission for this lab
+    if (request.user.is_admin and not request.user.is_super_admin and 
+            booking.computer.lab not in request.user.managed_labs.all()):
+        messages.error(request, "You don't have permission to manage attendance for this lab")
+        return redirect('admin_check_in_dashboard')
+    
+    # Get or initialize attendance
+    try:
+        attendance = booking.attendance
+    except ComputerBookingAttendance.DoesNotExist:
+        attendance = None
+    
+    if request.method == 'POST':
+        form = AttendanceForm(request.POST, instance=attendance)
+        if form.is_valid():
+            attendance = form.save(commit=False)
+            attendance.booking = booking
+            attendance.checked_by = request.user
+            
+            # Set check-in time if not already set
+            if not attendance.check_in_time and form.cleaned_data['status'] in ['present', 'late']:
+                attendance.check_in_time = timezone.now()
+            
+            attendance.save()
+            
+            # Create notification
+            Notification.objects.create(
+                user=booking.student,
+                message=f"Your attendance for booking at {booking.computer} has been marked as {attendance.get_status_display()}",
+                notification_type='attendance_marked' if not attendance.pk else 'attendance_updated',
+                booking=booking
+            )
+            
+            messages.success(request, f"Attendance for {booking.student.get_full_name()} has been recorded")
+            return redirect('admin_check_in_dashboard')
+    else:
+        initial_data = {}
+        # Auto-mark as late if arriving after start time + 10 min grace period
+        if not attendance and booking.start_time + timedelta(minutes=10) < timezone.now():
+            initial_data['status'] = 'late'
+        
+        form = AttendanceForm(instance=attendance, initial=initial_data)
+    
+    context = {
+        'booking': booking,
+        'form': form,
+        'attendance': attendance
+    }
+    
+    return render(request, 'booking/computer_booking_check_in.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+def lab_session_attendance(request, session_id):
+    """View for managing attendance for a lab session"""
+    session = get_object_or_404(LabSession, id=session_id)
+    
+    # Check if admin has permission for this lab
+    if (request.user.is_admin and not request.user.is_super_admin and 
+            session.lab not in request.user.managed_labs.all()):
+        messages.error(request, "You don't have permission to manage attendance for this lab")
+        return redirect('admin_check_in_dashboard')
+    
+    # Get existing attendance records
+    attendance_records = SessionAttendance.objects.filter(session=session)
+    
+    # Get all students who are supposed to attend
+    attending_students = session.attending_students.all()
+    
+    # For students without attendance records, create placeholders
+    attendance_dict = {record.student_id: record for record in attendance_records}
+    
+    students_data = []
+    for student in attending_students:
+        attendance = attendance_dict.get(student.id)
+        students_data.append({
+            'student': student,
+            'attendance': attendance,
+            'status': attendance.status if attendance else 'absent',
+            'check_in_time': attendance.check_in_time if attendance else None,
+        })
+    
+    if request.method == 'POST':
+        # Process bulk attendance form
+        form = BulkAttendanceForm(request.POST)
+        if form.is_valid():
+            # Extract student IDs and statuses from form
+            student_ids = request.POST.getlist('student_id')
+            statuses = request.POST.getlist('status')
+            notes = request.POST.getlist('notes')
+            
+            # Process each student's attendance
+            for i, student_id in enumerate(student_ids):
+                try:
+                    student = User.objects.get(id=student_id)
+                    status = statuses[i]
+                    note = notes[i] if i < len(notes) else ''
+                    
+                    # Record attendance
+                    session.record_student_attendance(
+                        student=student,
+                        status=status,
+                        admin_user=request.user,
+                        notes=note
+                    )
+                except (User.DoesNotExist, IndexError):
+                    continue
+            
+            messages.success(request, f"Attendance recorded for {len(student_ids)} students")
+            return redirect('admin_check_in_dashboard')
+    else:
+        # Initialize form
+        form = BulkAttendanceForm()
+    
+    context = {
+        'session': session,
+        'students_data': students_data,
+        'form': form
+    }
+    
+    return render(request, 'booking/lab_session_attendance.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+@require_POST
+def quick_check_in(request, booking_id):
+    """API endpoint for quickly checking in a student without additional info"""
+    booking = get_object_or_404(ComputerBooking, id=booking_id)
+    
+    # Check if admin has permission for this lab
+    if (request.user.is_admin and not request.user.is_super_admin and 
+            booking.computer.lab not in request.user.managed_labs.all()):
+        return JsonResponse({'status': 'error', 'message': 'Permission denied'}, status=403)
+        
+    status = request.POST.get('status', 'present')
+    notes = request.POST.get('notes', '')
+    
+    attendance = booking.mark_attendance(
+        status=status,
+        admin_user=request.user,
+        check_in_time=timezone.now(),
+        notes=notes
+    )
+    
+    return JsonResponse({
+        'status': 'success', 
+        'attendance': {
+            'status': attendance.status,
+            'status_display': attendance.get_status_display(),
+            'check_in_time': attendance.check_in_time.strftime('%H:%M')
+        }
     })
