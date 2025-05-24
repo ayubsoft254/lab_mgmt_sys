@@ -1,8 +1,8 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic import TemplateView
-from django.db.models import Count, Q
+from django.db.models import Count
 from django.utils import timezone
-from datetime import timedelta, datetime
+from datetime import timedelta
 from django.http import JsonResponse
 from .models import SystemEvent
 import json
@@ -10,7 +10,7 @@ import json
 
 class AnalyticsView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
     """Enhanced analytics view for system events with comprehensive data"""
-    template_name = 'system_events/analytics.html'
+    template_name = 'analytics_dashboard.html'
     permission_required = 'system_events.view_systemevent'
     
     def get_context_data(self, **kwargs):
