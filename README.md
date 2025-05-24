@@ -1,8 +1,8 @@
 
 # Lab Management System
 
-![Django](https://img.shields.io/badge/Django-4.2-green.svg)
-![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
+![Django](https://img.shields.io/badge/Django-5.1-green.svg)
+![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 A comprehensive Django-based web application designed specifically for managing computer laboratories at Taita Taveta University's School of Science and Informatics. This system facilitates efficient resource allocation, booking management, and lab administration.
