@@ -90,13 +90,15 @@
                                     <td>{{ booking.computer }}</td>
                                     <td>
                                         <div>{{ booking.start_time|time:"H:i" }} - {{ booking.end_time|time:"H:i" }}</div>
-                                        <small class="{% if booking.start_time < now %}text-success{% else %}text-muted{% endif %}">
-                                            {% if booking.start_time < now %}
+                                        {% now "Y-m-d H:i:s" as current_time %}
+                                        <small class="{% if booking.start_time|stringformat:"Y-m-d H:i:s" < current_time %}text-success{% else %}text-muted{% endif %}">
+                                            {% if booking.start_time|stringformat:"Y-m-d H:i:s" < current_time %}
                                                 Started {{ booking.start_time|timesince }} ago
                                             {% else %}
-                                                Starts in {{ now|timeuntil:booking.start_time }}
+                                                Starts in {{ booking.start_time|timeuntil }}
                                             {% endif %}
                                         </small>
+
                                     </td>
                                     <td>
                                         {% if hasattr booking 'attendance' %}
