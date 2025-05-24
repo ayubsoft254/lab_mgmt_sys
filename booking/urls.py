@@ -44,4 +44,7 @@ urlpatterns = [
     path('api/bookings/<int:booking_id>/details/', views.booking_details_api, name='booking_details_api'),
     path('students/<int:student_id>/details/', views.student_details_view, name='student_details'),
     path('students/<int:student_id>/rate/', views.rate_student_view, name='rate_student'),
+
+    # Add this to your existing URLs
+    path('profile/', views.ProfileView.as_view(), name='profile'),
 ]
