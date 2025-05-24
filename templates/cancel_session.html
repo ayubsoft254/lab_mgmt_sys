@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Cancel Lab Session{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-times-circle text-danger me-2"></i>
+                        Cancel Lab Session
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Are you sure you want to cancel this lab session? This action cannot be undone and will notify all attending students.
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6>Session Details:</h6>
+                        <p><strong>Title:</strong> {{ session.title }}</p>
+                        <p><strong>Lab:</strong> {{ session.lab.name }}</p>
+                        <p><strong>Date:</strong> {{ session.start_time|date:"F j, Y" }}</p>
+                        <p><strong>Time:</strong> {{ session.start_time|time:"H:i" }} - {{ session.end_time|time:"H:i" }}</p>
+                        <p><strong>Attending Students:</strong> {{ session.attending_students.count }}</p>
+                        {% if session.description %}
+                            <p><strong>Description:</strong> {{ session.description }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="reason" class="form-label">Reason for Cancellation:</label>
+                            <textarea class="form-control" id="reason" name="reason" rows="3" required placeholder="Please provide a reason for cancelling this session..."></textarea>
+                            <div class="form-text">This will be shared with attending students and lab administrators.</div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'session_detail' session.id %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Back
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-times-circle me-1"></i> Cancel Session
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
