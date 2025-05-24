@@ -319,7 +319,10 @@ class Notification(models.Model):
         ('booking_rejected', 'Booking Rejected'),
         ('recurring_session_created', 'Recurring Session Created'),
         ('recurring_session_approved', 'Recurring Session Approved'),
-        ('recurring_session_rejected', 'Recurring Session Rejected')
+        ('recurring_session_rejected', 'Recurring Session Rejected'),
+        ('booking_ending', 'Booking Ending Soon'),
+        ('booking_extended', 'Booking Extended'),
+        ('extension_unavailable', 'Extension Unavailable'),
     ])
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
