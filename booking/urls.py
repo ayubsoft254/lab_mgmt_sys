@@ -61,4 +61,5 @@ urlpatterns = [
     # Newsletter subscription
     path('subscribe/', subscribe_newsletter, name='subscribe_newsletter'),
     path('assign-student/', views.assign_student_view, name='assign_student'),
+    path('api/labs/<int:lab_id>/computers/', views.lab_computers_api, name='lab_computers_api'),
 ]
