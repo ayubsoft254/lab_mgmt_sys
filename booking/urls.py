@@ -51,6 +51,7 @@ urlpatterns = [
     # Profile and booking management
     path('profile/', views.ProfileView.as_view(), name='profile'),
     path('booking/<int:booking_id>/extend/', views.extend_booking, name='extend_booking'),
+    path('profile/booking-history/', views.booking_history_view, name='booking_history'),
 
     # Check-in URLs
     path('check-in/', views.admin_check_in_dashboard, name='admin_check_in_dashboard'),
