@@ -1772,3 +1772,27 @@ def assign_student_view(request):
         messages.error(request, "Invalid assignment type")
     
     return redirect('admin_dashboard')
+
+@login_required
+@require_GET
+def lab_computers_api(request, lab_id):
+    """API endpoint to get computers for a lab"""
+    try:
+        lab = Lab.objects.get(id=lab_id)
+        computers = Computer.objects.filter(lab=lab)
+        
+        data = {
+            'lab_id': lab.id,
+            'lab_name': lab.name,
+            'computers': [
+                {
+                    'id': computer.id,
+                    'number': computer.computer_number,
+                    'specs': computer.specs,
+                    'status': computer.status
+                } for computer in computers
+            ]
+        }
+        return JsonResponse(data)
+    except Lab.DoesNotExist:
+        return JsonResponse({'error': 'Lab not found'}, status=404)
