@@ -310,8 +310,11 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('click', function(e) {
         const rateBtn = e.target.closest('.rate-student-btn');
         if (rateBtn) {
+            console.log("Rate button clicked");
             const studentId = rateBtn.dataset.studentId;
             const studentName = rateBtn.dataset.studentName;
+            
+            console.log("Student ID:", studentId, "Name:", studentName);
             
             rateStudentNameDisplay.textContent = studentName;
             rateStudentIdInput.value = studentId;
@@ -319,8 +322,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // Reset form
             resetRatingForm();
             
-            // Load bookings
-            loadStudentBookings(studentId, rateBtn.dataset.bookingsUrl);
+            // Load bookings with direct URL
+            const bookingsUrl = `/api/students/${studentId}/bookings/`;
+            loadStudentBookings(studentId, bookingsUrl);
             
             // Show modal
             rateModal.classList.remove('hidden');
@@ -360,7 +364,8 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (this.value === 'session' && sessionSelect.options.length <= 1) {
                 const studentId = rateStudentIdInput.value;
-                const sessionsUrl = document.querySelector('.rate-student-btn').dataset.sessionsUrl;
+                // Direct URL instead of relying on dataset
+                const sessionsUrl = `/api/students/${studentId}/sessions/`;
                 loadStudentSessions(studentId, sessionsUrl);
             }
         });
@@ -369,16 +374,23 @@ document.addEventListener('DOMContentLoaded', function() {
     // Form Submission
     rateForm.addEventListener('submit', async function(e) {
         e.preventDefault();
+        console.log("Form submitted");
         
         // Validate form
-        if (!validateRatingForm()) return;
+        if (!validateRatingForm()) {
+            console.log("Form validation failed");
+            return;
+        }
         
         try {
+            console.log("Submitting rating form");
             // Show loading state
             submitRatingBtn.disabled = true;
             submitRatingBtn.innerHTML = '<span class="animate-pulse">Submitting...</span>';
             
             const formData = new FormData(this);
+            console.log("Form data:", Object.fromEntries(formData));
+            
             const response = await fetch(this.action, {
                 method: 'POST',
                 body: formData,
@@ -388,9 +400,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
+            console.log("Response status:", response.status);
             const data = await response.json();
+            console.log("Response data:", data);
             
-            if (!response.ok) throw new Error(data.error || 'Failed to submit rating');
+            if (!response.ok) {
+                throw new Error(data.error || `Server error: ${response.status}`);
+            }
             
             showAlert('success', 'Rating submitted successfully!');
             setTimeout(() => window.location.reload(), 1500);
@@ -467,7 +483,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return false;
         }
         
-        if (isNaN(score) {
+        if (isNaN(score)) { // Fixed parenthesis
             showAlert('error', 'Please select a rating score');
             return false;
         }
