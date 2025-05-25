@@ -1684,3 +1684,86 @@ def booking_history_view(request):
         ) if lab_sessions else [],
         'past_lab_sessions': past_lab_sessions,
     })
+
+@login_required
+@user_passes_test(is_admin)
+def assign_student_view(request):
+    """View for admins to assign students to sessions or computers"""
+    if request.method != 'POST':
+        messages.error(request, "Invalid request method")
+        return redirect('admin_dashboard')
+    
+    student_id = request.POST.get('student_id')
+    assignment_type = request.POST.get('assignment_type')
+    purpose = request.POST.get('purpose', '')
+    
+    try:
+        student = User.objects.get(id=student_id, is_student=True)
+    except User.DoesNotExist:
+        messages.error(request, "Student not found")
+        return redirect('admin_dashboard')
+    
+    if assignment_type == 'lab_session':
+        # Assign student to lab session
+        session_id = request.POST.get('lab_session_id')
+        try:
+            session = LabSession.objects.get(id=session_id)
+            
+            # Add student to the session
+            session.attending_students.add(student)
+            
+            # Create notification for the student
+            Notification.objects.create(
+                user=student,
+                message=f"You have been assigned to the lab session: {session.title} on {session.start_time.strftime('%Y-%m-%d %H:%M')}",
+                notification_type='session_booked',
+                lab_session=session
+            )
+            
+            messages.success(request, f"Successfully assigned {student.get_full_name()} to {session.title}")
+            
+        except LabSession.DoesNotExist:
+            messages.error(request, "Lab session not found")
+            
+    elif assignment_type == 'computer_booking':
+        # Create a computer booking for the student
+        computer_id = request.POST.get('computer_id')
+        start_time_str = request.POST.get('start_time')
+        end_time_str = request.POST.get('end_time')
+        
+        try:
+            computer = Computer.objects.get(id=computer_id)
+            start_time = timezone.make_aware(datetime.fromisoformat(start_time_str))
+            end_time = timezone.make_aware(datetime.fromisoformat(end_time_str))
+            
+            # Create new booking
+            booking = ComputerBooking.objects.create(
+                computer=computer,
+                student=student,
+                start_time=start_time,
+                end_time=end_time,
+                purpose=purpose,
+                is_approved=True  # Admin-created bookings are auto-approved
+            )
+            
+            # Create notification for the student
+            Notification.objects.create(
+                user=student,
+                message=f"A computer has been booked for you: {computer} on {start_time.strftime('%Y-%m-%d %H:%M')}",
+                notification_type='booking_approved',
+                booking=booking
+            )
+            
+            messages.success(request, f"Successfully booked {computer} for {student.get_full_name()}")
+            
+        except Computer.DoesNotExist:
+            messages.error(request, "Computer not found")
+        except ValueError:
+            messages.error(request, "Invalid date/time format")
+        except ValidationError as e:
+            messages.error(request, f"Booking validation error: {str(e)}")
+    
+    else:
+        messages.error(request, "Invalid assignment type")
+    
+    return redirect('admin_dashboard')
