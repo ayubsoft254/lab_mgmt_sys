@@ -348,7 +348,15 @@ def admin_dashboard_view(request):
         is_approved=True
     ).order_by('start_date')
     
-    return render(request, 'admin_dashboard.html', {
+    # Add this:
+    today = timezone.now().date()
+    today_bookings = ComputerBooking.objects.filter(
+        start_time__date=today
+    )
+    today_sessions = LabSession.objects.filter(
+        start_time__date=today
+    )
+    context = {
         'pending_computer_bookings': pending_computer_bookings,        
         'pending_lab_sessions': pending_lab_sessions,              
         'upcoming_computer_bookings': upcoming_computer_bookings,
@@ -361,7 +369,25 @@ def admin_dashboard_view(request):
         'date_to': date_to,
         'pending_recurring_sessions': pending_recurring_sessions,
         'approved_recurring_sessions': approved_recurring_sessions,
+    }
+    
+    # Add these to the context in admin_check_in_dashboard view
+    context.update({
+        'debug_info': {
+            'today': today,
+            'timezone_now': timezone.now(),
+            'today_bookings_count': today_bookings.count(),
+            'today_sessions_count': today_sessions.count(),
+            'today_bookings_times': [
+                (b.id, b.start_time, b.end_time) for b in today_bookings[:5]
+            ],
+            'today_sessions_times': [
+                (s.id, s.start_time, s.end_time) for s in today_sessions[:5]
+            ]
+        }
     })
+    
+    return render(request, 'admin_dashboard.html', context)
 
 @login_required
 def approve_booking_view(request, booking_id):
@@ -1299,6 +1325,22 @@ def admin_check_in_dashboard(request):
         'all_bookings_count': all_bookings_count,
         'all_sessions_count': all_sessions_count
     }
+    
+    # Add these to the context in admin_check_in_dashboard view
+    context.update({
+        'debug_info': {
+            'today': today,
+            'timezone_now': timezone.now(),
+            'today_bookings_count': today_bookings.count(),
+            'today_sessions_count': today_sessions.count(),
+            'today_bookings_times': [
+                (b.id, b.start_time, b.end_time) for b in today_bookings[:5]
+            ],
+            'today_sessions_times': [
+                (s.id, s.start_time, s.end_time) for s in today_sessions[:5]
+            ]
+        }
+    })
     
     return render(request, 'check_in_dashboard.html', context)
 
