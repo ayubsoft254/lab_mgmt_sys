@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Email Verification Required" %}{% endblock %}
+
+{% block content %}
+<style>
+/* Base Styles */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9fafb;
+}
+
+/* Container */
+.verify-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Card */
+.verify-card {
+    width: 100%;
+    max-width: 400px;
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    border-top: 5px solid #047857;
+}
+
+/* Title */
+.verify-title {
+    text-align: center;
+    color: #047857;
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* Paragraph */
+.verify-description {
+    font-size: 14px;
+    color: #374151;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Icon */
+.verify-icon {
+    width: 60px;
+    height: 60px;
+    background-color: #fef3c7;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.verify-icon svg {
+    width: 30px;
+    height: 30px;
+    color: #d97706;
+}
+
+/* Button */
+.action-button {
+    padding: 10px;
+    background-color: #047857;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+    display: block;
+    width: 100%;
+    text-align: center;
+    text-decoration: none;
+    margin-top: 20px;
+}
+
+.action-button:hover {
+    background-color: #065f46;
+}
+
+/* Contact Text */
+.contact-text {
+    margin-top: 20px;
+    font-size: 14px;
+    text-align: center;
+}
+
+/* Status Message */
+.status-message {
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    text-align: center;
+}
+
+.status-message.warning {
+    background-color: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+</style>
+
+<div class="verify-container">
+  <div class="verify-card">
+    <div class="verify-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+      </svg>
+    </div>
+
+    <h2 class="verify-title">{% trans "Email Verification Required" %}</h2>
+    
+    <div class="status-message warning">
+      {% trans "Your account is currently inactive." %}
+    </div>
+    
+    <p class="verify-description">
+      {% blocktrans %}To access your account, you need to verify your email address. Please check your email for a verification link.{% endblocktrans %}
+    </p>
+    
+    <p class="verify-description">
+      {% blocktrans %}If you haven't received the verification email, you can request a new one.{% endblocktrans %}
+    </p>
+    
+    <a href="{% url 'account_email' %}" class="action-button">{% trans "Manage Email Addresses" %}</a>
+    
+    <p class="contact-text">
+      {% blocktrans %}Please contact us if you have any trouble verifying your email.{% endblocktrans %}
+    </p>
+  </div>
+</div>
+{% endblock %}
