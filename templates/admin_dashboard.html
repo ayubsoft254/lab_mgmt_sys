@@ -56,51 +56,51 @@
     </div>
 
     <!-- Tab Navigation -->
-    <div class="border-b border-gray-200 mb-6">
-        <ul class="flex flex-wrap -mb-px" id="adminTabs" role="tablist">
-            <li class="mr-2" role="presentation">
-                <button class="inline-block py-3 px-4 text-sm font-medium text-center border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 active-tab" 
+    <div class="border-b border-gray-200 mb-6 overflow-x-auto">
+        <ul class="flex flex-nowrap -mb-px whitespace-nowrap" id="adminTabs" role="tablist">
+            <li class="mr-1" role="presentation">
+                <button class="inline-block py-2 px-3 text-sm font-medium text-center border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 active-tab" 
                         id="pending-tab" 
                         data-tab-target="pending" 
                         type="button" 
                         role="tab">
-                    Pending Approvals
+                    <i class="fas fa-clock mr-1"></i> Pending
                 </button>
             </li>
-            <li class="mr-2" role="presentation">
-                <button class="inline-block py-3 px-4 text-sm font-medium text-center border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" 
+            <li class="mr-1" role="presentation">
+                <button class="inline-block py-2 px-3 text-sm font-medium text-center border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" 
                         id="upcoming-tab" 
                         data-tab-target="upcoming" 
                         type="button" 
                         role="tab">
-                    Upcoming
+                    <i class="fas fa-calendar mr-1"></i> Upcoming
                 </button>
             </li>
-            <li class="mr-2" role="presentation">
-                <button class="inline-block py-3 px-4 text-sm font-medium text-center border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" 
+            <li class="mr-1" role="presentation">
+                <button class="inline-block py-2 px-3 text-sm font-medium text-center border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" 
                         id="past-tab" 
                         data-tab-target="past" 
                         type="button" 
                         role="tab">
-                    Past
+                    <i class="fas fa-history mr-1"></i> Past
                 </button>
             </li>
-            <li class="mr-2" role="presentation">
-                <button class="inline-block py-3 px-4 text-sm font-medium text-center border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" 
+            <li class="mr-1" role="presentation">
+                <button class="inline-block py-2 px-3 text-sm font-medium text-center border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" 
                         id="recurring-tab" 
                         data-tab-target="recurring" 
                         type="button" 
                         role="tab">
-                    Recurring Sessions
+                    <i class="fas fa-sync mr-1"></i> Recurring
                 </button>
             </li>
-            <li class="mr-2" role="presentation">
-                <button class="inline-block py-3 px-4 text-sm font-medium text-center border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" 
+            <li role="presentation">
+                <button class="inline-block py-2 px-3 text-sm font-medium text-center border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" 
                         id="students-tab" 
                         data-tab-target="students" 
                         type="button" 
                         role="tab">
-                    Students
+                    <i class="fas fa-user-graduate mr-1"></i> Students
                 </button>
             </li>
         </ul>
