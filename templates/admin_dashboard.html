@@ -899,10 +899,148 @@
     </div>
 </div>
 
-<!-- Add this right after the studentSearch input -->
-<div id="searchResultsCounter" class="text-sm text-gray-500 mt-2"></div>
-
+<!-- Student Assignment functionality -->
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const assignModal = document.getElementById('assignStudentModal');
+        const closeAssignButtons = document.querySelectorAll('.closeAssignModal');
+        const assignButtons = document.querySelectorAll('.assign-student-btn');
+        const studentNameDisplay = document.getElementById('studentNameDisplay');
+        const studentIdInput = document.getElementById('student_id');
+        const assignmentTypeSelect = document.getElementById('assignment_type');
+        const labSessionSection = document.getElementById('lab_session_section');
+        const computerSection = document.getElementById('computer_section');
+        const labSelect = document.getElementById('lab');
+        const computersContainer = document.getElementById('computers_container');
+        const computerSelect = document.getElementById('computer');
+        const bookingTimeContainer = document.getElementById('booking_time_container');
+        
+        // Open assignment modal
+        assignButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const studentId = button.getAttribute('data-student-id');
+                const studentName = button.getAttribute('data-student-name');
+                
+                studentNameDisplay.textContent = studentName;
+                studentIdInput.value = studentId;
+                
+                assignModal.classList.remove('hidden');
+            });
+        });
+        
+        // Close assignment modal
+        closeAssignButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                assignModal.classList.add('hidden');
+                resetForm();
+            });
+        });
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === assignModal) {
+                assignModal.classList.add('hidden');
+                resetForm();
+            }
+        });
+        
+        // Handle assignment type change
+        assignmentTypeSelect.addEventListener('change', function() {
+            if (this.value === 'lab_session') {
+                labSessionSection.classList.remove('hidden');
+                computerSection.classList.add('hidden');
+            } else if (this.value === 'computer_booking') {
+                computerSection.classList.remove('hidden');
+                labSessionSection.classList.add('hidden');
+            } else {
+                labSessionSection.classList.add('hidden');
+                computerSection.classList.add('hidden');
+            }
+        });
+        
+        // Handle lab selection change - load computers for that lab
+        labSelect.addEventListener('change', function() {
+            const labId = this.value;
+            
+            if (labId) {
+                // Show computers container
+                computersContainer.classList.remove('hidden');
+                bookingTimeContainer.classList.remove('hidden');
+                
+                // Reset computer select
+                computerSelect.innerHTML = '<option value="">Loading computers...</option>';
+                
+                // Fetch computers for the selected lab
+                fetch(`/api/labs/${labId}/computers/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        let options = '<option value="">Select a computer</option>';
+                        data.computers.forEach(computer => {
+                            if (computer.status === 'available') {
+                                options += `<option value="${computer.id}">${computer.number} - ${computer.specs}</option>`;
+                            } else {
+                                options += `<option value="${computer.id}" disabled>${computer.number} - ${computer.status}</option>`;
+                            }
+                        });
+                        computerSelect.innerHTML = options;
+                    })
+                    .catch(error => {
+                        computerSelect.innerHTML = '<option value="">Error loading computers</option>';
+                        console.error('Error:', error);
+                    });
+            } else {
+                computersContainer.classList.add('hidden');
+                bookingTimeContainer.classList.add('hidden');
+            }
+        });
+        
+        // Reset form function
+        function resetForm() {
+            document.getElementById('assignStudentForm').reset();
+            labSessionSection.classList.add('hidden');
+            computerSection.classList.add('hidden');
+            computersContainer.classList.add('hidden');
+            bookingTimeContainer.classList.add('hidden');
+        }
+        
+        document.getElementById('assignStudentForm').addEventListener('submit', function(e) {
+            const assignmentType = document.getElementById('assignment_type').value;
+            let isValid = true;
+            let errorMessage = "";
+            
+            if (!assignmentType) {
+                isValid = false;
+                errorMessage = "Please select an assignment type";
+            } else if (assignmentType === 'lab_session') {
+                const sessionId = document.getElementById('lab_session').value;
+                if (!sessionId) {
+                    isValid = false;
+                    errorMessage = "Please select a lab session";
+                }
+            } else if (assignmentType === 'computer_booking') {
+                const computerId = document.getElementById('computer').value;
+                const startTime = document.getElementById('start_time').value;
+                const endTime = document.getElementById('end_time').value;
+                
+                if (!computerId) {
+                    isValid = false;
+                    errorMessage = "Please select a computer";
+                } else if (!startTime || !endTime) {
+                    isValid = false;
+                    errorMessage = "Please specify both start and end times";
+                } else if (new Date(startTime) >= new Date(endTime)) {
+                    isValid = false;
+                    errorMessage = "End time must be after start time";
+                }
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+                alert(errorMessage);
+            }
+        });
+    });
+    
     // Tab functionality
     document.addEventListener('DOMContentLoaded', function() {
         const tabButtons = document.querySelectorAll('[data-tab-target]');
@@ -1234,145 +1372,190 @@
         }
     });
     
-    // Student Assignment functionality
+    // Student Rating functionality
     document.addEventListener('DOMContentLoaded', function() {
-        const assignModal = document.getElementById('assignStudentModal');
-        const closeAssignButtons = document.querySelectorAll('.closeAssignModal');
-        const assignButtons = document.querySelectorAll('.assign-student-btn');
-        const studentNameDisplay = document.getElementById('studentNameDisplay');
-        const studentIdInput = document.getElementById('student_id');
-        const assignmentTypeSelect = document.getElementById('assignment_type');
-        const labSessionSection = document.getElementById('lab_session_section');
-        const computerSection = document.getElementById('computer_section');
-        const labSelect = document.getElementById('lab');
-        const computersContainer = document.getElementById('computers_container');
-        const computerSelect = document.getElementById('computer');
-        const bookingTimeContainer = document.getElementById('booking_time_container');
+        const rateModal = document.getElementById('rateStudentModal');
+        const closeRateButtons = document.querySelectorAll('.closeRateModal');
+        const rateButtons = document.querySelectorAll('.rate-student-btn');
+        const rateStudentNameDisplay = document.getElementById('rateStudentNameDisplay');
+        const rateStudentIdInput = document.getElementById('rate_student_id');
+        const bookingSelect = document.getElementById('booking_select');
+        const sessionSelect = document.getElementById('session_select');
+        const starButtons = document.querySelectorAll('.star-btn');
+        const ratingInput = document.getElementById('rating_value');
+        const ratingText = document.getElementById('rating-text');
+        const submitRatingBtn = document.getElementById('submit-rating');
         
-        // Open assignment modal
-        assignButtons.forEach(button => {
+        // Rating type radio buttons
+        const rateGeneral = document.getElementById('rate_general');
+        const rateBooking = document.getElementById('rate_booking');
+        const rateSession = document.getElementById('rate_session');
+        
+        // Open rating modal
+        rateButtons.forEach(button => {
             button.addEventListener('click', () => {
                 const studentId = button.getAttribute('data-student-id');
                 const studentName = button.getAttribute('data-student-name');
                 
-                studentNameDisplay.textContent = studentName;
-                studentIdInput.value = studentId;
+                rateStudentNameDisplay.textContent = studentName;
+                rateStudentIdInput.value = studentId;
                 
-                assignModal.classList.remove('hidden');
+                // Reset stars
+                resetStars();
+                
+                // Load student's bookings and sessions
+                loadStudentBookings(studentId);
+                loadStudentSessions(studentId);
+                
+                rateModal.classList.remove('hidden');
             });
         });
         
-        // Close assignment modal
-        closeAssignButtons.forEach(button => {
+        // Close rating modal
+        closeRateButtons.forEach(button => {
             button.addEventListener('click', () => {
-                assignModal.classList.add('hidden');
-                resetForm();
+                rateModal.classList.add('hidden');
+                resetRatingForm();
             });
         });
         
         // Close modal when clicking outside
         window.addEventListener('click', (e) => {
-            if (e.target === assignModal) {
-                assignModal.classList.add('hidden');
-                resetForm();
+            if (e.target === rateModal) {
+                rateModal.classList.add('hidden');
+                resetRatingForm();
             }
         });
         
-        // Handle assignment type change
-        assignmentTypeSelect.addEventListener('change', function() {
-            if (this.value === 'lab_session') {
-                labSessionSection.classList.remove('hidden');
-                computerSection.classList.add('hidden');
-            } else if (this.value === 'computer_booking') {
-                computerSection.classList.remove('hidden');
-                labSessionSection.classList.add('hidden');
-            } else {
-                labSessionSection.classList.add('hidden');
-                computerSection.classList.add('hidden');
+        // Handle rating type change
+        rateGeneral.addEventListener('change', function() {
+            if (this.checked) {
+                bookingSelect.disabled = true;
+                sessionSelect.disabled = true;
             }
         });
         
-        // Handle lab selection change - load computers for that lab
-        labSelect.addEventListener('change', function() {
-            const labId = this.value;
+        rateBooking.addEventListener('change', function() {
+            if (this.checked) {
+                bookingSelect.disabled = false;
+                sessionSelect.disabled = true;
+            }
+        });
+        
+        rateSession.addEventListener('change', function() {
+            if (this.checked) {
+                bookingSelect.disabled = true;
+                sessionSelect.disabled = false;
+            }
+        });
+        
+        // Star rating functionality
+        starButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const rating = parseInt(this.getAttribute('data-rating'));
+                ratingInput.value = rating;
+                
+                // Update stars display
+                starButtons.forEach((btn, index) => {
+                    if (index < rating) {
+                        btn.classList.remove('text-gray-300');
+                        btn.classList.add('text-yellow-400');
+                    } else {
+                        btn.classList.remove('text-yellow-400');
+                        btn.classList.add('text-gray-300');
+                    }
+                });
+                
+                // Update rating text
+                const ratingTexts = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+                ratingText.textContent = ratingTexts[rating];
+                
+                // Enable submit button if rating is selected
+                submitRatingBtn.disabled = rating === 0;
+            });
+        });
+        
+        // Handle form validation
+        document.getElementById('rateStudentForm').addEventListener('submit', function(e) {
+            const rating = parseInt(ratingInput.value);
+            if (rating === 0) {
+                e.preventDefault();
+                alert('Please select a rating');
+                return;
+            }
             
-            if (labId) {
-                // Show computers container
-                computersContainer.classList.remove('hidden');
-                bookingTimeContainer.classList.remove('hidden');
-                
-                // Reset computer select
-                computerSelect.innerHTML = '<option value="">Loading computers...</option>';
-                
-                // Fetch computers for the selected lab
-                fetch(`/api/labs/${labId}/computers/`)
-                    .then(response => response.json())
-                    .then(data => {
-                        let options = '<option value="">Select a computer</option>';
-                        data.computers.forEach(computer => {
-                            if (computer.status === 'available') {
-                                options += `<option value="${computer.id}">${computer.number} - ${computer.specs}</option>`;
-                            } else {
-                                options += `<option value="${computer.id}" disabled>${computer.number} - ${computer.status}</option>`;
-                            }
-                        });
-                        computerSelect.innerHTML = options;
-                    })
-                    .catch(error => {
-                        computerSelect.innerHTML = '<option value="">Error loading computers</option>';
-                        console.error('Error:', error);
-                    });
-            } else {
-                computersContainer.classList.add('hidden');
-                bookingTimeContainer.classList.add('hidden');
+            const ratingType = document.querySelector('input[name="rating_type"]:checked').value;
+            
+            if (ratingType === 'booking' && !bookingSelect.value) {
+                e.preventDefault();
+                alert('Please select a booking');
+                return;
+            }
+            
+            if (ratingType === 'session' && !sessionSelect.value) {
+                e.preventDefault();
+                alert('Please select a session');
+                return;
             }
         });
         
-        // Reset form function
-        function resetForm() {
-            document.getElementById('assignStudentForm').reset();
-            labSessionSection.classList.add('hidden');
-            computerSection.classList.add('hidden');
-            computersContainer.classList.add('hidden');
-            bookingTimeContainer.classList.add('hidden');
+        // Load student's bookings
+        function loadStudentBookings(studentId) {
+            fetch(`/api/students/${studentId}/bookings/`)
+                .then(response => response.json())
+                .then(data => {
+                    let options = '<option value="">Select a booking</option>';
+                    data.bookings.forEach(booking => {
+                        const date = new Date(booking.start_time).toLocaleDateString();
+                        const time = new Date(booking.start_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                        options += `<option value="${booking.id}">${date} ${time} - Computer ${booking.computer_number}</option>`;
+                    });
+                    bookingSelect.innerHTML = options;
+                })
+                .catch(error => {
+                    console.error('Error loading bookings:', error);
+                    bookingSelect.innerHTML = '<option value="">Error loading bookings</option>';
+                });
         }
         
-        document.getElementById('assignStudentForm').addEventListener('submit', function(e) {
-            const assignmentType = document.getElementById('assignment_type').value;
-            let isValid = true;
-            let errorMessage = "";
-            
-            if (!assignmentType) {
-                isValid = false;
-                errorMessage = "Please select an assignment type";
-            } else if (assignmentType === 'lab_session') {
-                const sessionId = document.getElementById('lab_session').value;
-                if (!sessionId) {
-                    isValid = false;
-                    errorMessage = "Please select a lab session";
-                }
-            } else if (assignmentType === 'computer_booking') {
-                const computerId = document.getElementById('computer').value;
-                const startTime = document.getElementById('start_time').value;
-                const endTime = document.getElementById('end_time').value;
-                
-                if (!computerId) {
-                    isValid = false;
-                    errorMessage = "Please select a computer";
-                } else if (!startTime || !endTime) {
-                    isValid = false;
-                    errorMessage = "Please specify both start and end times";
-                } else if (new Date(startTime) >= new Date(endTime)) {
-                    isValid = false;
-                    errorMessage = "End time must be after start time";
-                }
-            }
-            
-            if (!isValid) {
-                e.preventDefault();
-                alert(errorMessage);
-            }
-        });
+        // Load student's sessions
+        function loadStudentSessions(studentId) {
+            fetch(`/api/students/${studentId}/sessions/`)
+                .then(response => response.json())
+                .then(data => {
+                    let options = '<option value="">Select a session</option>';
+                    data.sessions.forEach(session => {
+                        const date = new Date(session.start_time).toLocaleDateString();
+                        options += `<option value="${session.id}">${date} - ${session.title}</option>`;
+                    });
+                    sessionSelect.innerHTML = options;
+                })
+                .catch(error => {
+                    console.error('Error loading sessions:', error);
+                    sessionSelect.innerHTML = '<option value="">Error loading sessions</option>';
+                });
+        }
+        
+        // Reset stars
+        function resetStars() {
+            ratingInput.value = 0;
+            starButtons.forEach(btn => {
+                btn.classList.remove('text-yellow-400');
+                btn.classList.add('text-gray-300');
+            });
+            ratingText.textContent = 'Select rating';
+            submitRatingBtn.disabled = true;
+        }
+        
+        // Reset form
+        function resetRatingForm() {
+            document.getElementById('rateStudentForm').reset();
+            resetStars();
+            bookingSelect.disabled = true;
+            sessionSelect.disabled = true;
+            bookingSelect.innerHTML = '<option value="">Select a booking</option>';
+            sessionSelect.innerHTML = '<option value="">Select a session</option>';
+        }
     });
 </script>
 
