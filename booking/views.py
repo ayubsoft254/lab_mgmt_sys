@@ -428,9 +428,10 @@ def free_timeslots_view(request, lab_id=None, computer_id=None):
         lab = get_object_or_404(Lab, id=lab_id)
         computer = None
     else:
-        # If no specific lab or computer is selected, return an error
-        return render(request, 'free_timeslots.html', {
-            'error': 'Please select a lab or computer'
+        # If no specific lab or computer is selected, show labs list
+        labs = Lab.objects.all()
+        return render(request, 'free_timeslots_select.html', {
+            'labs': labs
         })
     
     # Set up date range (next 7 days)
@@ -466,7 +467,9 @@ def free_timeslots_view(request, lab_id=None, computer_id=None):
     while current_date <= end_date:
         # Generate hourly slots from 8:00 AM to 8:00 PM
         for hour in range(8, 20):
-            slot_start = timezone.make_aware(datetime.combine(current_date, datetime.min.replace(hour=hour)))
+            # Fix: Use time object instead of datetime.min
+            slot_start_time = datetime.time(hour=hour, minute=0)
+            slot_start = timezone.make_aware(datetime.combine(current_date, slot_start_time))
             slot_end = slot_start + timedelta(hours=1)
             
             # Check if slot is free
