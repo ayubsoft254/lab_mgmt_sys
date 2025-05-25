@@ -1083,6 +1083,110 @@
             });
         }
     });
+    
+    // Student Assignment functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const assignModal = document.getElementById('assignStudentModal');
+        const closeAssignButtons = document.querySelectorAll('.closeAssignModal');
+        const assignButtons = document.querySelectorAll('.assign-student-btn');
+        const studentNameDisplay = document.getElementById('studentNameDisplay');
+        const studentIdInput = document.getElementById('student_id');
+        const assignmentTypeSelect = document.getElementById('assignment_type');
+        const labSessionSection = document.getElementById('lab_session_section');
+        const computerSection = document.getElementById('computer_section');
+        const labSelect = document.getElementById('lab');
+        const computersContainer = document.getElementById('computers_container');
+        const computerSelect = document.getElementById('computer');
+        const bookingTimeContainer = document.getElementById('booking_time_container');
+        
+        // Open assignment modal
+        assignButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const studentId = button.getAttribute('data-student-id');
+                const studentName = button.getAttribute('data-student-name');
+                
+                studentNameDisplay.textContent = studentName;
+                studentIdInput.value = studentId;
+                
+                assignModal.classList.remove('hidden');
+            });
+        });
+        
+        // Close assignment modal
+        closeAssignButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                assignModal.classList.add('hidden');
+                resetForm();
+            });
+        });
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === assignModal) {
+                assignModal.classList.add('hidden');
+                resetForm();
+            }
+        });
+        
+        // Handle assignment type change
+        assignmentTypeSelect.addEventListener('change', function() {
+            if (this.value === 'lab_session') {
+                labSessionSection.classList.remove('hidden');
+                computerSection.classList.add('hidden');
+            } else if (this.value === 'computer_booking') {
+                computerSection.classList.remove('hidden');
+                labSessionSection.classList.add('hidden');
+            } else {
+                labSessionSection.classList.add('hidden');
+                computerSection.classList.add('hidden');
+            }
+        });
+        
+        // Handle lab selection change - load computers for that lab
+        labSelect.addEventListener('change', function() {
+            const labId = this.value;
+            
+            if (labId) {
+                // Show computers container
+                computersContainer.classList.remove('hidden');
+                bookingTimeContainer.classList.remove('hidden');
+                
+                // Reset computer select
+                computerSelect.innerHTML = '<option value="">Loading computers...</option>';
+                
+                // Fetch computers for the selected lab
+                fetch(`/api/labs/${labId}/computers/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        let options = '<option value="">Select a computer</option>';
+                        data.computers.forEach(computer => {
+                            if (computer.status === 'available') {
+                                options += `<option value="${computer.id}">${computer.number} - ${computer.specs}</option>`;
+                            } else {
+                                options += `<option value="${computer.id}" disabled>${computer.number} - ${computer.status}</option>`;
+                            }
+                        });
+                        computerSelect.innerHTML = options;
+                    })
+                    .catch(error => {
+                        computerSelect.innerHTML = '<option value="">Error loading computers</option>';
+                        console.error('Error:', error);
+                    });
+            } else {
+                computersContainer.classList.add('hidden');
+                bookingTimeContainer.classList.add('hidden');
+            }
+        });
+        
+        // Reset form function
+        function resetForm() {
+            document.getElementById('assignStudentForm').reset();
+            labSessionSection.classList.add('hidden');
+            computerSection.classList.add('hidden');
+            computersContainer.classList.add('hidden');
+            bookingTimeContainer.classList.add('hidden');
+        }
+    });
 </script>
 
 <style>
