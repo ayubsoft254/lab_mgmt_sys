@@ -258,6 +258,7 @@ class SystemEventAdmin(admin.ModelAdmin):
     def export_selected_events(self, request, queryset):
         """Export selected events to CSV"""
         import csv
+        import json
         from django.http import HttpResponse
         
         response = HttpResponse(content_type='text/csv')
@@ -270,6 +271,9 @@ class SystemEventAdmin(admin.ModelAdmin):
         ])
         
         for event in queryset:
+            # Convert details to JSON string if it's not already a string
+            details_str = json.dumps(event.details) if event.details else ''
+            
             writer.writerow([
                 event.id,
                 event.get_event_type_display(),
@@ -278,7 +282,7 @@ class SystemEventAdmin(admin.ModelAdmin):
                 event.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
                 'Yes' if event.resolved else 'No',
                 event.ip_address or '',
-                event.details or ''
+                details_str
             ])
         
         return response
