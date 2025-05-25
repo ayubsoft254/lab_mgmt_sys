@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto p-6 animate-fade-in">
+    <h1 class="text-3xl font-bold text-ttu-dark mb-6">Find Free Time Slots</h1>
+    
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold mb-4">Select a Lab</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for lab in labs %}
+                <div class="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
+                    <div class="p-4 bg-white">
+                        <h3 class="font-bold text-lg text-ttu-dark">{{ lab.name }}</h3>
+                        <p class="text-sm text-gray-600">{{ lab.location }}</p>
+                        
+                        <div class="mt-4">
+                            <a href="{% url 'lab_free_timeslots' lab.id %}" 
+                               class="inline-block bg-ttu-green text-white py-2 px-4 rounded hover:bg-ttu-dark transition">
+                                View Free Slots
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
