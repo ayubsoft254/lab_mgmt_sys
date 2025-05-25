@@ -287,6 +287,7 @@
         </div>
     </div>
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -331,8 +332,8 @@
                     loadStudentBookings(studentId);
                     
                     // Show modal with direct DOM manipulation to be sure
-                    document.getElementById('rateStudentModal').style.display = 'block';
-                    document.getElementById('rateStudentModal').classList.remove('hidden');
+                    rateModal.style.display = 'block';
+                    rateModal.classList.remove('hidden');
                 });
             }
         } else {
@@ -406,28 +407,19 @@
         // Handle form validation
         document.getElementById('rateStudentForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            console.log("Form submitted");
             
             const score = parseInt(scoreInput.value);
-            if (!score || score < 1 || score > 5) {
-                alert('Please select a valid score (1-5 stars)');
-                return;
-            }
+            console.log("Score value:", score);
             
-            const ratingType = document.querySelector('input[name="rating_type"]:checked').value;
+            // Rest of your validation code...
             
-            if (ratingType === 'booking' && !bookingSelect.value) {
-                alert('Please select a booking');
-                return;
-            }
-            
-            if (ratingType === 'session' && !sessionSelect.value) {
-                alert('Please select a session');
-                return;
-            }
+            // Log the form data being sent
+            const formData = new FormData(this);
+            console.log("Form action URL:", this.action);
+            console.log("Sending data:", Object.fromEntries(formData));
             
             // Submit the form using fetch API
-            const formData = new FormData(this);
-            
             fetch(this.action, {
                 method: 'POST',
                 body: formData,
@@ -472,34 +464,19 @@
         
         // Load student's bookings
         function loadStudentBookings(studentId) {
+            console.log("Loading bookings for student:", studentId);
             bookingSelect.innerHTML = '<option value="">Loading bookings...</option>';
             
-            fetch(`/api/students/${studentId}/bookings/`)
+            // Log the URL being fetched
+            const url = `/api/students/${studentId}/bookings/`;
+            console.log("Fetching URL:", url);
+            
+            fetch(url)
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
+                    console.log("Response status:", response.status);
+                    // Rest of your code...
                 })
-                .then(data => {
-                    if (data.bookings.length === 0) {
-                        bookingSelect.innerHTML = '<option value="">No bookings found</option>';
-                    } else {
-                        let options = '<option value="">Select a booking</option>';
-                        data.bookings.forEach(booking => {
-                            const date = new Date(booking.start_time);
-                            const formattedDate = date.toLocaleDateString() + ' ' + 
-                                               date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                            
-                            options += `<option value="${booking.id}">${formattedDate} - Computer #${booking.computer_number}</option>`;
-                        });
-                        bookingSelect.innerHTML = options;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading bookings:', error);
-                    bookingSelect.innerHTML = '<option value="">Error loading bookings</option>';
-                });
+                // Rest of your code...
         }
         
         // Load student's lab sessions
