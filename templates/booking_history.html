@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block title %}Booking History | Lab Management System{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-6">Your Booking History</h1>
+    
+    <div class="mb-8">
+        <h2 class="text-xl font-semibold mb-4">Current Bookings</h2>
+        {% if current_computer_bookings %}
+            <div class="bg-white shadow overflow-hidden rounded-md">
+                <ul class="divide-y divide-gray-200">
+                    {% for booking in current_computer_bookings %}
+                        <li class="px-6 py-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-lg font-medium text-gray-900">
+                                        Computer #{{ booking.computer.number }} in {{ booking.computer.lab.name }}
+                                    </h3>
+                                    <p class="text-sm text-gray-500">
+                                        {{ booking.start_time|date:"D, M d, Y" }} at {{ booking.start_time|date:"g:i A" }} - 
+                                        {{ booking.end_time|date:"g:i A" }}
+                                    </p>
+                                    <p class="text-sm text-gray-500 mt-1">
+                                        Status: 
+                                        {% if booking.is_approved %}
+                                            <span class="text-green-600 font-medium">Approved</span>
+                                        {% elif booking.is_rejected %}
+                                            <span class="text-red-600 font-medium">Rejected</span>
+                                        {% else %}
+                                            <span class="text-yellow-600 font-medium">Pending</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <div>
+                                    {% if not booking.is_cancelled and not booking.is_rejected %}
+                                        <a href="{% url 'cancel_booking' booking.id %}" class="text-red-600 hover:text-red-800 text-sm font-medium">
+                                            Cancel
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% else %}
+            <p class="text-gray-600">You don't have any current computer bookings.</p>
+        {% endif %}
+        
+        {% if current_lab_sessions %}
+            <h3 class="text-lg font-semibold mt-6 mb-3">Current Lab Sessions</h3>
+            <div class="bg-white shadow overflow-hidden rounded-md">
+                <ul class="divide-y divide-gray-200">
+                    {% for session in current_lab_sessions %}
+                        <li class="px-6 py-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-lg font-medium text-gray-900">
+                                        {{ session.lab.name }} - {{ session.title }}
+                                    </h3>
+                                    <p class="text-sm text-gray-500">
+                                        {{ session.start_time|date:"D, M d, Y" }} at {{ session.start_time|date:"g:i A" }} - 
+                                        {{ session.end_time|date:"g:i A" }}
+                                    </p>
+                                    <p class="text-sm text-gray-500 mt-1">
+                                        Status: 
+                                        {% if session.is_approved %}
+                                            <span class="text-green-600 font-medium">Approved</span>
+                                        {% elif session.is_rejected %}
+                                            <span class="text-red-600 font-medium">Rejected</span>
+                                        {% else %}
+                                            <span class="text-yellow-600 font-medium">Pending</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <div>
+                                    {% if not session.is_cancelled and not session.is_rejected %}
+                                        <a href="{% url 'cancel_session' session.id %}" class="text-red-600 hover:text-red-800 text-sm font-medium">
+                                            Cancel
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+    
+    <div>
+        <h2 class="text-xl font-semibold mb-4">Past Bookings</h2>
+        {% if past_computer_bookings %}
+            <div class="bg-white shadow overflow-hidden rounded-md">
+                <ul class="divide-y divide-gray-200">
+                    {% for booking in past_computer_bookings %}
+                        <li class="px-6 py-4">
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-900">
+                                    Computer #{{ booking.computer.number }} in {{ booking.computer.lab.name }}
+                                </h3>
+                                <p class="text-sm text-gray-500">
+                                    {{ booking.start_time|date:"D, M d, Y" }} at {{ booking.start_time|date:"g:i A" }} - 
+                                    {{ booking.end_time|date:"g:i A" }}
+                                </p>
+                                <p class="text-sm text-gray-500 mt-1">
+                                    Status: 
+                                    {% if booking.is_cancelled %}
+                                        <span class="text-gray-600 font-medium">Cancelled</span>
+                                    {% elif booking.is_rejected %}
+                                        <span class="text-red-600 font-medium">Rejected</span>
+                                    {% elif booking.checked_in %}
+                                        <span class="text-blue-600 font-medium">Attended</span>
+                                    {% else %}
+                                        <span class="text-purple-600 font-medium">Completed</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% else %}
+            <p class="text-gray-600">You don't have any past computer bookings.</p>
+        {% endif %}
+        
+        {% if past_lab_sessions %}
+            <h3 class="text-lg font-semibold mt-6 mb-3">Past Lab Sessions</h3>
+            <div class="bg-white shadow overflow-hidden rounded-md">
+                <ul class="divide-y divide-gray-200">
+                    {% for session in past_lab_sessions %}
+                        <li class="px-6 py-4">
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-900">
+                                    {{ session.lab.name }} - {{ session.title }}
+                                </h3>
+                                <p class="text-sm text-gray-500">
+                                    {{ session.start_time|date:"D, M d, Y" }} at {{ session.start_time|date:"g:i A" }} - 
+                                    {{ session.end_time|date:"g:i A" }}
+                                </p>
+                                <p class="text-sm text-gray-500 mt-1">
+                                    Status: 
+                                    {% if session.is_cancelled %}
+                                        <span class="text-gray-600 font-medium">Cancelled</span>
+                                    {% elif session.is_rejected %}
+                                        <span class="text-red-600 font-medium">Rejected</span>
+                                    {% else %}
+                                        <span class="text-purple-600 font-medium">Completed</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
