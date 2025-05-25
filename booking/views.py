@@ -356,6 +356,9 @@ def admin_dashboard_view(request):
     today_sessions = LabSession.objects.filter(
         start_time__date=today
     )
+
+    students = User.objects.filter(is_student=True).order_by('username')
+
     context = {
         'pending_computer_bookings': pending_computer_bookings,        
         'pending_lab_sessions': pending_lab_sessions,              
@@ -369,7 +372,9 @@ def admin_dashboard_view(request):
         'date_to': date_to,
         'pending_recurring_sessions': pending_recurring_sessions,
         'approved_recurring_sessions': approved_recurring_sessions,
+        'students': students,
     }
+    
     
     # Add these to the context in admin_check_in_dashboard view
     context.update({
