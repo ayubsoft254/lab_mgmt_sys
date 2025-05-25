@@ -202,7 +202,8 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'booking.User'
 
-# Celery Settings
+# Celery settings
+CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Adjust based on your broker
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
