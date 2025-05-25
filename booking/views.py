@@ -397,6 +397,20 @@ def admin_dashboard_view(request):
 
     context['session_attendance'] = session_attendance
     
+    # In admin_check_in_dashboard view
+    date_str = request.GET.get('date')
+    if date_str:
+        try:
+            selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        except ValueError:
+            selected_date = today
+    else:
+        selected_date = today
+    
+    # Use selected_date instead of today in your queries
+    context['today'] = selected_date
+    context['tomorrow'] = selected_date + timedelta(days=1)
+    
     return render(request, 'admin_dashboard.html', context)
 
 @login_required
@@ -1361,6 +1375,20 @@ def admin_check_in_dashboard(request):
         ).count()
 
     context['session_attendance'] = session_attendance
+    
+    # In admin_check_in_dashboard view
+    date_str = request.GET.get('date')
+    if date_str:
+        try:
+            selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        except ValueError:
+            selected_date = today
+    else:
+        selected_date = today
+    
+    # Use selected_date instead of today in your queries
+    context['today'] = selected_date
+    context['tomorrow'] = selected_date + timedelta(days=1)
     
     return render(request, 'check_in_dashboard.html', context)
 
