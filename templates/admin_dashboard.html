@@ -811,6 +811,94 @@
     </div>
 </div>
 
+<!-- Student Rating Modal -->
+<div id="rateStudentModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="fixed inset-0 bg-black opacity-50"></div>
+        <div class="relative bg-white rounded-lg shadow-xl max-w-lg w-full mx-auto">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-gray-800">Rate Student: <span id="rateStudentNameDisplay"></span></h3>
+                <button type="button" class="closeRateModal text-gray-400 hover:text-gray-500">
+                    <span class="sr-only">Close</span>
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="px-6 py-4">
+                <form id="rateStudentForm" method="post" action="{% url 'rate_student_ajax' %}">
+                    {% csrf_token %}
+                    <input type="hidden" id="rate_student_id" name="student_id">
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Rate Based On:</label>
+                        <div class="mb-3">
+                            <div class="flex items-center">
+                                <input type="radio" id="rate_general" name="rating_type" value="general" checked class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <label for="rate_general" class="ml-2 block text-sm text-gray-700">General Rating</label>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1 ml-6">Rate the student based on your overall impression</p>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="flex items-center">
+                                <input type="radio" id="rate_booking" name="rating_type" value="booking" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <label for="rate_booking" class="ml-2 block text-sm text-gray-700">Computer Booking</label>
+                            </div>
+                            <div class="ml-6 mt-2">
+                                <select id="booking_select" name="booking_id" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" disabled>
+                                    <option value="">Select a booking</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="flex items-center">
+                                <input type="radio" id="rate_session" name="rating_type" value="session" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <label for="rate_session" class="ml-2 block text-sm text-gray-700">Lab Session</label>
+                            </div>
+                            <div class="ml-6 mt-2">
+                                <select id="session_select" name="session_id" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" disabled>
+                                    <option value="">Select a session</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Rating:</label>
+                        <div class="flex items-center space-x-2">
+                            <div id="star-rating" class="flex">
+                                <button type="button" class="star-btn text-2xl text-gray-300 hover:text-yellow-400 focus:outline-none" data-rating="1">★</button>
+                                <button type="button" class="star-btn text-2xl text-gray-300 hover:text-yellow-400 focus:outline-none" data-rating="2">★</button>
+                                <button type="button" class="star-btn text-2xl text-gray-300 hover:text-yellow-400 focus:outline-none" data-rating="3">★</button>
+                                <button type="button" class="star-btn text-2xl text-gray-300 hover:text-yellow-400 focus:outline-none" data-rating="4">★</button>
+                                <button type="button" class="star-btn text-2xl text-gray-300 hover:text-yellow-400 focus:outline-none" data-rating="5">★</button>
+                            </div>
+                            <input type="hidden" id="rating_value" name="rating" value="0" required>
+                            <span id="rating-text" class="ml-2 text-gray-600">Select rating</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="rating_comment">
+                            Comments (optional):
+                        </label>
+                        <textarea id="rating_comment" name="comment" rows="3" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+                    </div>
+                    
+                    <div class="flex justify-end">
+                        <button type="button" class="closeRateModal inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mr-3">
+                            Cancel
+                        </button>
+                        <button type="submit" id="submit-rating" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" disabled>
+                            Submit Rating
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Add this right after the studentSearch input -->
 <div id="searchResultsCounter" class="text-sm text-gray-500 mt-2"></div>
 
