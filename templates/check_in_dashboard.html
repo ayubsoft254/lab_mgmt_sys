@@ -213,6 +213,17 @@
         </div>
     </div>
 
+    <div class="mb-4">
+        <form class="d-flex align-items-center" method="get">
+            <div class="input-group me-3" style="max-width: 200px;">
+                <input type="date" name="date" class="form-control" value="{{ today|date:'Y-m-d' }}">
+                <button class="btn btn-outline-secondary" type="submit">Go</button>
+            </div>
+            <a href="?date={{ today|date:'Y-m-d' }}" class="btn btn-outline-secondary btn-sm me-2">Today</a>
+            <a href="?date={{ tomorrow|date:'Y-m-d' }}" class="btn btn-outline-secondary btn-sm">Tomorrow</a>
+        </form>
+    </div>
+
     {% if request.user.is_superuser %}
     <div class="mt-4 card shadow-sm">
         <div class="card-header bg-white">
