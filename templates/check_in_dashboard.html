@@ -15,8 +15,15 @@
                         Attendance Dashboard - {{ today|date:"l, F j, Y" }}
                     </h5>
                     <div>
-                        <a href="?date={{ today|date:'Y-m-d' }}" class="btn btn-outline-secondary btn-sm">Today</a>
-                        <a href="?date={% now 'Y-m-d' %}" class="btn btn-outline-secondary btn-sm">Tomorrow</a>
+                        <!-- Fixed date navigation -->
+                        <form class="d-flex align-items-center" method="get">
+                            <div class="input-group me-3" style="max-width: 200px;">
+                                <input type="date" name="date" class="form-control" value="{{ today|date:'Y-m-d' }}">
+                                <button class="btn btn-outline-secondary" type="submit">Go</button>
+                            </div>
+                            <a href="?date={{ today|date:'Y-m-d' }}" class="btn btn-outline-secondary btn-sm me-2">Today</a>
+                            <a href="?date={{ tomorrow|date:'Y-m-d' }}" class="btn btn-outline-secondary btn-sm">Tomorrow</a>
+                        </form>
                     </div>
                 </div>
                 <div class="card-body">
@@ -91,7 +98,6 @@
                                     <td>{{ booking.computer }}</td>
                                     <td>
                                         <div>{{ booking.start_time|time:"H:i" }} - {{ booking.end_time|time:"H:i" }}</div>
-                                        {% now "Y-m-d H:i:s" as current_datetime %}
                                         <small class="{% if booking.start_time <= now %}text-success{% else %}text-muted{% endif %}">
                                             {% if booking.start_time <= now %}
                                                 Started {{ booking.start_time|timesince }} ago
@@ -184,7 +190,7 @@
                                         <div class="d-flex align-items-center">
                                             <div>{{ session.attending_students.count }}</div>
                                             <div class="ms-2">
-                                                {% with present_count=session_attendance|get_item:session.id %}
+                                                {% with present_count=session_attendance|default:{}|get_item:session.id %}
                                                     {% if present_count > 0 %}
                                                         <span class="badge bg-success">{{ present_count }} present</span>
                                                     {% endif %}
@@ -213,47 +219,92 @@
         </div>
     </div>
 
-    <div class="mb-4">
-        <form class="d-flex align-items-center" method="get">
-            <div class="input-group me-3" style="max-width: 200px;">
-                <input type="date" name="date" class="form-control" value="{{ today|date:'Y-m-d' }}">
-                <button class="btn btn-outline-secondary" type="submit">Go</button>
-            </div>
-            <a href="?date={{ today|date:'Y-m-d' }}" class="btn btn-outline-secondary btn-sm me-2">Today</a>
-            <a href="?date={{ tomorrow|date:'Y-m-d' }}" class="btn btn-outline-secondary btn-sm">Tomorrow</a>
-        </form>
-    </div>
-
     {% if request.user.is_superuser %}
     <div class="mt-4 card shadow-sm">
-        <div class="card-header bg-white">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Debug Information</h5>
+            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#debugInfo">
+                Toggle
+            </button>
         </div>
-        <div class="card-body">
-            <p>Today: {{ debug_info.today }}</p>
-            <p>Current time: {{ debug_info.timezone_now }}</p>
-            <p>Total bookings in system: {{ all_bookings_count }}</p>
-            <p>Total sessions in system: {{ all_sessions_count }}</p>
-            <p>Bookings for today: {{ debug_info.today_bookings_count }}</p>
-            <p>Sessions for today: {{ debug_info.today_sessions_count }}</p>
+        <div class="card-body collapse" id="debugInfo">
+            <!-- Basic debug info -->
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Date/Time Info</h6>
+                    <ul class="list-unstyled">
+                        <li><strong>Today:</strong> {{ debug_info.today }}</li>
+                        <li><strong>Current time:</strong> {{ debug_info.now }}</li>
+                    </ul>
+                    
+                    <h6>Bookings Info</h6>
+                    <ul class="list-unstyled">
+                        <li><strong>Total bookings in system:</strong> {{ all_bookings_count }}</li>
+                        <li><strong>Bookings for today:</strong> {{ debug_info.today_bookings_count }}</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6>Sessions Info</h6>
+                    <ul class="list-unstyled">
+                        <li><strong>Total sessions in system:</strong> {{ all_sessions_count }}</li>
+                        <li><strong>Sessions for today:</strong> {{ debug_info.today_sessions_count }}</li>
+                    </ul>
+                </div>
+            </div>
             
-            {% if debug_info.today_bookings_times %}
-                <h6 class="mt-3">Sample bookings (ID, start, end):</h6>
-                <ul>
-                    {% for id, start, end in debug_info.today_bookings_times %}
-                        <li>ID: {{ id }}, {{ start }} - {{ end }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-            
-            {% if debug_info.today_sessions_times %}
-                <h6 class="mt-3">Sample sessions (ID, start, end):</h6>
-                <ul>
-                    {% for id, start, end in debug_info.today_sessions_times %}
-                        <li>ID: {{ id }}, {{ start }} - {{ end }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
+            <!-- Sample data info -->
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    {% if debug_info.sample_bookings %}
+                        <h6>Sample bookings:</h6>
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Student</th>
+                                    <th>Start</th>
+                                    <th>End</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for booking in debug_info.sample_bookings %}
+                                    <tr>
+                                        <td>{{ booking.id }}</td>
+                                        <td>{{ booking.student }}</td>
+                                        <td>{{ booking.start }}</td>
+                                        <td>{{ booking.end }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    {% if debug_info.sample_sessions %}
+                        <h6>Sample sessions:</h6>
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Start</th>
+                                    <th>End</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for session in debug_info.sample_sessions %}
+                                    <tr>
+                                        <td>{{ session.id }}</td>
+                                        <td>{{ session.title }}</td>
+                                        <td>{{ session.start }}</td>
+                                        <td>{{ session.end }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </div>
     {% endif %}
@@ -272,8 +323,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const statusCell = row.querySelector('td:nth-child(4)');
             const actionButtons = row.querySelectorAll('.quick-check-in');
             
+            // Disable buttons immediately to prevent double-clicks
+            actionButtons.forEach(btn => btn.disabled = true);
+            
+            // Add loading indicator
+            this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+            
             // Send AJAX request
-            fetch(`/admin/check-in/quick/${bookingId}/`, {
+            fetch(`/check-in/quick/${bookingId}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -288,6 +345,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.json();
             })
             .then(data => {
+                console.log('Success:', data);
+                
                 if (data.status === 'success') {
                     // Update UI
                     const badgeClass = status === 'present' ? 'bg-success' : 'bg-warning';
@@ -299,8 +358,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         <small class="text-muted">${data.attendance.check_in_time}</small>
                     `;
                     
-                    // Disable buttons
-                    actionButtons.forEach(btn => btn.disabled = true);
+                    // Restore button UI but keep disabled
+                    this.innerHTML = status === 'present' ? 
+                        '<i class="fas fa-check"></i>' : 
+                        '<i class="fas fa-clock"></i>';
                     
                     // Show success message
                     const alert = document.createElement('div');
@@ -316,17 +377,29 @@ document.addEventListener('DOMContentLoaded', function() {
                         alert.remove();
                     }, 3000);
                 } else {
-                    throw new Error('Server returned error status');
+                    // Re-enable buttons if there was an error in the response
+                    actionButtons.forEach(btn => btn.disabled = false);
+                    this.innerHTML = status === 'present' ? 
+                        '<i class="fas fa-check"></i>' : 
+                        '<i class="fas fa-clock"></i>';
+                    throw new Error('Server returned error status: ' + (data.message || 'Unknown error'));
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
+                
+                // Re-enable buttons
+                actionButtons.forEach(btn => btn.disabled = false);
+                this.innerHTML = status === 'present' ? 
+                    '<i class="fas fa-check"></i>' : 
+                    '<i class="fas fa-clock"></i>';
+                
                 // Show error message
                 const alert = document.createElement('div');
                 alert.className = 'alert alert-danger alert-dismissible fade show mt-3';
                 alert.innerHTML = `
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    Failed to record attendance. Please try again.
+                    Failed to record attendance: ${error.message || 'Please try again.'}
                 `;
                 document.querySelector('.container-fluid').prepend(alert);
                 
