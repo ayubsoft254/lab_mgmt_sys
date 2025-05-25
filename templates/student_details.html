@@ -1,3 +1,296 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Details: {{ student.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-6">
+        <a href="{% url 'admin_dashboard' %}" class="text-indigo-600 hover:text-indigo-900">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+            <h2 class="text-2xl font-bold text-gray-800">Student Profile</h2>
+        </div>
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Personal Information -->
+                <div class="col-span-1">
+                    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                        <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-800">Personal Information</h3>
+                        </div>
+                        <div class="p-4">
+                            <dl>
+                                <div class="mb-2">
+                                    <dt class="text-sm font-medium text-gray-500">Name</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">
+                                        {% if student.salutation %}{{ student.salutation }} {% endif %}
+                                        {{ student.first_name }} {{ student.last_name }}
+                                    </dd>
+                                </div>
+                                <div class="mb-2">
+                                    <dt class="text-sm font-medium text-gray-500">Username</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ student.username }}</dd>
+                                </div>
+                                <div class="mb-2">
+                                    <dt class="text-sm font-medium text-gray-500">Email</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ student.email }}</dd>
+                                </div>
+                                <div class="mb-2">
+                                    <dt class="text-sm font-medium text-gray-500">School</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ student.get_school_display|default:"Not specified" }}</dd>
+                                </div>
+                                <div class="mb-2">
+                                    <dt class="text-sm font-medium text-gray-500">Course</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ student.course|default:"Not specified" }}</dd>
+                                </div>
+                                <div class="mb-2">
+                                    <dt class="text-sm font-medium text-gray-500">Registered</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ student.date_joined|date:"F j, Y" }}</dd>
+                                </div>
+                            </dl>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 bg-white rounded-lg border border-gray-200 overflow-hidden">
+                        <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-800">Rating</h3>
+                        </div>
+                        <div class="p-4">
+                            <div class="flex items-center mb-2">
+                                {% for i in "12345"|make_list %}
+                                    {% if forloop.counter <= student.average_rating|floatformat:"0" %}
+                                        <i class="fas fa-star text-yellow-400"></i>
+                                    {% elif forloop.counter <= student.average_rating|add:0.5|floatformat:"0" %}
+                                        <i class="fas fa-star-half-alt text-yellow-400"></i>
+                                    {% else %}
+                                        <i class="far fa-star text-yellow-400"></i>
+                                    {% endif %}
+                                {% endfor %}
+                                <span class="ml-2 text-gray-700">
+                                    {{ student.average_rating|floatformat:1 }} / 5.0
+                                </span>
+                            </div>
+                            <p class="text-sm text-gray-600">Based on {{ student.total_ratings }} ratings</p>
+                            
+                            <div class="mt-4">
+                                <!-- Fix the rating button -->
+                                <button 
+                                    type="button"
+                                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 rate-student-btn"
+                                    data-student-id="{{ student.id }}"
+                                    data-student-name="{% if student.salutation %}{{ student.salutation }} {% endif %}{{ student.first_name }} {{ student.last_name }}"
+                                >
+                                    Rate Student
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Activity -->
+                <div class="col-span-2">
+                    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                        <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-800">Recent Bookings</h3>
+                        </div>
+                        <div class="p-4">
+                            {% if recent_bookings %}
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Computer</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            {% for booking in recent_bookings %}
+                                                <tr>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        {{ booking.computer }}
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        {{ booking.start_time|date:"M d, Y" }}
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        {{ booking.start_time|date:"H:i" }} - {{ booking.end_time|date:"H:i" }}
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">
+                                                        {% if booking.is_cancelled %}
+                                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                                Cancelled
+                                                            </span>
+                                                        {% elif booking.is_approved %}
+                                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                                Approved
+                                                            </span>
+                                                        {% else %}
+                                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                                Pending
+                                                            </span>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-gray-500">No recent bookings found.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 bg-white rounded-lg border border-gray-200 overflow-hidden">
+                        <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-800">Rating History</h3>
+                        </div>
+                        <div class="p-4">
+                            {% if ratings %}
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Admin</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rating</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comment</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            {% for rating in ratings %}
+                                                <tr>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        {{ rating.created_at|date:"M d, Y" }}
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        {{ rating.rated_by.username }}
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">
+                                                        <div class="flex">
+                                                            {% for i in "12345"|make_list %}
+                                                                {% if forloop.counter <= rating.score %}
+                                                                    <i class="fas fa-star text-yellow-400"></i>
+                                                                {% else %}
+                                                                    <i class="far fa-star text-yellow-400"></i>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </div>
+                                                    </td>
+                                                    <td class="px-6 py-4 text-sm text-gray-500">
+                                                        {{ rating.comment|default:"-" }}
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-gray-500">No ratings yet.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Student Rating Modal -->
+<div id="rateStudentModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="fixed inset-0 bg-black opacity-50"></div>
+        <div class="relative bg-white rounded-lg shadow-xl max-w-lg w-full mx-auto">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-gray-800">Rate Student: <span id="rateStudentNameDisplay"></span></h3>
+                <button type="button" class="closeRateModal text-gray-400 hover:text-gray-500">
+                    <span class="sr-only">Close</span>
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="px-6 py-4">
+                <form id="rateStudentForm" method="post" action="{% url 'rate_student_ajax' %}">
+                    {% csrf_token %}
+                    <input type="hidden" id="rate_student_id" name="student_id" value="{{ student.id }}">
+                    
+                    <!-- Rating Type Selection -->
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Rate Based On:</label>
+                        
+                        <div class="mb-3">
+                            <div class="flex items-center">
+                                <input type="radio" id="rate_booking" name="rating_type" value="booking" checked class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <label for="rate_booking" class="ml-2 block text-sm text-gray-700">Computer Booking</label>
+                            </div>
+                            <div class="ml-6 mt-2">
+                                <select id="booking_select" name="booking_id" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                    <option value="">Select a booking</option>
+                                </select>
+                                <p class="text-xs text-gray-500 mt-1">Required for booking-based ratings</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="flex items-center">
+                                <input type="radio" id="rate_session" name="rating_type" value="session" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <label for="rate_session" class="ml-2 block text-sm text-gray-700">Lab Session</label>
+                            </div>
+                            <div class="ml-6 mt-2">
+                                <select id="session_select" name="session_id" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" disabled>
+                                    <option value="">Select a session</option>
+                                </select>
+                                <p class="text-xs text-gray-500 mt-1">Required for session-based ratings</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Star Rating -->
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Score:</label>
+                        <div class="flex items-center space-x-2">
+                            <div id="star-rating" class="flex">
+                                <button type="button" class="star-btn text-2xl text-gray-300 hover:text-yellow-400 focus:outline-none" data-score="1">★</button>
+                                <button type="button" class="star-btn text-2xl text-gray-300 hover:text-yellow-400 focus:outline-none" data-score="2">★</button>
+                                <button type="button" class="star-btn text-2xl text-gray-300 hover:text-yellow-400 focus:outline-none" data-score="3">★</button>
+                                <button type="button" class="star-btn text-2xl text-gray-300 hover:text-yellow-400 focus:outline-none" data-score="4">★</button>
+                                <button type="button" class="star-btn text-2xl text-gray-300 hover:text-yellow-400 focus:outline-none" data-score="5">★</button>
+                            </div>
+                            <input type="hidden" id="score_value" name="score" value="" required>
+                            <span id="rating-text" class="ml-2 text-gray-600">Select rating</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Comment Field -->
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="comment">
+                            Comments (optional):
+                        </label>
+                        <textarea id="comment" name="comment" rows="3" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+                    </div>
+                    
+                    <!-- Form Actions -->
+                    <div class="flex justify-end">
+                        <button type="button" class="closeRateModal inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mr-3">
+                            Cancel
+                        </button>
+                        <button type="submit" id="submit-rating" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" disabled>
+                            Submit Rating
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
