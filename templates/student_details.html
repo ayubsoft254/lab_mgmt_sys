@@ -77,9 +77,14 @@
                             <p class="text-sm text-gray-600">Based on {{ student.total_ratings }} ratings</p>
                             
                             <div class="mt-4">
-                                <a href="{% url 'rate_student' student.id %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                <button 
+                                    type="button"
+                                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 rate-student-btn"
+                                    data-student-id="{{ student.id }}"
+                                    data-student-name="{% if student.salutation %}{{ student.salutation }} {% endif %}{{ student.first_name }} {{ student.last_name }}"
+                                >
                                     Rate Student
-                                </a>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -195,4 +200,352 @@
         </div>
     </div>
 </div>
+
+<!-- Student Rating Modal -->
+<div id="rateStudentModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="fixed inset-0 bg-black opacity-50"></div>
+        <div class="relative bg-white rounded-lg shadow-xl max-w-lg w-full mx-auto">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-gray-800">Rate Student: <span id="rateStudentNameDisplay"></span></h3>
+                <button type="button" class="closeRateModal text-gray-400 hover:text-gray-500">
+                    <span class="sr-only">Close</span>
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="px-6 py-4">
+                <form id="rateStudentForm" method="post" action="{% url 'rate_student_ajax' %}">
+                    {% csrf_token %}
+                    <input type="hidden" id="rate_student_id" name="student_id" value="{{ student.id }}">
+                    
+                    <!-- Rating Type Selection -->
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Rate Based On:</label>
+                        
+                        <div class="mb-3">
+                            <div class="flex items-center">
+                                <input type="radio" id="rate_booking" name="rating_type" value="booking" checked class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <label for="rate_booking" class="ml-2 block text-sm text-gray-700">Computer Booking</label>
+                            </div>
+                            <div class="ml-6 mt-2">
+                                <select id="booking_select" name="booking_id" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                    <option value="">Select a booking</option>
+                                </select>
+                                <p class="text-xs text-gray-500 mt-1">Required for booking-based ratings</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="flex items-center">
+                                <input type="radio" id="rate_session" name="rating_type" value="session" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <label for="rate_session" class="ml-2 block text-sm text-gray-700">Lab Session</label>
+                            </div>
+                            <div class="ml-6 mt-2">
+                                <select id="session_select" name="session_id" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" disabled>
+                                    <option value="">Select a session</option>
+                                </select>
+                                <p class="text-xs text-gray-500 mt-1">Required for session-based ratings</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Star Rating -->
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Score:</label>
+                        <div class="flex items-center space-x-2">
+                            <div id="star-rating" class="flex">
+                                <button type="button" class="star-btn text-2xl text-gray-300 hover:text-yellow-400 focus:outline-none" data-score="1">★</button>
+                                <button type="button" class="star-btn text-2xl text-gray-300 hover:text-yellow-400 focus:outline-none" data-score="2">★</button>
+                                <button type="button" class="star-btn text-2xl text-gray-300 hover:text-yellow-400 focus:outline-none" data-score="3">★</button>
+                                <button type="button" class="star-btn text-2xl text-gray-300 hover:text-yellow-400 focus:outline-none" data-score="4">★</button>
+                                <button type="button" class="star-btn text-2xl text-gray-300 hover:text-yellow-400 focus:outline-none" data-score="5">★</button>
+                            </div>
+                            <input type="hidden" id="score_value" name="score" value="" required>
+                            <span id="rating-text" class="ml-2 text-gray-600">Select rating</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Comment Field -->
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="comment">
+                            Comments (optional):
+                        </label>
+                        <textarea id="comment" name="comment" rows="3" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+                    </div>
+                    
+                    <!-- Form Actions -->
+                    <div class="flex justify-end">
+                        <button type="button" class="closeRateModal inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mr-3">
+                            Cancel
+                        </button>
+                        <button type="submit" id="submit-rating" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" disabled>
+                            Submit Rating
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const rateModal = document.getElementById('rateStudentModal');
+        const closeRateButtons = document.querySelectorAll('.closeRateModal');
+        const rateButtons = document.querySelectorAll('.rate-student-btn');
+        const rateStudentNameDisplay = document.getElementById('rateStudentNameDisplay');
+        const rateStudentIdInput = document.getElementById('rate_student_id');
+        const bookingSelect = document.getElementById('booking_select');
+        const sessionSelect = document.getElementById('session_select');
+        const starButtons = document.querySelectorAll('.star-btn');
+        const scoreInput = document.getElementById('score_value');
+        const ratingText = document.getElementById('rating-text');
+        const submitRatingBtn = document.getElementById('submit-rating');
+        
+        // Rating type radio buttons
+        const rateBooking = document.getElementById('rate_booking');
+        const rateSession = document.getElementById('rate_session');
+        
+        // Open rating modal
+        rateButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const studentId = button.getAttribute('data-student-id');
+                const studentName = button.getAttribute('data-student-name');
+                
+                rateStudentNameDisplay.textContent = studentName;
+                rateStudentIdInput.value = studentId;
+                
+                // Reset stars
+                resetStars();
+                
+                // Load student's bookings and sessions
+                loadStudentBookings(studentId);
+                
+                rateModal.classList.remove('hidden');
+            });
+        });
+        
+        // Close rating modal
+        closeRateButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                rateModal.classList.add('hidden');
+                resetRatingForm();
+            });
+        });
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === rateModal) {
+                rateModal.classList.add('hidden');
+                resetRatingForm();
+            }
+        });
+        
+        // Handle rating type change
+        rateBooking.addEventListener('change', function() {
+            if (this.checked) {
+                bookingSelect.disabled = false;
+                sessionSelect.disabled = true;
+                sessionSelect.value = '';
+            }
+        });
+        
+        rateSession.addEventListener('change', function() {
+            if (this.checked) {
+                bookingSelect.disabled = true;
+                sessionSelect.disabled = false;
+                bookingSelect.value = '';
+                
+                // Load sessions if not already loaded
+                if (sessionSelect.options.length <= 1) {
+                    loadStudentSessions(rateStudentIdInput.value);
+                }
+            }
+        });
+        
+        // Star rating functionality
+        starButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const score = parseInt(this.getAttribute('data-score'));
+                scoreInput.value = score;
+                
+                // Update stars display
+                starButtons.forEach((btn, index) => {
+                    if (index < score) {
+                        btn.classList.remove('text-gray-300');
+                        btn.classList.add('text-yellow-400');
+                    } else {
+                        btn.classList.remove('text-yellow-400');
+                        btn.classList.add('text-gray-300');
+                    }
+                });
+                
+                // Update rating text
+                const ratingTexts = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+                ratingText.textContent = ratingTexts[score];
+                
+                // Enable submit button if score is selected
+                submitRatingBtn.disabled = false;
+            });
+        });
+        
+        // Handle form validation
+        document.getElementById('rateStudentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const score = parseInt(scoreInput.value);
+            if (!score || score < 1 || score > 5) {
+                alert('Please select a valid score (1-5 stars)');
+                return;
+            }
+            
+            const ratingType = document.querySelector('input[name="rating_type"]:checked').value;
+            
+            if (ratingType === 'booking' && !bookingSelect.value) {
+                alert('Please select a booking');
+                return;
+            }
+            
+            if (ratingType === 'session' && !sessionSelect.value) {
+                alert('Please select a session');
+                return;
+            }
+            
+            // Submit the form using fetch API
+            const formData = new FormData(this);
+            
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Close the modal
+                    rateModal.classList.add('hidden');
+                    resetRatingForm();
+                    
+                    // Show success message
+                    const alert = document.createElement('div');
+                    alert.className = 'fixed top-5 right-5 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 z-50';
+                    alert.innerHTML = `
+                        <p class="font-bold">Success!</p>
+                        <p>Rating submitted successfully.</p>
+                    `;
+                    document.body.appendChild(alert);
+                    
+                    // Remove the alert after 3 seconds
+                    setTimeout(() => {
+                        alert.remove();
+                    }, 3000);
+                    
+                    // Reload the page to show updated ratings
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    alert(`Error: ${data.error || 'Something went wrong'}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to submit rating. Please try again.');
+            });
+        });
+        
+        // Load student's bookings
+        function loadStudentBookings(studentId) {
+            bookingSelect.innerHTML = '<option value="">Loading bookings...</option>';
+            
+            fetch(`/api/students/${studentId}/bookings/`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.bookings.length === 0) {
+                        bookingSelect.innerHTML = '<option value="">No bookings found</option>';
+                    } else {
+                        let options = '<option value="">Select a booking</option>';
+                        data.bookings.forEach(booking => {
+                            const date = new Date(booking.start_time);
+                            const formattedDate = date.toLocaleDateString() + ' ' + 
+                                               date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                            
+                            options += `<option value="${booking.id}">${formattedDate} - Computer #${booking.computer_number}</option>`;
+                        });
+                        bookingSelect.innerHTML = options;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading bookings:', error);
+                    bookingSelect.innerHTML = '<option value="">Error loading bookings</option>';
+                });
+        }
+        
+        // Load student's lab sessions
+        function loadStudentSessions(studentId) {
+            sessionSelect.innerHTML = '<option value="">Loading sessions...</option>';
+            
+            fetch(`/api/students/${studentId}/sessions/`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.sessions.length === 0) {
+                        sessionSelect.innerHTML = '<option value="">No lab sessions found</option>';
+                    } else {
+                        let options = '<option value="">Select a lab session</option>';
+                        data.sessions.forEach(session => {
+                            const date = new Date(session.start_time);
+                            const formattedDate = date.toLocaleDateString();
+                            
+                            options += `<option value="${session.id}">${formattedDate} - ${session.title}</option>`;
+                        });
+                        sessionSelect.innerHTML = options;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading sessions:', error);
+                    sessionSelect.innerHTML = '<option value="">Error loading sessions</option>';
+                });
+        }
+        
+        // Reset stars
+        function resetStars() {
+            scoreInput.value = '';
+            starButtons.forEach(btn => {
+                btn.classList.remove('text-yellow-400');
+                btn.classList.add('text-gray-300');
+            });
+            ratingText.textContent = 'Select rating';
+            submitRatingBtn.disabled = true;
+        }
+        
+        // Reset form
+        function resetRatingForm() {
+            document.getElementById('rateStudentForm').reset();
+            resetStars();
+            
+            // Default to booking type
+            rateBooking.checked = true;
+            bookingSelect.disabled = false;
+            sessionSelect.disabled = true;
+            
+            // Clear selects
+            bookingSelect.innerHTML = '<option value="">Select a booking</option>';
+            sessionSelect.innerHTML = '<option value="">Select a session</option>';
+        }
+    });
+</script>
 {% endblock %}
