@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load account %}
+{% load allauth %}
 
 {% block title %}{% trans "Confirm Email Address" %}{% endblock %}
 
@@ -142,24 +144,42 @@ body {
 
 <div class="confirm-container">
   <div class="confirm-card">
-    {% if confirmation %}
-      <div class="confirm-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-        </svg>
-      </div>
-
-      <h2 class="confirm-title">{% trans "Confirm Email" %}</h2>
-      
-      <p class="confirm-description">
-        {% blocktrans with confirmation.email_address.email as email %}Please confirm that <strong>{{ email }}</strong> is your email address.{% endblocktrans %}
-      </p>
-
-      <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
-        {% csrf_token %}
-        <button class="confirm-button" type="submit">{% trans "Confirm" %}</button>
-      </form>
+    <h2 class="confirm-title">{% trans "Confirm Email Address" %}</h2>
     
+    {% if confirmation %}
+      {% user_display confirmation.email_address.user as user_display %}
+      
+      {% if can_confirm %}
+        <div class="confirm-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+          </svg>
+        </div>
+      
+        <p class="confirm-description">
+          {% blocktrans with confirmation.email_address.email as email %}Please confirm that <strong><a href="mailto:{{ email }}" class="text-blue-600 hover:underline">{{ email }}</a></strong> is an email address for user <strong>{{ user_display }}</strong>.{% endblocktrans %}
+        </p>
+
+        <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
+          {% csrf_token %}
+          {{ redirect_field }}
+          <button class="confirm-button" type="submit">{% trans "Confirm" %}</button>
+        </form>
+        
+      {% else %}
+        <div class="confirm-icon warning">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        
+        <div class="status-message warning">
+          {% blocktrans with confirmation.email_address.email as email %}Unable to confirm <strong>{{ email }}</strong> because it is already confirmed by a different account.{% endblocktrans %}
+        </div>
+        
+        <a href="{% url 'account_login' %}" class="confirm-button">{% trans "Go to Login" %}</a>
+      {% endif %}
+      
     {% else %}
       <div class="confirm-icon error">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -167,14 +187,13 @@ body {
         </svg>
       </div>
 
-      <h2 class="confirm-title">{% trans "Invalid Confirmation Link" %}</h2>
-      
       <div class="status-message error">
         {% trans "This confirmation link is invalid or has expired." %}
       </div>
       
       <p class="confirm-description">
-        {% blocktrans %}The confirmation link was invalid, possibly because it has already been used or has expired.{% endblocktrans %}
+        {% url 'account_email' as email_url %}
+        {% blocktrans %}This email confirmation link expired or is invalid. Please <a href="{{ email_url }}" class="text-blue-600 hover:underline">issue a new email confirmation request</a>.{% endblocktrans %}
       </p>
       
       <a href="{% url 'account_email' %}" class="confirm-button">{% trans "Manage Email Addresses" %}</a>
