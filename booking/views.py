@@ -420,6 +420,8 @@ def notification_list_view(request):
 
 @login_required
 def free_timeslots_view(request, lab_id=None, computer_id=None):
+    from datetime import time  # Add this import
+    
     # Determine the scope of the search (lab-wide or computer-specific)
     if computer_id:
         computer = get_object_or_404(Computer, id=computer_id)
@@ -467,8 +469,8 @@ def free_timeslots_view(request, lab_id=None, computer_id=None):
     while current_date <= end_date:
         # Generate hourly slots from 8:00 AM to 8:00 PM
         for hour in range(8, 20):
-            # Fix: Use time object instead of datetime.min
-            slot_start_time = datetime.time(hour=hour, minute=0)
+            # Fixed: Use the correct way to create a time object
+            slot_start_time = time(hour=hour, minute=0)
             slot_start = timezone.make_aware(datetime.combine(current_date, slot_start_time))
             slot_end = slot_start + timedelta(hours=1)
             
