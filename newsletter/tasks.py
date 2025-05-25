@@ -1,12 +1,14 @@
-from django.conf import settings
+from celery import shared_task
+import logging
+import time
 from django.utils import timezone
 from django.core.mail import EmailMultiAlternatives
 from django.template import Template, Context
-import logging
-import time
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
+@shared_task
 def process_email_campaign(campaign_id):
     """Process an email campaign by sending emails to all recipients"""
     from .models import EmailCampaign, EmailDelivery
@@ -42,7 +44,7 @@ def process_email_campaign(campaign_id):
                     'user': recipient,
                     'first_name': recipient.first_name or '',
                     'last_name': recipient.last_name or '',
-                    'tracking_pixel': f"{settings.BASE_URL}/newsletter/track/open/{delivery.tracking_id}/",
+                    'tracking_pixel': f"{settings.BASE_URL}/track/open/{delivery.tracking_id}/",
                 }
                 
                 # Create email with both HTML and plain text
