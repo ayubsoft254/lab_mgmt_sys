@@ -1186,6 +1186,43 @@
             computersContainer.classList.add('hidden');
             bookingTimeContainer.classList.add('hidden');
         }
+        
+        document.getElementById('assignStudentForm').addEventListener('submit', function(e) {
+            const assignmentType = document.getElementById('assignment_type').value;
+            let isValid = true;
+            let errorMessage = "";
+            
+            if (!assignmentType) {
+                isValid = false;
+                errorMessage = "Please select an assignment type";
+            } else if (assignmentType === 'lab_session') {
+                const sessionId = document.getElementById('lab_session').value;
+                if (!sessionId) {
+                    isValid = false;
+                    errorMessage = "Please select a lab session";
+                }
+            } else if (assignmentType === 'computer_booking') {
+                const computerId = document.getElementById('computer').value;
+                const startTime = document.getElementById('start_time').value;
+                const endTime = document.getElementById('end_time').value;
+                
+                if (!computerId) {
+                    isValid = false;
+                    errorMessage = "Please select a computer";
+                } else if (!startTime || !endTime) {
+                    isValid = false;
+                    errorMessage = "Please specify both start and end times";
+                } else if (new Date(startTime) >= new Date(endTime)) {
+                    isValid = false;
+                    errorMessage = "End time must be after start time";
+                }
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+                alert(errorMessage);
+            }
+        });
     });
 </script>
 
