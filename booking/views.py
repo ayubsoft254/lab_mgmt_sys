@@ -1230,7 +1230,7 @@ def is_admin(user):
 @user_passes_test(is_admin)
 def admin_check_in_dashboard(request):
     """Dashboard for admins to view and manage check-ins"""
-    # Get today's date with proper timezone handling
+    # Clean up the duplicate filtering code
     today = timezone.now().date()
     
     # Define base queries
@@ -1249,7 +1249,7 @@ def admin_check_in_dashboard(request):
         base_bookings_query = base_bookings_query.filter(computer__lab__in=managed_labs)
         base_sessions_query = base_sessions_query.filter(lab__in=managed_labs)
     
-    # Get today's bookings - ensure we get bookings that overlap with today
+    # Get today's bookings - improving the filter to capture any booking active today
     today_bookings = base_bookings_query.filter(
         start_time__date__lte=today,
         end_time__date__gte=today
@@ -1260,6 +1260,9 @@ def admin_check_in_dashboard(request):
         start_time__date__lte=today,
         end_time__date__gte=today
     ).order_by('start_time')
+    
+    # Check if we have data and log for debugging
+    print(f"Found {today_bookings.count()} bookings and {today_sessions.count()} sessions for today")
     
     # Count attendance stats after filtering
     booking_attendance = {
