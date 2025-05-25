@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Verification Email Sent" %}{% endblock %}
+
+{% block content %}
+<style>
+/* Base Styles */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9fafb;
+}
+
+/* Container */
+.verify-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Card */
+.verify-card {
+    width: 100%;
+    max-width: 400px;
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    border-top: 5px solid #047857;
+}
+
+/* Title */
+.verify-title {
+    text-align: center;
+    color: #047857;
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* Paragraph */
+.verify-description {
+    font-size: 14px;
+    color: #374151;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Icon */
+.verify-icon {
+    width: 60px;
+    height: 60px;
+    background-color: #d1fae5;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.verify-icon svg {
+    width: 30px;
+    height: 30px;
+    color: #047857;
+}
+
+/* Button */
+.verify-button {
+    padding: 10px;
+    background-color: #047857;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+    display: block;
+    width: 100%;
+    text-align: center;
+    text-decoration: none;
+    margin-top: 20px;
+}
+
+.verify-button:hover {
+    background-color: #065f46;
+}
+
+/* Contact Text */
+.contact-text {
+    margin-top: 20px;
+    font-size: 14px;
+    text-align: center;
+}
+
+/* Status Message */
+.status-message {
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    text-align: center;
+}
+
+.status-message.success {
+    background-color: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+</style>
+
+<div class="verify-container">
+  <div class="verify-card">
+    <div class="verify-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+      </svg>
+    </div>
+
+    <h2 class="verify-title">{% trans "Verification Email Sent" %}</h2>
+    
+    <div class="status-message success">
+      {% trans "We've sent you a verification email!" %}
+    </div>
+    
+    <p class="verify-description">
+      {% blocktrans %}We have sent an email to verify your email address. Please check your inbox and click on the confirmation link to complete your registration.{% endblocktrans %}
+    </p>
+    
+    <p class="verify-description">
+      {% blocktrans %}If you don't see the email in your inbox within a few minutes, please check your spam or junk folder.{% endblocktrans %}
+    </p>
+    
+    <a href="{% url 'account_login' %}" class="verify-button">{% trans "Return to Login" %}</a>
+
+    <p class="contact-text">
+      {% blocktrans %}Please contact us if you have any trouble with the verification process.{% endblocktrans %}
+    </p>
+  </div>
+</div>
+{% endblock %}
