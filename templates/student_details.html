@@ -409,26 +409,56 @@
             e.preventDefault();
             console.log("Form submitted");
             
+            // Get selected rating type
+            const ratingType = document.querySelector('input[name="rating_type"]:checked');
+            if (!ratingType) {
+                alert('Please select rating type (booking or session)');
+                return;
+            }
+            
+            // Validate score
             const score = parseInt(scoreInput.value);
             console.log("Score value:", score);
+            if (isNaN(score) || score < 1 || score > 5) {
+                alert('Please select a valid score (1-5 stars)');
+                return;
+            }
             
-            // Rest of your validation code...
+            // Validate selection based on type
+            if (ratingType.value === 'booking' && !bookingSelect.value) {
+                alert('Please select a booking');
+                return;
+            }
+            
+            if (ratingType.value === 'session' && !sessionSelect.value) {
+                alert('Please select a session');
+                return;
+            }
             
             // Log the form data being sent
             const formData = new FormData(this);
             console.log("Form action URL:", this.action);
             console.log("Sending data:", Object.fromEntries(formData));
             
+            // Show loading state
+            submitRatingBtn.disabled = true;
+            submitRatingBtn.innerHTML = '<span class="animate-pulse">Submitting...</span>';
+            
             // Submit the form using fetch API
             fetch(this.action, {
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token }}'
                 }
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log("Response received:", response.status);
+                return response.json();
+            })
             .then(data => {
+                console.log("Response data:", data);
                 if (data.success) {
                     // Close the modal
                     rateModal.classList.add('hidden');
@@ -453,11 +483,15 @@
                         window.location.reload();
                     }, 1000);
                 } else {
+                    submitRatingBtn.disabled = false;
+                    submitRatingBtn.innerHTML = 'Submit Rating';
                     alert(`Error: ${data.error || 'Something went wrong'}`);
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
+                submitRatingBtn.disabled = false;
+                submitRatingBtn.innerHTML = 'Submit Rating';
                 alert('Failed to submit rating. Please try again.');
             });
         });
@@ -474,9 +508,31 @@
             fetch(url)
                 .then(response => {
                     console.log("Response status:", response.status);
-                    // Rest of your code...
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
                 })
-                // Rest of your code...
+                .then(data => {
+                    console.log("Received booking data:", data);
+                    if (!data.bookings || data.bookings.length === 0) {
+                        bookingSelect.innerHTML = '<option value="">No bookings found</option>';
+                    } else {
+                        let options = '<option value="">Select a booking</option>';
+                        data.bookings.forEach(booking => {
+                            const date = new Date(booking.start_time);
+                            const formattedDate = date.toLocaleDateString() + ' ' + 
+                                               date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                            
+                            options += `<option value="${booking.id}">${formattedDate} - Computer #${booking.computer_number}</option>`;
+                        });
+                        bookingSelect.innerHTML = options;
+                    }
+                })
+                .catch(error => {
+                    console.error("Error loading bookings:", error);
+                    bookingSelect.innerHTML = '<option value="">Error loading bookings - try again</option>';
+                });
         }
         
         // Load student's lab sessions
@@ -509,6 +565,24 @@
                     sessionSelect.innerHTML = '<option value="">Error loading sessions</option>';
                 });
         }
+        
+        // Test API endpoints
+        console.log("Checking API endpoints...");
+        fetch('/api/students/1/bookings/')
+            .then(response => {
+                console.log("Bookings API test response:", response.status);
+            })
+            .catch(error => {
+                console.error("Bookings API test error:", error);
+            });
+
+        fetch('/api/students/1/sessions/')
+            .then(response => {
+                console.log("Sessions API test response:", response.status);
+            })
+            .catch(error => {
+                console.error("Sessions API test error:", error);
+            });
         
         // Reset stars
         function resetStars() {
