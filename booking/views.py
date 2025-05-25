@@ -390,10 +390,12 @@ def admin_dashboard_view(request):
     # Add this to the admin_check_in_dashboard view:
     session_attendance = {}
     for session in today_sessions:
-        session_attendance[session.id] = SessionAttendance.objects.filter(
-            session=session, 
+        # Get count of students marked as present for this session
+        present_count = SessionAttendance.objects.filter(
+            session=session,
             status='present'
         ).count()
+        session_attendance[session.id] = present_count
 
     context['session_attendance'] = session_attendance
     
@@ -1369,10 +1371,12 @@ def admin_check_in_dashboard(request):
     # Add this to the admin_check_in_dashboard view:
     session_attendance = {}
     for session in today_sessions:
-        session_attendance[session.id] = SessionAttendance.objects.filter(
-            session=session, 
+        # Get count of students marked as present for this session
+        present_count = SessionAttendance.objects.filter(
+            session=session,
             status='present'
         ).count()
+        session_attendance[session.id] = present_count
 
     context['session_attendance'] = session_attendance
     
