@@ -495,6 +495,14 @@ class ComputerBooking(models.Model):
         )
         
         return True
+    
+    @property
+    def attendance(self):
+        """Get the attendance record for this booking if it exists"""
+        try:
+            return self.computerbookingattendance
+        except ComputerBookingAttendance.DoesNotExist:
+            return None
 
 class RecurringSession(models.Model):
     RECURRENCE_CHOICES = [
