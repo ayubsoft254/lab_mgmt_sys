@@ -1278,6 +1278,7 @@ from .models import (
     SessionAttendance, User
 )
 from .forms import AttendanceForm, BulkAttendanceForm
+from django.db.models import Avg
 
 def is_admin(user):
     """Check if user is admin or super admin"""
@@ -1858,48 +1859,57 @@ def rate_student_ajax(request):
     try:
         student_id = request.POST.get('student_id')
         rating_type = request.POST.get('rating_type')
-        rating = int(request.POST.get('rating'))
+        
+        # Fix: Get the score parameter and check if it exists
+        score_value = request.POST.get('score')
+        if not score_value:
+            return JsonResponse({'success': False, 'error': 'No score provided'}, status=400)
+        
+        score = int(score_value)
         comment = request.POST.get('comment', '')
         
         student = get_object_or_404(User, id=student_id, is_student=True)
         
         if rating_type == 'booking':
             booking_id = request.POST.get('booking_id')
+            if not booking_id:
+                return JsonResponse({'success': False, 'error': 'No booking selected'}, status=400)
+                
             booking = get_object_or_404(ComputerBooking, id=booking_id)
             
             # Create rating for booking
             StudentRating.objects.create(
                 student=student,
                 rated_by=request.user,
-                rating=rating,
+                score=score,  # Changed from 'rating' to 'score' to match model
                 comment=comment,
-                booking=booking
+                booking=booking,
+                session=None  # Explicitly set the other field to None
             )
             
         elif rating_type == 'session':
             session_id = request.POST.get('session_id')
+            if not session_id:
+                return JsonResponse({'success': False, 'error': 'No session selected'}, status=400)
+                
             session = get_object_or_404(LabSession, id=session_id)
             
             # Create rating for session
             StudentRating.objects.create(
                 student=student,
                 rated_by=request.user,
-                rating=rating,
+                score=score,  # Changed from 'rating' to 'score' to match model
                 comment=comment,
-                lab_session=session
+                session=session,
+                booking=None  # Explicitly set the other field to None
             )
             
         else:
-            # Create general rating
-            StudentRating.objects.create(
-                student=student,
-                rated_by=request.user,
-                rating=rating,
-                comment=comment
-            )
+            return JsonResponse({'success': False, 'error': 'Invalid rating type'}, status=400)
         
         # Calculate new average rating
-        avg_rating = StudentRating.objects.filter(student=student).aggregate(Avg('rating'))['rating__avg']
+        from django.db.models import Avg
+        avg_rating = StudentRating.objects.filter(student=student).aggregate(Avg('score'))['score__avg']
         
         return JsonResponse({
             'success': True,
@@ -1907,5 +1917,9 @@ def rate_student_ajax(request):
             'new_rating': avg_rating
         })
         
+    except ValueError:
+        return JsonResponse({'success': False, 'error': 'Invalid score value'}, status=400)
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
