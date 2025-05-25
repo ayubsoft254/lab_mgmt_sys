@@ -1517,3 +1517,43 @@ def session_detail(request, session_id):
         'now_plus_2hr': now_plus_2hr,
     }
     return render(request, 'session_detail.html', context)
+
+@login_required
+def booking_history_view(request):
+    """View for showing a user's booking history"""
+    
+    # Get the current user's bookings
+    computer_bookings = ComputerBooking.objects.filter(
+        student=request.user
+    ).order_by('-start_time')
+    
+    # If the user is a lecturer, get their lab sessions too
+    lab_sessions = []
+    if hasattr(request.user, 'is_lecturer') and request.user.is_lecturer:
+        lab_sessions = LabSession.objects.filter(
+            lecturer=request.user
+        ).order_by('-start_time')
+    
+    # For past bookings/sessions
+    past_computer_bookings = computer_bookings.filter(
+        end_time__lt=timezone.now()
+    )
+    
+    past_lab_sessions = []
+    if hasattr(request.user, 'is_lecturer') and request.user.is_lecturer:
+        past_lab_sessions = lab_sessions.filter(
+            end_time__lt=timezone.now()
+        )
+    
+    return render(request, 'booking_history.html', {
+        'current_computer_bookings': computer_bookings.filter(
+            end_time__gte=timezone.now(),
+            is_cancelled=False
+        ),
+        'past_computer_bookings': past_computer_bookings,
+        'current_lab_sessions': lab_sessions.filter(
+            end_time__gte=timezone.now(),
+            is_cancelled=False
+        ) if lab_sessions else [],
+        'past_lab_sessions': past_lab_sessions,
+    })
