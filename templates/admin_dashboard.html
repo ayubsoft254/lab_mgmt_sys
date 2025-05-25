@@ -1065,21 +1065,80 @@
         // Student search functionality
         const studentSearch = document.getElementById('studentSearch');
         if (studentSearch) {
+            // Add clear button to search input
+            const searchWrapper = document.createElement('div');
+            searchWrapper.className = 'relative';
+            studentSearch.parentNode.insertBefore(searchWrapper, studentSearch);
+            searchWrapper.appendChild(studentSearch);
+            
+            const clearButton = document.createElement('button');
+            clearButton.className = 'absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600';
+            clearButton.innerHTML = '<i class="fas fa-times-circle"></i>';
+            clearButton.style.display = 'none';
+            clearButton.setAttribute('type', 'button');
+            searchWrapper.appendChild(clearButton);
+            
+            clearButton.addEventListener('click', function() {
+                studentSearch.value = '';
+                clearButton.style.display = 'none';
+                // Trigger the search event to show all rows
+                const event = new Event('keyup');
+                studentSearch.dispatchEvent(event);
+                studentSearch.focus();
+            });
+            
             studentSearch.addEventListener('keyup', function() {
                 const searchValue = this.value.toLowerCase();
+                clearButton.style.display = searchValue ? 'block' : 'none';
+                
                 const rows = document.querySelectorAll('#studentTableBody tr');
+                let visibleCount = 0;
                 
                 rows.forEach(row => {
-                    const studentName = row.querySelector('td:nth-child(1)')?.textContent.toLowerCase() || '';
-                    const school = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || '';
-                    const course = row.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || '';
+                    const studentNameCell = row.querySelector('td:nth-child(1)');
+                    const schoolCell = row.querySelector('td:nth-child(2)');
+                    const courseCell = row.querySelector('td:nth-child(3)');
                     
-                    if (studentName.includes(searchValue) || school.includes(searchValue) || course.includes(searchValue)) {
+                    if (!studentNameCell) return; // Skip if row doesn't have cells
+                    
+                    const studentName = studentNameCell.textContent.toLowerCase() || '';
+                    const school = schoolCell ? schoolCell.textContent.toLowerCase() : '';
+                    const course = courseCell ? courseCell.textContent.toLowerCase() : '';
+                    
+                    if (studentName.includes(searchValue) || 
+                        school.includes(searchValue) || 
+                        course.includes(searchValue)) {
                         row.style.display = '';
+                        visibleCount++;
                     } else {
                         row.style.display = 'none';
                     }
                 });
+                
+                // Update the counter or show "no results" message
+                const resultsCounter = document.getElementById('searchResultsCounter');
+                if (resultsCounter) {
+                    resultsCounter.textContent = `${visibleCount} student${visibleCount !== 1 ? 's' : ''} found`;
+                }
+                
+                // Show/hide no results message
+                const noResultsMsg = document.getElementById('noSearchResults');
+                if (noResultsMsg) {
+                    noResultsMsg.style.display = visibleCount === 0 ? 'block' : 'none';
+                } else if (visibleCount === 0) {
+                    // Create the message if it doesn't exist
+                    const msg = document.createElement('div');
+                    msg.id = 'noSearchResults';
+                    msg.className = 'text-center py-4 text-gray-500';
+                    msg.innerHTML = `
+                        <i class="fas fa-search text-gray-400 text-xl mb-2"></i>
+                        <p>No students match your search criteria.</p>
+                    `;
+                    const tableBody = document.getElementById('studentTableBody');
+                    if (tableBody) {
+                        tableBody.parentNode.insertBefore(msg, tableBody.nextSibling);
+                    }
+                }
             });
         }
     });
