@@ -1453,7 +1453,7 @@
         starButtons.forEach(button => {
             button.addEventListener('click', function() {
                 const score = parseInt(this.getAttribute('data-score'));
-                scoreInput.value = score;
+                scoreInput.value = score; // Make sure this line is working
                 
                 // Update stars display
                 starButtons.forEach((btn, index) => {
