@@ -1278,12 +1278,23 @@ def admin_check_in_dashboard(request):
         ).count(),
     }
     
+    # Add debugging info for admins
+    all_bookings_count = base_bookings_query.count()
+    all_sessions_count = base_sessions_query.count()
+    
+    if all_bookings_count == 0 and all_sessions_count == 0:
+        messages.warning(request, "There are no bookings or sessions in the system yet.")
+    elif today_bookings.count() == 0 and today_sessions.count() == 0:
+        messages.info(request, f"No bookings or sessions scheduled for today ({today.strftime('%Y-%m-%d')}). There are {all_bookings_count} total bookings and {all_sessions_count} total sessions in the system.")
+    
     context = {
         'today_bookings': today_bookings,
         'today_sessions': today_sessions,
         'booking_attendance': booking_attendance,
         'today': today,
-        'now': timezone.now()
+        'now': timezone.now(),
+        'all_bookings_count': all_bookings_count,
+        'all_sessions_count': all_sessions_count
     }
     
     return render(request, 'check_in_dashboard.html', context)
