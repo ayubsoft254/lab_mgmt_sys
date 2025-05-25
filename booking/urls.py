@@ -60,4 +60,5 @@ urlpatterns = [
     path('check-in/quick/<int:booking_id>/', views.quick_check_in, name='quick_check_in'),
     # Newsletter subscription
     path('subscribe/', subscribe_newsletter, name='subscribe_newsletter'),
+    path('assign-student/', views.assign_student_view, name='assign_student'),
 ]
