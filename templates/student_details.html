@@ -292,9 +292,15 @@
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        console.log("Rating script loaded"); // Debug loading
+        
         const rateModal = document.getElementById('rateStudentModal');
         const closeRateButtons = document.querySelectorAll('.closeRateModal');
         const rateButtons = document.querySelectorAll('.rate-student-btn');
+        
+        console.log("Found rating buttons:", rateButtons.length); // Debug element selection
+        
+        // Other variables...
         const rateStudentNameDisplay = document.getElementById('rateStudentNameDisplay');
         const rateStudentIdInput = document.getElementById('rate_student_id');
         const bookingSelect = document.getElementById('booking_select');
@@ -308,11 +314,17 @@
         const rateBooking = document.getElementById('rate_booking');
         const rateSession = document.getElementById('rate_session');
         
-        // Open rating modal
+        // Open rating modal - Fixed event listener
         rateButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const studentId = button.getAttribute('data-student-id');
-                const studentName = button.getAttribute('data-student-name');
+            console.log("Adding click handler to button:", button); // Debug button registration
+            
+            // Use direct listener with debugging
+            button.onclick = function() {
+                console.log("Rate button clicked"); // Debug click event
+                const studentId = this.getAttribute('data-student-id');
+                const studentName = this.getAttribute('data-student-name');
+                
+                console.log("Student ID:", studentId, "Name:", studentName); // Debug data attributes
                 
                 rateStudentNameDisplay.textContent = studentName;
                 rateStudentIdInput.value = studentId;
@@ -323,8 +335,10 @@
                 // Load student's bookings and sessions
                 loadStudentBookings(studentId);
                 
+                // Show the modal
                 rateModal.classList.remove('hidden');
-            });
+                console.log("Modal should be visible now"); // Debug modal display
+            };
         });
         
         // Close rating modal
