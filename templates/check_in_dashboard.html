@@ -212,6 +212,40 @@
             </div>
         </div>
     </div>
+
+    {% if request.user.is_superuser %}
+    <div class="mt-4 card shadow-sm">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">Debug Information</h5>
+        </div>
+        <div class="card-body">
+            <p>Today: {{ debug_info.today }}</p>
+            <p>Current time: {{ debug_info.timezone_now }}</p>
+            <p>Total bookings in system: {{ all_bookings_count }}</p>
+            <p>Total sessions in system: {{ all_sessions_count }}</p>
+            <p>Bookings for today: {{ debug_info.today_bookings_count }}</p>
+            <p>Sessions for today: {{ debug_info.today_sessions_count }}</p>
+            
+            {% if debug_info.today_bookings_times %}
+                <h6 class="mt-3">Sample bookings (ID, start, end):</h6>
+                <ul>
+                    {% for id, start, end in debug_info.today_bookings_times %}
+                        <li>ID: {{ id }}, {{ start }} - {{ end }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            
+            {% if debug_info.today_sessions_times %}
+                <h6 class="mt-3">Sample sessions (ID, start, end):</h6>
+                <ul>
+                    {% for id, start, end in debug_info.today_sessions_times %}
+                        <li>ID: {{ id }}, {{ start }} - {{ end }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
 
