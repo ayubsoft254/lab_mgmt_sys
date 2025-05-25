@@ -1796,3 +1796,116 @@ def lab_computers_api(request, lab_id):
         return JsonResponse(data)
     except Lab.DoesNotExist:
         return JsonResponse({'error': 'Lab not found'}, status=404)
+    
+@login_required
+@user_passes_test(is_admin)
+def student_bookings_api(request, student_id):
+    """API endpoint to get a student's computer bookings"""
+    try:
+        student = get_object_or_404(User, id=student_id, is_student=True)
+        bookings = ComputerBooking.objects.filter(
+            student=student, 
+            is_approved=True,
+            is_cancelled=False
+        ).order_by('-start_time')[:20]
+        
+        data = {
+            'bookings': [
+                {
+                    'id': booking.id,
+                    'start_time': booking.start_time.isoformat(),
+                    'end_time': booking.end_time.isoformat(),
+                    'computer_number': booking.computer.computer_number,
+                    'lab_name': booking.computer.lab.name
+                } for booking in bookings
+            ]
+        }
+        return JsonResponse(data)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+@login_required
+@user_passes_test(is_admin)
+def student_sessions_api(request, student_id):
+    """API endpoint to get a student's lab sessions"""
+    try:
+        student = get_object_or_404(User, id=student_id, is_student=True)
+        sessions = LabSession.objects.filter(
+            attending_students=student,
+            is_approved=True
+        ).order_by('-start_time')[:20]
+        
+        data = {
+            'sessions': [
+                {
+                    'id': session.id,
+                    'title': session.title,
+                    'start_time': session.start_time.isoformat(),
+                    'end_time': session.end_time.isoformat(),
+                    'lab_name': session.lab.name
+                } for session in sessions
+            ]
+        }
+        return JsonResponse(data)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+@login_required
+@user_passes_test(is_admin)
+@require_POST
+def rate_student_ajax(request):
+    """AJAX endpoint for rating a student"""
+    try:
+        student_id = request.POST.get('student_id')
+        rating_type = request.POST.get('rating_type')
+        rating = int(request.POST.get('rating'))
+        comment = request.POST.get('comment', '')
+        
+        student = get_object_or_404(User, id=student_id, is_student=True)
+        
+        if rating_type == 'booking':
+            booking_id = request.POST.get('booking_id')
+            booking = get_object_or_404(ComputerBooking, id=booking_id)
+            
+            # Create rating for booking
+            StudentRating.objects.create(
+                student=student,
+                rated_by=request.user,
+                rating=rating,
+                comment=comment,
+                booking=booking
+            )
+            
+        elif rating_type == 'session':
+            session_id = request.POST.get('session_id')
+            session = get_object_or_404(LabSession, id=session_id)
+            
+            # Create rating for session
+            StudentRating.objects.create(
+                student=student,
+                rated_by=request.user,
+                rating=rating,
+                comment=comment,
+                lab_session=session
+            )
+            
+        else:
+            # Create general rating
+            StudentRating.objects.create(
+                student=student,
+                rated_by=request.user,
+                rating=rating,
+                comment=comment
+            )
+        
+        # Calculate new average rating
+        avg_rating = StudentRating.objects.filter(student=student).aggregate(Avg('rating'))['rating__avg']
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Rating submitted successfully',
+            'new_rating': avg_rating
+        })
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
