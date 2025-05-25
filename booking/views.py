@@ -267,7 +267,7 @@ def admin_dashboard_view(request):
     pending_recurring_sessions = RecurringSession.objects.filter(
         is_approved=False,        
         end_time__gte=now
-    ).order_by('start_time')
+    ).order_by('start_date')
     
     # Upcoming (approved) bookings and sessions
     upcoming_computer_bookings = ComputerBooking.objects.filter(
@@ -1230,23 +1230,38 @@ def is_admin(user):
 @user_passes_test(is_admin)
 def admin_check_in_dashboard(request):
     """Dashboard for admins to view and manage check-ins"""
-    # Get today's date
+    # Get today's date with proper timezone handling
     today = timezone.now().date()
     
-    # Get today's computer bookings
-    today_bookings = ComputerBooking.objects.filter(
-        start_time__date=today,
+    # Define base queries
+    base_bookings_query = ComputerBooking.objects.filter(
         is_approved=True,
         is_cancelled=False
+    )
+    
+    base_sessions_query = LabSession.objects.filter(
+        is_approved=True
+    )
+    
+    # If user is lab-specific admin, filter by their labs
+    if request.user.is_admin and not request.user.is_super_admin:
+        managed_labs = request.user.managed_labs.all()
+        base_bookings_query = base_bookings_query.filter(computer__lab__in=managed_labs)
+        base_sessions_query = base_sessions_query.filter(lab__in=managed_labs)
+    
+    # Get today's bookings - ensure we get bookings that overlap with today
+    today_bookings = base_bookings_query.filter(
+        start_time__date__lte=today,
+        end_time__date__gte=today
     ).order_by('start_time')
     
     # Get today's lab sessions
-    today_sessions = LabSession.objects.filter(
-        start_time__date=today,
-        is_approved=True
+    today_sessions = base_sessions_query.filter(
+        start_time__date__lte=today,
+        end_time__date__gte=today
     ).order_by('start_time')
     
-    # Count attendance stats
+    # Count attendance stats after filtering
     booking_attendance = {
         'total': today_bookings.count(),
         'checked_in': ComputerBookingAttendance.objects.filter(
@@ -1262,12 +1277,6 @@ def admin_check_in_dashboard(request):
             status='late'
         ).count(),
     }
-    
-    # If user is lab-specific admin, filter by their labs
-    if request.user.is_admin and not request.user.is_super_admin:
-        managed_labs = request.user.managed_labs.all()
-        today_bookings = today_bookings.filter(computer__lab__in=managed_labs)
-        today_sessions = today_sessions.filter(lab__in=managed_labs)
     
     context = {
         'today_bookings': today_bookings,
