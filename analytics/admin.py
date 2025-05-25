@@ -132,7 +132,10 @@ class SystemEventAdmin(admin.ModelAdmin):
     def user_link(self, obj):
         """Create clickable link to user"""
         if obj.user:
-            url = reverse('admin:auth_user_change', args=[obj.user.pk])
+            # Use the correct app_label and model_name from the user object itself
+            app_label = obj.user._meta.app_label
+            model_name = obj.user._meta.model_name
+            url = reverse(f'admin:{app_label}_{model_name}_change', args=[obj.user.pk])
             return format_html(
                 '<a href="{}" title="View user details">{}</a>',
                 url,
