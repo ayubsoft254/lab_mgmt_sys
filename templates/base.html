@@ -217,6 +217,9 @@
                         <a href="{% url 'lab_list' %}" class="nav-link text-white">
                             <i class="fas fa-flask mr-1"></i> Labs
                         </a>
+                        <a href="{% url 'free_timeslots' %}" class="nav-link text-white">
+                            <i class="fas fa-clock mr-1"></i> Free Timeslots
+                        </a>
                         
                         {% if user.is_lecturer %}
                             <a href="{% url 'lecturer_booking' %}" class="nav-link text-white">
@@ -291,6 +294,9 @@
                 {% if user.is_authenticated %}
                     <a href="{% url 'lab_list' %}" class="mobile-nav-link text-white">
                         <i class="fas fa-flask mr-2"></i> Labs
+                    </a>
+                    <a href="{% url 'free_timeslots' %}" class="mobile-nav-link text-white">
+                        <i class="fas fa-clock mr-2"></i> Free Timeslots
                     </a>
                     
                     {% if user.is_lecturer %}
