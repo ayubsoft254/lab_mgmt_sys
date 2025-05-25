@@ -306,35 +306,30 @@ document.addEventListener('DOMContentLoaded', function() {
     const submitRatingBtn = document.getElementById('submit-rating');
     const rateForm = document.getElementById('rateStudentForm');
 
-    // Event Delegation for Rate Buttons
-    document.addEventListener('click', function(e) {
-        const rateBtn = e.target.closest('.rate-student-btn');
-        if (rateBtn) {
+    // Event Delegation for Rate Buttons - Simplified approach
+    document.querySelectorAll('.rate-student-btn').forEach(button => {
+        console.log("Adding click handler to button:", button);
+        
+        button.addEventListener('click', function() {
             console.log("Rate button clicked");
-            const studentId = rateBtn.dataset.studentId;
-            const studentName = rateBtn.dataset.studentName;
+            const studentId = this.getAttribute('data-student-id');
+            const studentName = this.getAttribute('data-student-name');
             
             console.log("Student ID:", studentId, "Name:", studentName);
             
+            // The rest of your code
             rateStudentNameDisplay.textContent = studentName;
             rateStudentIdInput.value = studentId;
             
-            // Reset form
-            resetRatingForm();
+            // Reset stars
+            resetStars();
             
-            // Load bookings with direct URL
-            const bookingsUrl = `/api/students/${studentId}/bookings/`;
-            loadStudentBookings(studentId, bookingsUrl);
+            // Load student's bookings with direct URL
+            loadStudentBookings(studentId);
             
-            // Show modal
-            rateModal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-        
-        // Close modal handlers
-        if (e.target.closest('.closeRateModal') || e.target === rateModal) {
-            closeModal();
-        }
+            // Show modal directly
+            showRatingModal();
+        });
     });
 
     // Star Rating
@@ -535,6 +530,14 @@ document.addEventListener('DOMContentLoaded', function() {
         
         document.body.appendChild(alert);
         setTimeout(() => alert.remove(), 5000);
+    }
+
+    // Direct approach to showing the modal
+    function showRatingModal() {
+        // Make extra sure the modal is visible
+        rateModal.classList.remove('hidden');
+        rateModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // Prevent scrolling
     }
 });
 </script>
