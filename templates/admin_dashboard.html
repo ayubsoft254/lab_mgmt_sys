@@ -708,6 +708,109 @@
     </div>
 </div>
 
+<!-- Student Assignment Modal -->
+<div id="assignStudentModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="fixed inset-0 bg-black opacity-50"></div>
+        <div class="relative bg-white rounded-lg shadow-xl max-w-3xl w-full mx-auto">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-gray-800">Assign Student: <span id="studentNameDisplay"></span></h3>
+                <button type="button" class="closeAssignModal text-gray-400 hover:text-gray-500">
+                    <span class="sr-only">Close</span>
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="px-6 py-4">
+                <form id="assignStudentForm" method="post" action="{% url 'assign_student' %}">
+                    {% csrf_token %}
+                    <input type="hidden" id="student_id" name="student_id">
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="assignment_type">
+                            Assignment Type
+                        </label>
+                        <select id="assignment_type" name="assignment_type" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                            <option value="">Select Assignment Type</option>
+                            <option value="lab_session">Lab Session</option>
+                            <option value="computer_booking">Computer Booking</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Lab Session Selection (initially hidden) -->
+                    <div class="mb-4 hidden" id="lab_session_section">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="lab_session">
+                            Select Lab Session
+                        </label>
+                        <select id="lab_session" name="lab_session_id" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            <option value="">Select a Lab Session</option>
+                            {% for session in upcoming_lab_sessions %}
+                                <option value="{{ session.id }}">
+                                    {{ session.title }} - {{ session.lab.name }} ({{ session.start_time|date:"M d, H:i" }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Computer Selection (initially hidden) -->
+                    <div class="mb-4 hidden" id="computer_section">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="lab">
+                            Select Lab
+                        </label>
+                        <select id="lab" name="lab_id" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            <option value="">Select a Lab</option>
+                            {% for lab in labs %}
+                                <option value="{{ lab.id }}">{{ lab.name }}</option>
+                            {% endfor %}
+                        </select>
+                        
+                        <div class="mt-3 hidden" id="computers_container">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="computer">
+                                Select Computer
+                            </label>
+                            <select id="computer" name="computer_id" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                <option value="">First select a lab</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mt-3 hidden" id="booking_time_container">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-gray-700 text-sm font-bold mb-2" for="start_time">
+                                        Start Date & Time
+                                    </label>
+                                    <input type="datetime-local" id="start_time" name="start_time" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 text-sm font-bold mb-2" for="end_time">
+                                        End Date & Time
+                                    </label>
+                                    <input type="datetime-local" id="end_time" name="end_time" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="purpose">
+                            Purpose/Notes
+                        </label>
+                        <textarea id="purpose" name="purpose" rows="3" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+                    </div>
+                    
+                    <div class="flex justify-end">
+                        <button type="button" class="closeAssignModal inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mr-3">
+                            Cancel
+                        </button>
+                        <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Assign
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     // Tab functionality
     document.addEventListener('DOMContentLoaded', function() {
@@ -847,6 +950,7 @@
                         <div class="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
                         <div class="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
                         <div class="h-4 bg-gray-200 rounded w-5/6 mb-4"></div>
+                        <div class="h-4 bg-gray-200 rounded w-2/3 mb-4"></div>
                     </div>
                 `;
                 
