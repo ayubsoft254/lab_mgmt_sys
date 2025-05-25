@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% trans "Confirm Email Address" %}{% endblock %}
+{% block title %}{% trans "Email Verification Required" %}{% endblock %}
 
 {% block content %}
 <style>
@@ -13,7 +13,7 @@ body {
 }
 
 /* Container */
-.confirm-container {
+.verify-container {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -22,7 +22,7 @@ body {
 }
 
 /* Card */
-.confirm-card {
+.verify-card {
     width: 100%;
     max-width: 400px;
     background-color: #ffffff;
@@ -33,7 +33,7 @@ body {
 }
 
 /* Title */
-.confirm-title {
+.verify-title {
     text-align: center;
     color: #047857;
     font-size: 28px;
@@ -42,7 +42,7 @@ body {
 }
 
 /* Paragraph */
-.confirm-description {
+.verify-description {
     font-size: 14px;
     color: #374151;
     margin-bottom: 20px;
@@ -50,10 +50,10 @@ body {
 }
 
 /* Icon */
-.confirm-icon {
+.verify-icon {
     width: 60px;
     height: 60px;
-    background-color: #d1fae5;
+    background-color: #fef3c7;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -61,30 +61,14 @@ body {
     margin: 0 auto 20px;
 }
 
-.confirm-icon.warning {
-    background-color: #fef3c7;
-}
-
-.confirm-icon.error {
-    background-color: #fee2e2;
-}
-
-.confirm-icon svg {
+.verify-icon svg {
     width: 30px;
     height: 30px;
-    color: #047857;
-}
-
-.confirm-icon.warning svg {
     color: #d97706;
 }
 
-.confirm-icon.error svg {
-    color: #b91c1c;
-}
-
 /* Button */
-.confirm-button {
+.action-button {
     padding: 10px;
     background-color: #047857;
     color: #ffffff;
@@ -101,7 +85,7 @@ body {
     margin-top: 20px;
 }
 
-.confirm-button:hover {
+.action-button:hover {
     background-color: #065f46;
 }
 
@@ -121,67 +105,39 @@ body {
     text-align: center;
 }
 
-.status-message.success {
-    background-color: #d1fae5;
-    color: #065f46;
-    border: 1px solid #a7f3d0;
-}
-
 .status-message.warning {
     background-color: #fef3c7;
     color: #92400e;
     border: 1px solid #fde68a;
 }
-
-.status-message.error {
-    background-color: #fee2e2;
-    color: #b91c1c;
-    border: 1px solid #fecaca;
-}
 </style>
 
-<div class="confirm-container">
-  <div class="confirm-card">
-    {% if confirmation %}
-      <div class="confirm-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-        </svg>
-      </div>
+<div class="verify-container">
+  <div class="verify-card">
+    <div class="verify-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+      </svg>
+    </div>
 
-      <h2 class="confirm-title">{% trans "Confirm Email" %}</h2>
-      
-      <p class="confirm-description">
-        {% blocktrans with confirmation.email_address.email as email %}Please confirm that <strong>{{ email }}</strong> is your email address.{% endblocktrans %}
-      </p>
-
-      <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
-        {% csrf_token %}
-        <button class="confirm-button" type="submit">{% trans "Confirm" %}</button>
-      </form>
+    <h2 class="verify-title">{% trans "Email Verification Required" %}</h2>
     
-    {% else %}
-      <div class="confirm-icon error">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-        </svg>
-      </div>
-
-      <h2 class="confirm-title">{% trans "Invalid Confirmation Link" %}</h2>
-      
-      <div class="status-message error">
-        {% trans "This confirmation link is invalid or has expired." %}
-      </div>
-      
-      <p class="confirm-description">
-        {% blocktrans %}The confirmation link was invalid, possibly because it has already been used or has expired.{% endblocktrans %}
-      </p>
-      
-      <a href="{% url 'account_email' %}" class="confirm-button">{% trans "Manage Email Addresses" %}</a>
-    {% endif %}
-
+    <div class="status-message warning">
+      {% trans "Your account is currently inactive." %}
+    </div>
+    
+    <p class="verify-description">
+      {% blocktrans %}To access your account, you need to verify your email address. Please check your email for a verification link.{% endblocktrans %}
+    </p>
+    
+    <p class="verify-description">
+      {% blocktrans %}If you haven't received the verification email, you can request a new one.{% endblocktrans %}
+    </p>
+    
+    <a href="{% url 'account_email' %}" class="action-button">{% trans "Manage Email Addresses" %}</a>
+    
     <p class="contact-text">
-      {% blocktrans %}Please contact us if you have any trouble confirming your email.{% endblocktrans %}
+      {% blocktrans %}Please contact us if you have any trouble verifying your email.{% endblocktrans %}
     </p>
   </div>
 </div>

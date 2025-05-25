@@ -61,10 +61,26 @@ body {
     margin: 0 auto 20px;
 }
 
+.confirm-icon.warning {
+    background-color: #fef3c7;
+}
+
+.confirm-icon.error {
+    background-color: #fee2e2;
+}
+
 .confirm-icon svg {
     width: 30px;
     height: 30px;
     color: #047857;
+}
+
+.confirm-icon.warning svg {
+    color: #d97706;
+}
+
+.confirm-icon.error svg {
+    color: #b91c1c;
 }
 
 /* Button */
@@ -129,7 +145,7 @@ body {
     {% if confirmation %}
       <div class="confirm-icon">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
         </svg>
       </div>
 
@@ -145,63 +161,23 @@ body {
       </form>
     
     {% else %}
-      {% if email_confirmation_success %}
-        <div class="confirm-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-          </svg>
-        </div>
+      <div class="confirm-icon error">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+        </svg>
+      </div>
 
-        <h2 class="confirm-title">{% trans "Email Confirmed" %}</h2>
-        
-        <div class="status-message success">
-          {% trans "Your email address has been confirmed." %}
-        </div>
-        
-        <p class="confirm-description">
-          {% blocktrans %}You can now login with your new account.{% endblocktrans %}
-        </p>
-        
-        <a href="{% url 'account_login' %}" class="confirm-button">{% trans "Login" %}</a>
+      <h2 class="confirm-title">{% trans "Invalid Confirmation Link" %}</h2>
       
-      {% elif email_confirmation_expired %}
-        <div class="confirm-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-          </svg>
-        </div>
-        
-        <h2 class="confirm-title">{% trans "Link Expired" %}</h2>
-        
-        <div class="status-message error">
-          {% trans "This confirmation link has expired or is invalid." %}
-        </div>
-        
-        <p class="confirm-description">
-          {% blocktrans %}Please request a new confirmation email by logging in and visiting your profile settings.{% endblocktrans %}
-        </p>
-        
-        <a href="{% url 'account_login' %}" class="confirm-button">{% trans "Go to Login" %}</a>
+      <div class="status-message error">
+        {% trans "This confirmation link is invalid or has expired." %}
+      </div>
       
-      {% else %}
-        <div class="confirm-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-          </svg>
-        </div>
-
-        <h2 class="confirm-title">{% trans "Invalid Link" %}</h2>
-        
-        <div class="status-message warning">
-          {% trans "The confirmation link was invalid, possibly because it has already been used." %}
-        </div>
-        
-        <p class="confirm-description">
-          {% blocktrans %}Please request a new confirmation email or try logging in if you have already confirmed your email.{% endblocktrans %}
-        </p>
-        
-        <a href="{% url 'account_login' %}" class="confirm-button">{% trans "Go to Login" %}</a>
-      {% endif %}
+      <p class="confirm-description">
+        {% blocktrans %}The confirmation link was invalid, possibly because it has already been used or has expired.{% endblocktrans %}
+      </p>
+      
+      <a href="{% url 'account_email' %}" class="confirm-button">{% trans "Manage Email Addresses" %}</a>
     {% endif %}
 
     <p class="contact-text">
