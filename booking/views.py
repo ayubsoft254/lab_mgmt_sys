@@ -387,6 +387,16 @@ def admin_dashboard_view(request):
         }
     })
     
+    # Add this to the admin_check_in_dashboard view:
+    session_attendance = {}
+    for session in today_sessions:
+        session_attendance[session.id] = SessionAttendance.objects.filter(
+            session=session, 
+            status='present'
+        ).count()
+
+    context['session_attendance'] = session_attendance
+    
     return render(request, 'admin_dashboard.html', context)
 
 @login_required
@@ -1341,6 +1351,16 @@ def admin_check_in_dashboard(request):
             ]
         }
     })
+    
+    # Add this to the admin_check_in_dashboard view:
+    session_attendance = {}
+    for session in today_sessions:
+        session_attendance[session.id] = SessionAttendance.objects.filter(
+            session=session, 
+            status='present'
+        ).count()
+
+    context['session_attendance'] = session_attendance
     
     return render(request, 'check_in_dashboard.html', context)
 
