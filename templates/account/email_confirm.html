@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Confirm Email Address" %}{% endblock %}
+
+{% block content %}
+<style>
+/* Base Styles */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9fafb;
+}
+
+/* Container */
+.confirm-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Card */
+.confirm-card {
+    width: 100%;
+    max-width: 400px;
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    border-top: 5px solid #047857;
+}
+
+/* Title */
+.confirm-title {
+    text-align: center;
+    color: #047857;
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* Paragraph */
+.confirm-description {
+    font-size: 14px;
+    color: #374151;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Icon */
+.confirm-icon {
+    width: 60px;
+    height: 60px;
+    background-color: #d1fae5;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.confirm-icon svg {
+    width: 30px;
+    height: 30px;
+    color: #047857;
+}
+
+/* Button */
+.confirm-button {
+    padding: 10px;
+    background-color: #047857;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+    display: block;
+    width: 100%;
+    text-align: center;
+    text-decoration: none;
+    margin-top: 20px;
+}
+
+.confirm-button:hover {
+    background-color: #065f46;
+}
+
+/* Contact Text */
+.contact-text {
+    margin-top: 20px;
+    font-size: 14px;
+    text-align: center;
+}
+
+/* Status Message */
+.status-message {
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    text-align: center;
+}
+
+.status-message.success {
+    background-color: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.status-message.warning {
+    background-color: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+
+.status-message.error {
+    background-color: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+</style>
+
+<div class="confirm-container">
+  <div class="confirm-card">
+    {% if confirmation %}
+      <div class="confirm-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+        </svg>
+      </div>
+
+      <h2 class="confirm-title">{% trans "Confirm Email" %}</h2>
+      
+      <p class="confirm-description">
+        {% blocktrans with confirmation.email_address.email as email %}Please confirm that <strong>{{ email }}</strong> is your email address.{% endblocktrans %}
+      </p>
+
+      <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
+        {% csrf_token %}
+        <button class="confirm-button" type="submit">{% trans "Confirm" %}</button>
+      </form>
+    
+    {% else %}
+      {% if email_confirmation_success %}
+        <div class="confirm-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+          </svg>
+        </div>
+
+        <h2 class="confirm-title">{% trans "Email Confirmed" %}</h2>
+        
+        <div class="status-message success">
+          {% trans "Your email address has been confirmed." %}
+        </div>
+        
+        <p class="confirm-description">
+          {% blocktrans %}You can now login with your new account.{% endblocktrans %}
+        </p>
+        
+        <a href="{% url 'account_login' %}" class="confirm-button">{% trans "Login" %}</a>
+      
+      {% elif email_confirmation_expired %}
+        <div class="confirm-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        
+        <h2 class="confirm-title">{% trans "Link Expired" %}</h2>
+        
+        <div class="status-message error">
+          {% trans "This confirmation link has expired or is invalid." %}
+        </div>
+        
+        <p class="confirm-description">
+          {% blocktrans %}Please request a new confirmation email by logging in and visiting your profile settings.{% endblocktrans %}
+        </p>
+        
+        <a href="{% url 'account_login' %}" class="confirm-button">{% trans "Go to Login" %}</a>
+      
+      {% else %}
+        <div class="confirm-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+          </svg>
+        </div>
+
+        <h2 class="confirm-title">{% trans "Invalid Link" %}</h2>
+        
+        <div class="status-message warning">
+          {% trans "The confirmation link was invalid, possibly because it has already been used." %}
+        </div>
+        
+        <p class="confirm-description">
+          {% blocktrans %}Please request a new confirmation email or try logging in if you have already confirmed your email.{% endblocktrans %}
+        </p>
+        
+        <a href="{% url 'account_login' %}" class="confirm-button">{% trans "Go to Login" %}</a>
+      {% endif %}
+    {% endif %}
+
+    <p class="contact-text">
+      {% blocktrans %}Please contact us if you have any trouble confirming your email.{% endblocktrans %}
+    </p>
+  </div>
+</div>
+{% endblock %}
