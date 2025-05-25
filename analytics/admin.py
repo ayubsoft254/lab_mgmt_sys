@@ -171,8 +171,26 @@ class SystemEventAdmin(admin.ModelAdmin):
     def details_preview(self, obj):
         """Show truncated details"""
         if obj.details:
-            preview = obj.details[:100] + ('...' if len(obj.details) > 100 else '')
-            return format_html('<span title="{}">{}</span>', obj.details, preview)
+            import json
+            
+            # Pretty format the JSON for the tooltip
+            full_details = json.dumps(obj.details, indent=2)
+            
+            # Create a simplified preview
+            if isinstance(obj.details, dict):
+                # For dictionaries, show key count
+                keys = list(obj.details.keys())[:3]  # Get first 3 keys
+                preview = f"{len(obj.details)} keys: {', '.join(keys)}"
+                if len(obj.details) > 3:
+                    preview += ", ..."
+            elif isinstance(obj.details, list):
+                # For lists, show item count
+                preview = f"{len(obj.details)} items"
+            else:
+                # For other types, convert to string
+                preview = str(obj.details)[:100] + ('...' if len(str(obj.details)) > 100 else '')
+                
+            return format_html('<span title="{}">{}</span>', full_details.replace('"', '&quot;'), preview)
         return format_html('<em>No details</em>')
     details_preview.short_description = 'Details'
     
