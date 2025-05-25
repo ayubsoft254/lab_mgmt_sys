@@ -75,18 +75,6 @@
                                 </span>
                             </div>
                             <p class="text-sm text-gray-600">Based on {{ student.total_ratings }} ratings</p>
-                            
-                            <div class="mt-4">
-                                <!-- Fix the rating button -->
-                                <button 
-                                    type="button"
-                                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 rate-student-btn"
-                                    data-student-id="{{ student.id }}"
-                                    data-student-name="{% if student.salutation %}{{ student.salutation }} {% endif %}{{ student.first_name }} {{ student.last_name }}"
-                                >
-                                    Rate Student
-                                </button>
-                            </div>
                         </div>
                     </div>
                 </div>
