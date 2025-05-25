@@ -1282,119 +1282,129 @@ def is_admin(user):
 @user_passes_test(is_admin)
 def admin_check_in_dashboard(request):
     """Dashboard for admins to view and manage check-ins"""
-    # Clean up the duplicate filtering code
-    today = timezone.now().date()
-    
-    # Define base queries
-    base_bookings_query = ComputerBooking.objects.filter(
-        is_approved=True,
-        is_cancelled=False
-    )
-    
-    base_sessions_query = LabSession.objects.filter(
-        is_approved=True
-    )
-    
-    # If user is lab-specific admin, filter by their labs
-    if request.user.is_admin and not request.user.is_super_admin:
-        managed_labs = request.user.managed_labs.all()
-        base_bookings_query = base_bookings_query.filter(computer__lab__in=managed_labs)
-        base_sessions_query = base_sessions_query.filter(lab__in=managed_labs)
-    
-    # Get today's bookings - improving the filter to capture any booking active today
-    today_bookings = base_bookings_query.filter(
-        start_time__date__lte=today,
-        end_time__date__gte=today
-    ).order_by('start_time')
-    
-    # Get today's lab sessions
-    today_sessions = base_sessions_query.filter(
-        start_time__date__lte=today,
-        end_time__date__gte=today
-    ).order_by('start_time')
-    
-    # Check if we have data and log for debugging
-    print(f"Found {today_bookings.count()} bookings and {today_sessions.count()} sessions for today")
-    
-    # Count attendance stats after filtering
-    booking_attendance = {
-        'total': today_bookings.count(),
-        'checked_in': ComputerBookingAttendance.objects.filter(
-            booking__in=today_bookings,
-            status='present'
-        ).count(),
-        'absent': ComputerBookingAttendance.objects.filter(
-            booking__in=today_bookings,
-            status='absent'
-        ).count(),
-        'late': ComputerBookingAttendance.objects.filter(
-            booking__in=today_bookings,
-            status='late'
-        ).count(),
-    }
-    
-    # Add debugging info for admins
-    all_bookings_count = base_bookings_query.count()
-    all_sessions_count = base_sessions_query.count()
-    
-    if all_bookings_count == 0 and all_sessions_count == 0:
-        messages.warning(request, "There are no bookings or sessions in the system yet.")
-    elif today_bookings.count() == 0 and today_sessions.count() == 0:
-        messages.info(request, f"No bookings or sessions scheduled for today ({today.strftime('%Y-%m-%d')}). There are {all_bookings_count} total bookings and {all_sessions_count} total sessions in the system.")
-    
-    context = {
-        'today_bookings': today_bookings,
-        'today_sessions': today_sessions,
-        'booking_attendance': booking_attendance,
-        'today': today,
-        'now': timezone.now(),
-        'all_bookings_count': all_bookings_count,
-        'all_sessions_count': all_sessions_count
-    }
-    
-    # Add these to the context in admin_check_in_dashboard view
-    context.update({
-        'debug_info': {
-            'today': today,
-            'timezone_now': timezone.now(),
-            'today_bookings_count': today_bookings.count(),
-            'today_sessions_count': today_sessions.count(),
-            'today_bookings_times': [
-                (b.id, b.start_time, b.end_time) for b in today_bookings[:5]
-            ],
-            'today_sessions_times': [
-                (s.id, s.start_time, s.end_time) for s in today_sessions[:5]
-            ]
+    try:
+        # Get date from query params or use today's date
+        date_str = request.GET.get('date')
+        if date_str:
+            try:
+                selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+            except ValueError:
+                selected_date = timezone.now().date()
+        else:
+            selected_date = timezone.now().date()
+        
+        now = timezone.now()
+        tomorrow = selected_date + timedelta(days=1)
+        
+        # Define base queries with select_related for performance
+        base_bookings_query = ComputerBooking.objects.filter(
+            is_approved=True,
+            is_cancelled=False
+        ).select_related('student', 'computer', 'computer__lab')
+        
+        base_sessions_query = LabSession.objects.filter(
+            is_approved=True,
+        ).select_related('lab', 'lecturer')
+        
+        # If user is lab-specific admin, filter by their labs
+        if request.user.is_admin and not request.user.is_super_admin:
+            managed_labs = request.user.managed_labs.all()
+            base_bookings_query = base_bookings_query.filter(computer__lab__in=managed_labs)
+            base_sessions_query = base_sessions_query.filter(lab__in=managed_labs)
+        
+        # Get bookings that overlap with the selected date
+        today_bookings = base_bookings_query.filter(
+            start_time__date__lte=selected_date,
+            end_time__date__gte=selected_date
+        ).order_by('start_time')
+        
+        # Get lab sessions for the selected date
+        today_sessions = base_sessions_query.filter(
+            start_time__date__lte=selected_date,
+            end_time__date__gte=selected_date
+        ).order_by('start_time')
+        
+        # Create session_attendance dictionary
+        session_attendance = {}
+        for session in today_sessions:
+            # Get count of students marked as present for this session
+            present_count = SessionAttendance.objects.filter(
+                session=session,
+                status='present'
+            ).count()
+            session_attendance[session.id] = present_count
+        
+        # Count attendance stats
+        booking_attendance = {
+            'total': today_bookings.count(),
+            'checked_in': ComputerBookingAttendance.objects.filter(
+                booking__in=today_bookings,
+                status='present'
+            ).count(),
+            'absent': ComputerBookingAttendance.objects.filter(
+                booking__in=today_bookings,
+                status='absent'
+            ).count(),
+            'late': ComputerBookingAttendance.objects.filter(
+                booking__in=today_bookings,
+                status='late'
+            ).count(),
         }
-    })
-    
-    # Add this to the admin_check_in_dashboard view:
-    session_attendance = {}
-    for session in today_sessions:
-        # Get count of students marked as present for this session
-        present_count = SessionAttendance.objects.filter(
-            session=session,
-            status='present'
-        ).count()
-        session_attendance[session.id] = present_count
-
-    context['session_attendance'] = session_attendance
-    
-    # In admin_check_in_dashboard view
-    date_str = request.GET.get('date')
-    if date_str:
-        try:
-            selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-        except ValueError:
-            selected_date = today
-    else:
-        selected_date = today
-    
-    # Use selected_date instead of today in your queries
-    context['today'] = selected_date
-    context['tomorrow'] = selected_date + timedelta(days=1)
-    
-    return render(request, 'check_in_dashboard.html', context)
+        
+        # Add debugging info for admins
+        all_bookings_count = base_bookings_query.count()
+        all_sessions_count = base_sessions_query.count()
+        
+        if all_bookings_count == 0 and all_sessions_count == 0:
+            messages.warning(request, "There are no bookings or sessions in the system yet.")
+        elif today_bookings.count() == 0 and today_sessions.count() == 0:
+            messages.info(request, 
+                f"No bookings or sessions scheduled for {selected_date.strftime('%Y-%m-%d')}. "
+                f"There are {all_bookings_count} total bookings and {all_sessions_count} total sessions in the system."
+            )
+        
+        context = {
+            'today_bookings': today_bookings,
+            'today_sessions': today_sessions,
+            'booking_attendance': booking_attendance,
+            'session_attendance': session_attendance,  # Add this for session attendance counts
+            'today': selected_date,
+            'tomorrow': tomorrow,
+            'now': now,
+            'all_bookings_count': all_bookings_count,
+            'all_sessions_count': all_sessions_count,
+            'debug_info': {
+                'today': selected_date,
+                'now': now,
+                'today_bookings_count': today_bookings.count(),
+                'today_sessions_count': today_sessions.count(),
+                'sample_bookings': [
+                    {
+                        'id': b.id,
+                        'student': b.student.username,
+                        'start': b.start_time,
+                        'end': b.end_time,
+                    } for b in today_bookings[:3]
+                ],
+                'sample_sessions': [
+                    {
+                        'id': s.id,
+                        'title': s.title,
+                        'start': s.start_time,
+                        'end': s.end_time,
+                    } for s in today_sessions[:3]
+                ]
+            }
+        }
+        
+        return render(request, 'check_in_dashboard.html', context)
+        
+    except Exception as e:
+        # Log unexpected errors
+        import traceback
+        traceback.print_exc()
+        messages.error(request, f"An error occurred: {str(e)}")
+        return redirect('home')
 
 @login_required
 @user_passes_test(is_admin)
