@@ -627,11 +627,11 @@
                                             <a href="{% url 'student_details' student.id %}" class="text-indigo-600 hover:text-indigo-900 mr-3">View Details</a>
                                             <a href="{% url 'rate_student' student.id %}" class="text-green-600 hover:text-green-900 mr-3">Rate</a>
                                             <button 
-                                                class="text-blue-600 hover:text-blue-900 assign-student-btn"
+                                                class="text-green-600 hover:text-green-900 mr-3 rate-student-btn"
                                                 data-student-id="{{ student.id }}" 
                                                 data-student-name="{% if student.salutation %}{{ student.salutation }} {% endif %}{{ student.first_name }} {{ student.last_name }}"
                                                 data-student-username="{{ student.username }}"
-                                            >Assign</button>
+                                            >Rate</button>
                                         </td>
                                     </tr>
                                 {% empty %}
