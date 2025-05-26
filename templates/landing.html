@@ -466,19 +466,19 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid md:grid-cols-4 gap-8 text-center">
                 <div class="p-6">
-                    <div class="text-4xl font-bold mb-2" data-count="{{ active_students|default:50|stringformat:'d' }}">0</div>
+                    <div class="text-4xl font-bold mb-2" data-count="{{ active_students|stringformat:'d' }}">0</div>
                     <div class="text-green-200 font-medium">Active Students</div>
                 </div>
                 <div class="p-6">
-                    <div class="text-4xl font-bold mb-2" data-count="{{ lab_count|default:4|stringformat:'d' }}">0</div>
+                    <div class="text-4xl font-bold mb-2" data-count="{{ lab_count|stringformat:'d' }}">0</div>
                     <div class="text-green-200 font-medium">Specialized Labs</div>
                 </div>
                 <div class="p-6">
-                    <div class="text-4xl font-bold mb-2" data-count="{{ uptime_percentage|default:99 }}">0</div>
+                    <div class="text-4xl font-bold mb-2" data-count="{{ uptime_percentage }}">0</div>
                     <div class="text-green-200 font-medium">% Uptime</div>
                 </div>
                 <div class="p-6">
-                    <div class="text-4xl font-bold mb-2" data-count="{{ total_hours|default:60 }}">0</div>
+                    <div class="text-4xl font-bold mb-2" data-count="{{ total_hours }}">0</div>
                     <div class="text-green-200 font-medium">Hours Used This Month</div>
                 </div>
             </div>
@@ -1041,8 +1041,10 @@
                     frame++;
                     const currentValue = Math.min(increment * frame, target);
                     
-                    // Handle decimal points for percentages
-                    if (target > 0 && target < 100) {
+                    // Handle different types of values:
+                    // 1. Use toFixed(1) for uptime percentage (value between 0-100)
+                    // 2. Use integers for student counts and lab counts
+                    if (counter.parentElement.querySelector('.text-green-200').textContent.includes('Uptime')) {
                         counter.textContent = currentValue.toFixed(1);
                     } else {
                         counter.textContent = Math.floor(currentValue);
