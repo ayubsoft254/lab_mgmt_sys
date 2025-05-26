@@ -259,7 +259,8 @@ class EmailCampaignAdmin(admin.ModelAdmin):
         if obj:  # Editing existing object
             return (
                 ('Campaign Information', {
-                    'fields': ('name', 'subject', 'recipient_type', 'created_by', 'created_at')
+                    'fields': ('name', 'subject', 'recipient_type', 'created_by', 'created_at'
+                    )
                 }),
                 ('Content', {
                     'fields': ('template', 'custom_html_content', 'custom_text_content')
@@ -286,6 +287,7 @@ class EmailCampaignAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         if not change:  # Creating new object
             obj.created_by = request.user
+            obj.status = 'draft'  # Ensure new campaigns start as drafts
         super().save_model(request, obj, form, change)
     
     def recipient_count(self, obj):
