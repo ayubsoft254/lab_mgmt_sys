@@ -466,19 +466,19 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid md:grid-cols-4 gap-8 text-center">
                 <div class="p-6">
-                    <div class="text-4xl font-bold mb-2" data-count="{{ active_students|default:'0' }}">0</div>
+                    <div class="text-4xl font-bold mb-2" data-count="{{ active_students|default:50 }}">0</div>
                     <div class="text-green-200 font-medium">Active Students</div>
                 </div>
                 <div class="p-6">
-                    <div class="text-4xl font-bold mb-2" data-count="{{ lab_count|default:'0' }}">0</div>
+                    <div class="text-4xl font-bold mb-2" data-count="{{ lab_count|default:4 }}">0</div>
                     <div class="text-green-200 font-medium">Specialized Labs</div>
                 </div>
                 <div class="p-6">
-                    <div class="text-4xl font-bold mb-2" data-count="{{ uptime_percentage|default:'99' }}">0</div>
+                    <div class="text-4xl font-bold mb-2" data-count="{{ uptime_percentage|default:99 }}">0</div>
                     <div class="text-green-200 font-medium">% Uptime</div>
                 </div>
                 <div class="p-6">
-                    <div class="text-4xl font-bold mb-2" data-count="{{ total_hours|default:'24' }}">0</div>
+                    <div class="text-4xl font-bold mb-2" data-count="{{ total_hours|default:60 }}">0</div>
                     <div class="text-green-200 font-medium">Hours Used This Month</div>
                 </div>
             </div>
@@ -1066,14 +1066,3 @@
     </script>
 </body>
 </html>
-
-<!-- Add fallback for missing context variables -->
-{% if not active_students %}{% with active_students=50 %}{% endif %}
-{% if not lab_count %}{% with lab_count=4 %}{% endif %}
-{% if not uptime_percentage %}{% with uptime_percentage=99 %}{% endif %}
-{% if not total_hours %}{% with total_hours=60 %}{% endif %}
-<!-- Close fallback with statements -->
-{% if not active_students %}{% endwith %}{% endif %}
-{% if not lab_count %}{% endwith %}{% endif %}
-{% if not uptime_percentage %}{% endwith %}{% endif %}
-{% if not total_hours %}{% endwith %}{% endif %}
