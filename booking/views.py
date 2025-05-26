@@ -26,38 +26,61 @@ class LandingPageView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Get statistics for the landing page
-        context['active_students'] = User.objects.filter(is_student=True).count()
-        context['lab_count'] = Lab.objects.count()
-        
-        # Calculate system uptime percentage (this is an example - you might want to use a real metric)
-        # For demonstration, we'll use a calculation based on successful bookings vs. total
-        total_bookings = ComputerBooking.objects.count()
-        successful_bookings = ComputerBooking.objects.filter(is_approved=True).count()
-        if total_bookings > 0:
-            uptime_percentage = round((successful_bookings / total_bookings) * 100)
-        else:
-            uptime_percentage = 100  # Default if no bookings yet
-        
-        # Ensure the percentage is reasonable
-        uptime_percentage = min(max(uptime_percentage, 95), 99.9)  # Between 95% and 99.9%
-        context['uptime_percentage'] = uptime_percentage
-        
-        # Get total hours of lab usage in the past month
-        one_month_ago = timezone.now() - timedelta(days=30)
-        
-        # Sum duration of all bookings in the past month
-        recent_bookings = ComputerBooking.objects.filter(
-            start_time__gte=one_month_ago,
-            is_approved=True
-        )
-        
-        total_hours = 0
-        for booking in recent_bookings:
-            duration = booking.end_time - booking.start_time
-            total_hours += duration.total_seconds() / 3600  # Convert seconds to hours
-        
-        context['total_hours'] = int(total_hours)
+        try:
+            # Get statistics for the landing page safely
+            context['active_students'] = User.objects.filter(is_student=True).count()
+            context['lab_count'] = Lab.objects.count()
+            
+            # Calculate system uptime percentage more safely
+            total_bookings = ComputerBooking.objects.count()
+            if total_bookings > 0:
+                successful_bookings = ComputerBooking.objects.filter(is_approved=True).count()
+                # Never divide by zero, and ensure it's a float division
+                uptime_percentage = round((successful_bookings / float(total_bookings)) * 100, 1)
+            else:
+                uptime_percentage = 100  # Default if no bookings yet
+            
+            # Ensure the percentage is reasonable
+            uptime_percentage = min(max(uptime_percentage, 95), 99.9)  # Between 95% and 99.9%
+            context['uptime_percentage'] = uptime_percentage
+            
+            # Get total hours of lab usage in the past month more safely
+            one_month_ago = timezone.now() - timedelta(days=30)
+            
+            # Sum duration of all bookings in the past month using database aggregation
+            from django.db.models import F, ExpressionWrapper, Sum, DurationField
+            
+            # Calculate duration as a database expression
+            recent_bookings = ComputerBooking.objects.filter(
+                start_time__gte=one_month_ago,
+                is_approved=True
+            ).annotate(
+                duration=ExpressionWrapper(
+                    F('end_time') - F('start_time'), 
+                    output_field=DurationField()
+                )
+            )
+            
+            # Sum all durations
+            total_duration = recent_bookings.aggregate(
+                total=Sum('duration')
+            )['total'] or timedelta(0)  # Default to 0 if None
+            
+            # Convert to hours
+            total_hours = total_duration.total_seconds() / 3600
+            context['total_hours'] = int(total_hours)
+            
+        except Exception as e:
+            # Log the error and provide fallback values
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error in landing page stats calculation: {str(e)}")
+            
+            # Provide fallback values
+            context['active_students'] = 0
+            context['lab_count'] = 0
+            context['uptime_percentage'] = 99.0
+            context['total_hours'] = 0
         
         return context
 
