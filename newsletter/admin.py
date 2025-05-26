@@ -240,7 +240,11 @@ class EmailCampaignAdminForm(forms.ModelForm):
     
     class Meta:
         model = EmailCampaign
-        exclude = ['status', 'started_at', 'completed_at', 'total_recipients', 'sent_count', 'open_count', 'click_count']
+        fields = [
+            'name', 'subject', 'template', 'custom_html_content', 'custom_text_content',
+            'recipient_type', 'scheduled_time'
+        ]
+        # Don't use exclude, use fields instead to explicitly list allowed fields
 
 @admin.register(EmailCampaign)
 class EmailCampaignAdmin(admin.ModelAdmin):
