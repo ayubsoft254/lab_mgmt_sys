@@ -466,11 +466,11 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid md:grid-cols-4 gap-8 text-center">
                 <div class="p-6">
-                    <div class="text-4xl font-bold mb-2" data-count="{{ active_students|default:50 }}">0</div>
+                    <div class="text-4xl font-bold mb-2" data-count="{{ active_students|default:50|stringformat:'d' }}">0</div>
                     <div class="text-green-200 font-medium">Active Students</div>
                 </div>
                 <div class="p-6">
-                    <div class="text-4xl font-bold mb-2" data-count="{{ lab_count|default:4 }}">0</div>
+                    <div class="text-4xl font-bold mb-2" data-count="{{ lab_count|default:4|stringformat:'d' }}">0</div>
                     <div class="text-green-200 font-medium">Specialized Labs</div>
                 </div>
                 <div class="p-6">
