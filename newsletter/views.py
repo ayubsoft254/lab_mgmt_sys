@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .models import NewsletterSubscription
-# Ensure utils.py exists in the same directory as this views.py file.
 from .utils import send_welcome_email
+import uuid  # Add this import
 from django.http import HttpResponse
 from django.utils import timezone
 from django.contrib import admin
@@ -29,21 +29,29 @@ def subscribe_newsletter(request):
         if existing_subscriber:
             messages.info(request, "You're already subscribed to our newsletter!")
         else:
-            # Create new subscription
-            subscription = NewsletterSubscription(
-                email=email,
-                name=name,
-                receive_updates='updates' in email_types,
-                receive_lab_news='lab_news' in email_types,
-                receive_tips='tips' in email_types,
-                receive_events='events' in email_types,
-            )
-            subscription.save()
-            
-            # Send welcome email
-            send_welcome_email(email, name)
-            
-            messages.success(request, "Thanks for subscribing to our newsletter!")
+            try:
+                # Generate a unique unsubscribe token
+                unsubscribe_token = str(uuid.uuid4())
+                
+                # Create new subscription with the token
+                subscription = NewsletterSubscription(
+                    email=email,
+                    name=name,
+                    unsubscribe_token=unsubscribe_token,  # Add the token here
+                    source=form_location,  # Set the source correctly
+                    receive_updates='updates' in email_types,
+                    receive_lab_news='lab_news' in email_types,
+                    receive_tips='tips' in email_types,
+                    receive_events='events' in email_types,
+                )
+                subscription.save()
+                
+                # Send welcome email
+                send_welcome_email(email, name)
+                
+                messages.success(request, "Thanks for subscribing to our newsletter!")
+            except Exception as e:
+                messages.error(request, f"An error occurred: {str(e)}")
         
         # Redirect back to the landing page with a success message
         return redirect('landing')
