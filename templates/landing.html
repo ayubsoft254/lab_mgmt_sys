@@ -1012,25 +1012,34 @@
         // Animated counter for stats
         function animateCounters() {
             const counters = document.querySelectorAll('[data-count]');
-            const speed = 200;
             
             counters.forEach(counter => {
-                const target = +counter.getAttribute('data-count');
-                const count = +counter.innerText;
-                const increment = target / speed;
+                const target = parseFloat(counter.getAttribute('data-count'));
+                let count = 0;
+                const duration = 2000; // 2 seconds
+                const frameDuration = 1000/60; // 60 fps
+                const totalFrames = Math.round(duration / frameDuration);
+                const increment = target / totalFrames;
                 
-                if (count === 0) {
-                    const interval = setInterval(() => {
-                        const newCount = Math.min(Math.ceil(count + increment), target);
-                        counter.innerText = newCount;
-                        
-                        if (newCount === target) {
-                            clearInterval(interval);
-                        }
-                    }, 1);
-                } else {
-                    counter.innerText = target;
-                }
+                // Use requestAnimationFrame for smoother animation
+                let frame = 0;
+                const animate = () => {
+                    frame++;
+                    const currentValue = Math.min(increment * frame, target);
+                    
+                    // Handle decimal points for percentages
+                    if (target > 0 && target < 100) {
+                        counter.textContent = currentValue.toFixed(1);
+                    } else {
+                        counter.textContent = Math.floor(currentValue);
+                    }
+                    
+                    if (frame < totalFrames) {
+                        requestAnimationFrame(animate);
+                    }
+                };
+                
+                requestAnimationFrame(animate);
             });
         }
 
