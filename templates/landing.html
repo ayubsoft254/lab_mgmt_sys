@@ -962,6 +962,9 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
     <script>
+        // Add this line at the beginning of your script
+        let countersInitialized = false;
+        
         // Mobile menu toggle
         document.querySelector('.mobile-menu-button').addEventListener('click', function() {
             document.querySelector('.mobile-menu').classList.toggle('hidden');
@@ -1055,14 +1058,19 @@
         }
 
         // Only run animation when section is visible
-        const statsObserver = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting && !countersInitialized) {
-                animateCounters();
-                countersInitialized = true;
-            }
-        }, { threshold: 0.1 });
+        const statsSection = document.querySelector('.py-16.bg-ttu-green');
+        if (statsSection) {
+            const statsObserver = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting && !countersInitialized) {
+                    animateCounters();
+                    countersInitialized = true;
+                }
+            }, { threshold: 0.1 });
 
-        statsObserver.observe(document.querySelector('.py-16.bg-ttu-green'));
+            statsObserver.observe(statsSection);
+        } else {
+            console.warn("Stats section not found");
+        }
     </script>
 </body>
 </html>
