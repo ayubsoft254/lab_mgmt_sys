@@ -1065,3 +1065,8 @@
 {% if not lab_count %}{% with lab_count=4 %}{% endif %}
 {% if not uptime_percentage %}{% with uptime_percentage=99 %}{% endif %}
 {% if not total_hours %}{% with total_hours=60 %}{% endif %}
+<!-- Close fallback with statements -->
+{% if not active_students %}{% endwith %}{% endif %}
+{% if not lab_count %}{% endwith %}{% endif %}
+{% if not uptime_percentage %}{% endwith %}{% endif %}
+{% if not total_hours %}{% endwith %}{% endif %}
