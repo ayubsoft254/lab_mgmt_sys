@@ -5,7 +5,11 @@ from .models import NewsletterSubscription
 from .utils import send_welcome_email
 from django.http import HttpResponse
 from django.utils import timezone
-import uuid  # Add this import
+from django.contrib import admin
+from django.contrib.auth.models import User
+from .models import EmailCampaign, EmailDelivery
+
+# Create your views here.
 
 def subscribe_newsletter(request):
     if request.method == 'POST':
@@ -25,28 +29,21 @@ def subscribe_newsletter(request):
         if existing_subscriber:
             messages.info(request, "You're already subscribed to our newsletter!")
         else:
-            try:
-                # Generate a unique unsubscribe token
-                unsubscribe_token = str(uuid.uuid4())
-                
-                # Create new subscription
-                subscription = NewsletterSubscription(
-                    email=email,
-                    name=name,
-                    receive_updates='updates' in email_types,
-                    receive_lab_news='lab_news' in email_types,
-                    receive_tips='tips' in email_types,
-                    receive_events='events' in email_types,
-                    unsubscribe_token=unsubscribe_token  # Set the token here
-                )
-                subscription.save()
-                
-                # Send welcome email
-                send_welcome_email(email, name)
-                
-                messages.success(request, "Thanks for subscribing to our newsletter!")
-            except Exception as e:
-                messages.error(request, f"An error occurred: {str(e)}")
+            # Create new subscription
+            subscription = NewsletterSubscription(
+                email=email,
+                name=name,
+                receive_updates='updates' in email_types,
+                receive_lab_news='lab_news' in email_types,
+                receive_tips='tips' in email_types,
+                receive_events='events' in email_types,
+            )
+            subscription.save()
+            
+            # Send welcome email
+            send_welcome_email(email, name)
+            
+            messages.success(request, "Thanks for subscribing to our newsletter!")
         
         # Redirect back to the landing page with a success message
         return redirect('home')
