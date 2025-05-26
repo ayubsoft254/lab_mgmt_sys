@@ -28,8 +28,9 @@ class LandingPageView(TemplateView):
         
         try:
             # Get statistics for the landing page safely
-            context['active_students'] = User.objects.filter(is_student=True).count()
-            context['lab_count'] = Lab.objects.count()
+            context['active_students'] = int(User.objects.filter(is_student=True).count())
+            context['lab_count'] = int(Lab.objects.count())
+
             
             # Calculate system uptime percentage more safely
             total_bookings = ComputerBooking.objects.count()
