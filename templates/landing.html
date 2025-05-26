@@ -1009,6 +1009,17 @@
             }
         }).mount();
 
+        // Show loading state for counters
+        function showLoadingState() {
+            const counters = document.querySelectorAll('[data-count]');
+            counters.forEach(counter => {
+                counter.innerHTML = '<span class="animate-pulse">...</span>';
+            });
+        }
+
+        // Call this at page load
+        showLoadingState();
+
         // Animated counter for stats
         function animateCounters() {
             const counters = document.querySelectorAll('[data-count]');
@@ -1043,19 +1054,15 @@
             });
         }
 
-        // Trigger counters on scroll
-        let countersInitialized = false;
-        const statsSection = document.querySelector('section.py-16.bg-ttu-green');
-        const observer = new IntersectionObserver(entries => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting && !countersInitialized) {
-                    animateCounters();
-                    countersInitialized = true;
-                }
-            });
-        }, { threshold: 0.5 });
+        // Only run animation when section is visible
+        const statsObserver = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && !countersInitialized) {
+                animateCounters();
+                countersInitialized = true;
+            }
+        }, { threshold: 0.1 });
 
-        observer.observe(statsSection);
+        statsObserver.observe(document.querySelector('.py-16.bg-ttu-green'));
     </script>
 </body>
 </html>
