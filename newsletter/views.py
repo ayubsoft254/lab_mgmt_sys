@@ -46,9 +46,9 @@ def subscribe_newsletter(request):
             messages.success(request, "Thanks for subscribing to our newsletter!")
         
         # Redirect back to the landing page with a success message
-        return redirect('home')
+        return redirect('landing')
     
-    return redirect('home')
+    return redirect('landing')
 
 def track_email_open(request, tracking_id):
     """
