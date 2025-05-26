@@ -93,10 +93,10 @@ class NewsletterSubscriptionAdmin(admin.ModelAdmin):
     actions_column.short_description = 'Actions'
     
     def get_readonly_fields(self, request, obj=None):
-        """Make email field read-only when editing existing object"""
-        if obj:  # editing an existing object
-            return self.readonly_fields + ('email', 'unsubscribe_token')
-        return self.readonly_fields
+        if obj:  # Editing existing object
+            return ('created_at', 'started_at', 'completed_at', 'total_recipients', 
+                    'sent_count', 'open_count', 'click_count', 'status')
+        return ('created_at',)  # Only created_at is readonly for new objects
     
     def export_subscribers_csv(self, request, queryset):
         """Export selected subscribers to CSV file"""
