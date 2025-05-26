@@ -54,9 +54,9 @@ def subscribe_newsletter(request):
                 messages.error(request, f"An error occurred: {str(e)}")
         
         # Redirect back to the landing page with a success message
-        return redirect('landing')
+        return redirect('home')
     
-    return redirect('landing')
+    return redirect('home')
 
 def track_email_open(request, tracking_id):
     """
