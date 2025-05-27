@@ -64,7 +64,7 @@ class SubSection(models.Model):
     """Sub-sections within documentation sections"""
     section = models.ForeignKey(DocumentationSection, on_delete=models.CASCADE, related_name='subsections')
     title = models.CharField(max_length=100)
-    slug = models.SlugField(editable=False)
+    slug = models.SlugField(editable=True, blank=True)
     order = models.PositiveSmallIntegerField(default=0)
     content = models.TextField(blank=True)
     is_visible = models.BooleanField(default=True)

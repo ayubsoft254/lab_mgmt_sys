@@ -176,7 +176,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://labs.ttu.ac.ke',
     'https://ttulabs.ayubsoft-inc.systems',
     'https://41.89.130.21',
-    # add other trusted origins if necessary
+    
 ]
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -204,7 +204,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'booking.User'
 
 # Celery settings
-CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Adjust based on your broker
+CELERY_BROKER_URL = 'redis://localhost:6379/0'  
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
