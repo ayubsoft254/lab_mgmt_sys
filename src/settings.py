@@ -45,7 +45,7 @@ SECRET_KEY = config("DJANGO_SECRET_KEY")
 DEBUG = False
 BASE_URL = config("BASE_URL", default=None)
 
-ALLOWED_HOSTS = ["https://ictlabs.ttu.ac.ke/", "https:ttulabs.ayubsoft-inc.systems",]
+ALLOWED_HOSTS = config("DJANGO_ALLOWED_HOSTS")
 SECURE_SSL_REDIRECT = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
