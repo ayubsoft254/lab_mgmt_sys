@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_head %}
+<style>
+    .terms-section {
+        scroll-margin-top: 80px;
+    }
+    
+    @media print {
+        .no-print {
+            display: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bg-gray-50 min-h-screen">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="bg-white shadow rounded-lg overflow-hidden">
+            <!-- Header -->
+            <div class="bg-ttu-green text-white px-6 py-4 flex items-center justify-between">
+                <h1 class="text-xl md:text-2xl font-bold">Terms & Conditions</h1>
+                <img src="{% static 'images/logo-white.png' %}" alt="TTU Logo" class="h-8 md:h-10">
+            </div>
+            
+            <!-- Content -->
+            <div class="p-6 md:p-8">
+                <div class="prose max-w-none mb-8">
+                    <p class="text-gray-700">
+                        These Terms & Conditions govern your use of the TTU Computer Lab Management System. Please read them carefully before using the system.
+                    </p>
+                    <p class="text-gray-700">
+                        By accessing or using the TTU Computer Lab Management System, you agree to be bound by these Terms & Conditions.
+                    </p>
+                </div>
+                
+                <!-- Table of Contents -->
+                <div class="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <h2 class="font-semibold text-gray-800 mb-2">Contents</h2>
+                    <nav class="grid md:grid-cols-2 gap-2">
+                        {% for section in terms_sections %}
+                        <a href="#{{ section.id }}" class="text-ttu-green hover:underline">{{ section.title }}</a>
+                        {% endfor %}
+                    </nav>
+                </div>
+                
+                <!-- Terms Sections -->
+                {% for section in terms_sections %}
+                <section id="{{ section.id }}" class="terms-section mb-8">
+                    <h2 class="text-xl font-bold text-gray-900 mb-3">{{ section.title }}</h2>
+                    
+                    {% if section.content %}
+                    <p class="text-gray-700 mb-2">{{ section.content }}</p>
+                    {% endif %}
+                    
+                    {% if section.items %}
+                    <ul class="list-disc pl-6 space-y-2">
+                        {% for item in section.items %}
+                        <li class="text-gray-700">{{ item }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </section>
+                {% endfor %}
+                
+                <!-- Last update info -->
+                <div class="mt-12 pt-4 border-t border-gray-200">
+                    <div class="flex flex-wrap justify-between items-center">
+                        <p class="text-sm text-gray-500">
+                            Last Updated: {{ version.date }}
+                        </p>
+                        <p class="text-sm text-gray-500">
+                            Version {{ version.number }}
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Action buttons -->
+                <div class="mt-8 flex flex-wrap gap-4 justify-center no-print">
+                    <button onclick="window.print()" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center">
+                        <i class="fas fa-print mr-2"></i> Print Terms
+                    </button>
+                    <a href="{% url 'home' %}" class="bg-ttu-green hover:bg-ttu-dark text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center">
+                        <i class="fas fa-arrow-left mr-2"></i> Return to Home
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div class="bg-gray-50 px-6 py-4 text-center text-sm text-gray-600">
+                <p>&copy; {% now "Y" %} Taita Taveta University. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                    
+                    // Update URL hash without scrolling
+                    history.pushState(null, null, targetId);
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
