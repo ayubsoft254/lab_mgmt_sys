@@ -172,12 +172,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-CSRF_TRUSTED_ORIGINS = [
-    'https://labs.ttu.ac.ke',
-    'https://ttulabs.ayubsoft-inc.systems',
-    'https://41.89.130.21',
-    
-]
+CSRF_TRUSTED_ORIGINS = config("TRUSTED_CSRF_ORIGINS", cast=lambda v: [s.strip() for s in v.split(',')])
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
