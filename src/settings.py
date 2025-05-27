@@ -73,6 +73,7 @@ INSTALLED_APPS = [
     'analytics',
     'contact',
     'newsletter',
+    'resources',
 ]
 
 SITE_ID = 1
