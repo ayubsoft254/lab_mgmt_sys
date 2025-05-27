@@ -5,6 +5,7 @@
 
 {% block extra_head %}
 <style>
+    /* Base responsive styling */
     .doc-sidebar {
         position: sticky;
         top: 80px;
@@ -15,11 +16,13 @@
     .doc-content h2 {
         padding-top: 80px;
         margin-top: -60px;
+        word-wrap: break-word;
     }
     
     .doc-content h3 {
         padding-top: 80px;
         margin-top: -60px;
+        word-wrap: break-word;
     }
     
     .doc-section {
@@ -30,6 +33,38 @@
         @apply text-ttu-green hover:text-ttu-dark hover:underline;
     }
     
+    /* Mobile-specific improvements */
+    @media (max-width: 768px) {
+        .doc-content h2 {
+            font-size: 1.5rem; /* Smaller headings on mobile */
+            padding-top: 70px;
+            margin-top: -50px;
+        }
+        
+        .doc-content h3 {
+            font-size: 1.25rem;
+            padding-top: 70px;
+            margin-top: -50px;
+        }
+        
+        .doc-section {
+            scroll-margin-top: 65px;
+        }
+        
+        /* Better spacing on mobile */
+        .doc-section {
+            margin-bottom: 2rem;
+        }
+        
+        /* Improved table styling for mobile */
+        .prose table {
+            display: block;
+            width: 100%;
+            overflow-x: auto;
+        }
+    }
+    
+    /* Print styles */
     @media print {
         .doc-sidebar, .no-print {
             display: none;
@@ -38,16 +73,42 @@
             width: 100%;
         }
     }
+    
+    /* Mobile TOC improvements */
+    .mobile-toc {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+    }
+    
+    .mobile-toc.open {
+        max-height: 80vh;
+    }
+    
+    /* Make version badge more mobile-friendly */
+    .version-badge {
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.875rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 9999px;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="bg-gray-50 min-h-screen">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="flex flex-col md:flex-row gap-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
+        <!-- Mobile version info - shown only on small screens -->
+        <div class="md:hidden mb-4 flex items-center justify-between bg-white p-3 rounded-lg shadow">
+            <h1 class="text-xl font-bold text-gray-900 truncate">{{ title }}</h1>
+            <span class="version-badge bg-green-100 text-ttu-green">v{{ version.number }}</span>
+        </div>
+        
+        <div class="flex flex-col md:flex-row gap-4 md:gap-8">
             <!-- Sidebar Navigation -->
-            <div class="md:w-1/4 doc-sidebar no-print">
-                <div class="bg-white shadow rounded-lg p-6 mb-4">
+            <div class="md:w-1/4 doc-sidebar no-print hidden md:block">
+                <div class="bg-white shadow rounded-lg p-4 md:p-6 mb-4">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Contents</h3>
                     <nav class="space-y-1">
                         {% for section in sections %}
@@ -74,7 +135,7 @@
                     </div>
                 </div>
                 
-                <div class="bg-white shadow rounded-lg p-6">
+                <div class="bg-white shadow rounded-lg p-4 md:p-6">
                     <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Version Info</h3>
                     <div class="text-sm text-gray-600">
                         <div class="flex justify-between mb-1">
@@ -107,52 +168,84 @@
             
             <!-- Main Content -->
             <div class="md:w-3/4 doc-content">
-                <div class="bg-white shadow rounded-lg p-6 md:p-8">
-                    <div class="flex items-center justify-between mb-6">
+                <div class="bg-white shadow rounded-lg p-4 md:p-8">
+                    <!-- Desktop header - hidden on mobile since we already show it above -->
+                    <div class="hidden md:flex items-center justify-between mb-6">
                         <h1 class="text-2xl md:text-3xl font-bold text-gray-900">{{ title }}</h1>
                         <img src="https://schools.ttu.ac.ke/static/images/logo.jpg" alt="TTU Logo" class="h-10 md:h-12">
                     </div>
                     
-                    <!-- Table of Contents for mobile -->
-                    <div class="md:hidden bg-gray-50 p-4 rounded-lg mb-8">
-                        <details>
-                            <summary class="font-medium text-gray-800">Table of Contents</summary>
-                            <nav class="mt-3 space-y-1">
-                                {% for section in sections %}
-                                <div class="py-1">
-                                    <a href="#{{ section.id }}" class="text-ttu-green hover:underline">{{ section.title }}</a>
+                    <!-- Mobile logo - only shown on mobile -->
+                    <div class="flex md:hidden justify-center mb-5">
+                        <img src="https://schools.ttu.ac.ke/static/images/logo.jpg" alt="TTU Logo" class="h-10">
+                    </div>
+                    
+                    <!-- Enhanced Mobile Table of Contents -->
+                    <div class="md:hidden mb-6">
+                        <button id="mobile-toc-toggle" class="w-full py-3 px-4 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 flex justify-between items-center">
+                            <span class="font-medium text-gray-800">Table of Contents</span>
+                            <i class="fas fa-chevron-down transition-transform" id="toc-icon"></i>
+                        </button>
+                        <div id="mobile-toc" class="mobile-toc mt-2 bg-white rounded-lg border border-gray-200 overflow-y-auto">
+                            <div class="p-4">
+                                <nav class="space-y-3">
+                                    {% for section in sections %}
+                                    <div>
+                                        <a href="#{{ section.id }}" class="block text-ttu-green hover:underline font-medium py-1">
+                                            {{ section.title }}
+                                        </a>
+                                        
+                                        {% if section.subsections %}
+                                        <div class="ml-4 mt-1 border-l-2 border-gray-200 pl-2">
+                                            {% for subsection in section.subsections %}
+                                            <a href="#{{ subsection.id }}" class="block text-sm text-gray-600 hover:text-ttu-green py-1">
+                                                {{ subsection.title }}
+                                            </a>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </nav>
+                                
+                                <!-- Mobile version info -->
+                                <div class="mt-5 pt-4 border-t border-gray-200">
+                                    <div class="grid grid-cols-2 gap-2 text-xs text-gray-500">
+                                        <div>Version: <span class="font-medium">{{ version.number }}</span></div>
+                                        <div>Updated: <span class="font-medium">{{ version.date }}</span></div>
+                                        <div class="col-span-2">By: <span class="font-medium">{{ version.developer }}</span></div>
+                                    </div>
                                 </div>
-                                {% endfor %}
-                            </nav>
-                        </details>
+                            </div>
+                        </div>
                     </div>
                     
                     <!-- Document Sections -->
                     {% for section in sections %}
-                    <section id="{{ section.id }}" class="doc-section mb-12">
-                        <h2 class="text-2xl font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                    <section id="{{ section.id }}" class="doc-section mb-8 md:mb-12">
+                        <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
                             {{ section.title }}
                         </h2>
                         
                         {% if section.content %}
-                        <div class="prose max-w-none">
+                        <div class="prose max-w-none text-base">
                             <p>{{ section.content|safe }}</p>
                         </div>
                         {% endif %}
                         
                         {% if section.subsections %}
                             {% for subsection in section.subsections %}
-                            <div id="{{ subsection.id }}" class="mt-8">
-                                <h3 class="text-xl font-semibold text-gray-800 mb-3">{{ subsection.title }}</h3>
+                            <div id="{{ subsection.id }}" class="mt-6 md:mt-8">
+                                <h3 class="text-lg md:text-xl font-semibold text-gray-800 mb-2 md:mb-3">{{ subsection.title }}</h3>
                                 
                                 {% if subsection.content %}
-                                <div class="prose max-w-none">
+                                <div class="prose max-w-none text-base">
                                     <p>{{ subsection.content|safe }}</p>
                                 </div>
                                 {% endif %}
                                 
                                 {% if subsection.items %}
-                                <ul class="mt-3 list-disc pl-5 space-y-1">
+                                <ul class="mt-2 md:mt-3 list-disc pl-5 space-y-1">
                                     {% for item in subsection.items %}
                                     <li class="text-gray-700">{{ item }}</li>
                                     {% endfor %}
@@ -163,14 +256,14 @@
                         {% endif %}
                         
                         {% if section.contacts %}
-                        <div class="mt-6 bg-gray-50 p-4 rounded-lg">
+                        <div class="mt-4 md:mt-6 bg-gray-50 p-3 md:p-4 rounded-lg">
                             <h3 class="font-semibold text-gray-800 mb-2">Contact Information</h3>
                             <div class="space-y-2">
                                 {% for contact in section.contacts %}
                                 <div class="flex flex-wrap items-center">
                                     <span class="font-medium text-gray-700 mr-2">{{ contact.title }}:</span>
                                     {% if contact.email %}
-                                    <a href="mailto:{{ contact.email }}" class="text-ttu-green hover:underline">{{ contact.email }}</a>
+                                    <a href="mailto:{{ contact.email }}" class="text-ttu-green hover:underline break-all">{{ contact.email }}</a>
                                     {% endif %}
                                     {% if contact.text %}
                                     <span class="text-gray-700">{{ contact.text }}</span>
@@ -188,8 +281,15 @@
                     </section>
                     {% endfor %}
                     
+                    <!-- Mobile Print Button -->
+                    <div class="mt-6 md:hidden flex justify-center">
+                        <button onclick="window.print()" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center">
+                            <i class="fas fa-print mr-2"></i> Print Documentation
+                        </button>
+                    </div>
+                    
                     <!-- Footer -->
-                    <div class="mt-12 pt-6 border-t border-gray-200 text-center text-sm text-gray-600">
+                    <div class="mt-8 md:mt-12 pt-4 md:pt-6 border-t border-gray-200 text-center text-sm text-gray-600">
                         <p>&copy; {% now "Y" %} Taita Taveta University. All rights reserved.</p>
                     </div>
                 </div>
@@ -200,6 +300,31 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Mobile TOC toggle functionality
+        const tocToggle = document.getElementById('mobile-toc-toggle');
+        const tocContent = document.getElementById('mobile-toc');
+        const tocIcon = document.getElementById('toc-icon');
+        
+        if (tocToggle && tocContent && tocIcon) {
+            tocToggle.addEventListener('click', function() {
+                tocContent.classList.toggle('open');
+                tocIcon.classList.toggle('transform');
+                tocIcon.classList.toggle('rotate-180');
+            });
+        }
+        
+        // Close mobile TOC when clicking a link in it
+        const mobileTocLinks = document.querySelectorAll('#mobile-toc a');
+        mobileTocLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                if (tocContent) tocContent.classList.remove('open');
+                if (tocIcon) {
+                    tocIcon.classList.remove('transform');
+                    tocIcon.classList.remove('rotate-180');
+                }
+            });
+        });
+        
         // Highlight the current section in the sidebar
         function highlightCurrentSection() {
             const sections = document.querySelectorAll('.doc-section');
