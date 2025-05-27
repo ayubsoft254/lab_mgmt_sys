@@ -134,7 +134,7 @@ class TermsConditionsView(TemplateView):
                 "content": "To ensure fair access to limited lab resources:",
                 "items": [
                     "If a student books a computer three (3) consecutive times without checking in, their account will be automatically suspended for the remainder of the semester",
-                    "Affected students may appeal their suspension through the university ICT department, but reinstatement is not guaranteed"
+                    "Affected students may appeal their suspension through the university IC department, but reinstatement is not guaranteed"
                 ]
             },
             {
