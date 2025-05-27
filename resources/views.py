@@ -306,9 +306,9 @@ class PrivacyPolicyView(TemplateView):
                 "content": "For privacy-related inquiries, please contact:",
                 "contact_info": {
                     "name": "Data Protection Officer",
-                    "email": "privacy@ttu.ac.ke",
-                    "department": "ICT Department, Taita Taveta University",
-                    "address": "P.O. Box 1076-80300, Voi, Kenya"
+                    "email": "ictlabs@ttu.ac.ke",
+                    "department": "IC Department, Taita Taveta University",
+                    "address": "P.O. Box 635-80300, Voi, Kenya"
                 }
             }
         ]
