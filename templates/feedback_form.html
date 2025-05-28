@@ -4,75 +4,206 @@
 
 {% block title %}Provide Feedback - TTU Lab Management System{% endblock %}
 
+{% block extra_head %}
+<style>
+    /* Custom animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .form-container {
+        animation: fadeIn 0.4s ease-out;
+    }
+    
+    /* Rating stars styling */
+    .rating-container {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .rating-option {
+        position: relative;
+    }
+    
+    .rating-option input {
+        position: absolute;
+        opacity: 0;
+        height: 0;
+        width: 0;
+    }
+    
+    .rating-option label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        transition: all 0.2s;
+        min-width: 3rem;
+    }
+    
+    .rating-option input:checked + label {
+        background-color: rgba(44, 110, 73, 0.1);
+        box-shadow: 0 0 0 2px #2c6e49;
+    }
+    
+    .rating-stars {
+        color: #d1d5db;
+        font-size: 1.5rem;
+        line-height: 1;
+    }
+    
+    .rating-option:nth-child(1) .rating-stars::before { content: "★"; }
+    .rating-option:nth-child(2) .rating-stars::before { content: "★★"; }
+    .rating-option:nth-child(3) .rating-stars::before { content: "★★★"; }
+    .rating-option:nth-child(4) .rating-stars::before { content: "★★★★"; }
+    .rating-option:nth-child(5) .rating-stars::before { content: "★★★★★"; }
+    
+    .rating-option input:checked + label .rating-stars {
+        color: #2c6e49;
+    }
+    
+    /* Responsive improvements */
+    @media (max-width: 640px) {
+        .form-heading {
+            padding: 1rem 1.25rem;
+        }
+        
+        .form-body {
+            padding: 1.25rem;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="bg-gray-50 min-h-screen py-8">
-    <div class="max-w-2xl mx-auto px-4 sm:px-6">
-        <div class="bg-white shadow rounded-lg overflow-hidden">
-            <div class="bg-ttu-green text-white px-6 py-4">
-                <h1 class="text-xl font-bold">Share Your Feedback</h1>
-                <p class="text-sm opacity-90">All submissions are anonymous - we don't collect any personally identifiable information</p>
+<div class="bg-gray-50 min-h-screen py-6 sm:py-8 md:py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="form-container bg-white shadow-lg sm:rounded-xl overflow-hidden">
+            <!-- Header -->
+            <div class="form-heading bg-gradient-to-r from-ttu-green to-ttu-dark text-white px-6 py-5">
+                <h1 class="text-xl sm:text-2xl font-bold flex items-center">
+                    <i class="fas fa-comment-alt mr-3"></i>
+                    Share Your Feedback
+                </h1>
+                <p class="text-sm mt-1 opacity-90">All submissions are anonymous - we don't collect any personally identifiable information</p>
             </div>
             
-            <form method="post" class="p-6">
+            <!-- Form -->
+            <form method="post" class="form-body p-5 sm:p-6">
                 {% csrf_token %}
                 
                 {% if form.non_field_errors %}
-                <div class="bg-red-50 text-red-700 p-4 rounded-md mb-6">
+                <div class="bg-red-50 text-red-700 p-4 rounded-lg mb-6 animate-pulse">
                     {% for error in form.non_field_errors %}
-                    <p>{{ error }}</p>
+                    <p class="flex items-center"><i class="fas fa-exclamation-circle mr-2"></i> {{ error }}</p>
                     {% endfor %}
                 </div>
                 {% endif %}
                 
+                <!-- Category Selection -->
                 <div class="mb-6">
-                    <label for="{{ form.category.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                    <label for="{{ form.category.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                        <i class="fas fa-tag mr-2 text-ttu-green"></i>
                         {{ form.category.label }}
                     </label>
-                    {{ form.category }}
+                    {% render_field form.category class="w-full rounded-lg border-gray-300 shadow-sm focus:border-ttu-green focus:ring focus:ring-ttu-light focus:ring-opacity-50 transition-colors" %}
                     {% if form.category.errors %}
-                    <p class="mt-1 text-sm text-red-600">{{ form.category.errors.0 }}</p>
+                    <p class="mt-1 text-sm text-red-600 flex items-center">
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                        {{ form.category.errors.0 }}
+                    </p>
                     {% endif %}
                 </div>
                 
+                <!-- Feedback Message -->
                 <div class="mb-6">
-                    <label for="{{ form.message.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                    <label for="{{ form.message.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                        <i class="fas fa-comment-dots mr-2 text-ttu-green"></i>
                         {{ form.message.label }}
                     </label>
-                    {{ form.message }}
+                    {% render_field form.message rows="4" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-ttu-green focus:ring focus:ring-ttu-light focus:ring-opacity-50 transition-colors" placeholder="Your feedback helps us improve. Feel free to share your thoughts..." %}
+                    <div class="mt-1 text-xs text-gray-500 flex items-center">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        <span>Be specific and include examples if possible</span>
+                    </div>
                     {% if form.message.errors %}
-                    <p class="mt-1 text-sm text-red-600">{{ form.message.errors.0 }}</p>
+                    <p class="mt-1 text-sm text-red-600 flex items-center">
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                        {{ form.message.errors.0 }}
+                    </p>
                     {% endif %}
                 </div>
                 
+                <!-- Rating Stars -->
                 <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-3 flex items-center">
+                        <i class="fas fa-star mr-2 text-ttu-green"></i>
                         {{ form.rating.label }}
                     </label>
-                    <div class="flex space-x-4">
+                    
+                    <div class="rating-container">
                         {% for radio in form.rating %}
-                        <label class="flex items-center">
+                        <div class="rating-option">
                             {{ radio.tag }}
-                            <span class="ml-2">{{ radio.choice_label }}</span>
-                        </label>
+                            <label for="{{ radio.id_for_label }}">
+                                <div class="rating-stars"></div>
+                                <span class="text-xs font-medium mt-1">{{ radio.choice_label }}</span>
+                            </label>
+                        </div>
                         {% endfor %}
                     </div>
+                    
                     {% if form.rating.errors %}
-                    <p class="mt-1 text-sm text-red-600">{{ form.rating.errors.0 }}</p>
+                    <p class="mt-1 text-sm text-red-600 flex items-center">
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                        {{ form.rating.errors.0 }}
+                    </p>
                     {% endif %}
                 </div>
                 
                 {{ form.page_url }}
                 
-                <div class="flex items-center justify-between mt-6">
-                    <a href="javascript:history.back()" class="text-ttu-green hover:underline">
-                        <i class="fas fa-arrow-left mr-1"></i> Go Back
-                    </a>
-                    <button type="submit" class="bg-ttu-green hover:bg-ttu-dark text-white font-medium py-2 px-4 rounded-lg">
+                <!-- Form Actions -->
+                <div class="flex flex-col sm:flex-row-reverse sm:items-center sm:justify-between gap-4 mt-8">
+                    <button type="submit" class="w-full sm:w-auto bg-ttu-green hover:bg-ttu-dark text-white font-medium py-2.5 px-6 rounded-lg flex items-center justify-center transition-all duration-200 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ttu-green">
+                        <i class="fas fa-paper-plane mr-2"></i>
                         Submit Feedback
                     </button>
+                    
+                    <a href="javascript:history.back()" class="w-full sm:w-auto text-center sm:text-left text-gray-600 hover:text-ttu-green py-2 flex items-center justify-center sm:justify-start transition-colors">
+                        <i class="fas fa-arrow-left mr-1.5"></i> Go Back
+                    </a>
+                </div>
+                
+                <!-- Privacy Note -->
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <p class="text-xs text-gray-500 flex items-start">
+                        <i class="fas fa-shield-alt mt-0.5 mr-2"></i>
+                        <span>Your privacy is important to us. This feedback is collected anonymously and will only be used to improve our services.</span>
+                    </p>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animation for form fields when they come into focus
+        const formFields = document.querySelectorAll('input, select, textarea');
+        formFields.forEach(field => {
+            field.addEventListener('focus', () => {
+                field.parentElement.classList.add('scale-105');
+                setTimeout(() => {
+                    field.parentElement.classList.remove('scale-105');
+                }, 200);
+            });
+        });
+    });
+</script>
 {% endblock %}
