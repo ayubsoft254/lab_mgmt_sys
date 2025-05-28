@@ -1,6 +1,10 @@
-from django.shortcuts import render
-from django.views.generic import TemplateView
-from .models import SystemVersion, DocumentationSection, SubSection, DocumentationItem, ContactInfo
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.views.generic import FormView, TemplateView
+from django.urls import reverse_lazy
+from django.contrib import messages
+from .models import SystemVersion, DocumentationSection
+from .forms import AnonymousFeedbackForm
 
 class DocumentationView(TemplateView):
     """
@@ -327,3 +331,37 @@ class PrivacyPolicyView(TemplateView):
             }
         
         return context
+
+class FeedbackFormView(FormView):
+    """View for displaying and processing the feedback form"""
+    form_class = AnonymousFeedbackForm
+    template_name = 'feedback_form.html'
+    success_url = reverse_lazy('feedback_success')
+    
+    def get_initial(self):
+        initial = super().get_initial()
+        initial['page_url'] = self.request.META.get('HTTP_REFERER', '')
+        return initial
+    
+    def form_valid(self, form):
+        form.save()  # Save anonymous feedback
+        messages.success(self.request, "Thank you for your feedback! It has been submitted anonymously.")
+        return super().form_valid(form)
+
+
+@require_POST
+def ajax_feedback_submit(request):
+    """AJAX endpoint for submitting feedback without page reload"""
+    form = AnonymousFeedbackForm(request.POST)
+    
+    if form.is_valid():
+        form.save()
+        return JsonResponse({
+            'success': True,
+            'message': 'Thank you for your feedback! It has been submitted anonymously.'
+        })
+    else:
+        return JsonResponse({
+            'success': False,
+            'errors': form.errors
+        }, status=400)
