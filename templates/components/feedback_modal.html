@@ -1,0 +1,174 @@
+<div id="feedback-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="bg-ttu-green text-white px-6 py-4 flex justify-between items-center">
+            <h3 class="text-lg font-medium">Quick Feedback</h3>
+            <button id="close-feedback-modal" class="text-white hover:text-gray-200">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form id="feedback-form" class="p-6">
+            {% csrf_token %}
+            <input type="hidden" name="page_url" id="feedback-page-url" value="{{ request.path }}">
+            
+            <div class="mb-4">
+                <label for="feedback-category" class="block text-sm font-medium text-gray-700 mb-1">Type of Feedback</label>
+                <select id="feedback-category" name="category" class="w-full rounded-lg border-gray-300 focus:border-ttu-green focus:ring focus:ring-ttu-light focus:ring-opacity-50">
+                    <option value="general">General Feedback</option>
+                    <option value="bug">Bug Report</option>
+                    <option value="feature">Feature Request</option>
+                    <option value="usability">Usability Issue</option>
+                    <option value="experience">User Experience</option>
+                </select>
+                <p class="feedback-error text-red-600 text-sm mt-1 hidden" data-field="category"></p>
+            </div>
+            
+            <div class="mb-4">
+                <label for="feedback-message" class="block text-sm font-medium text-gray-700 mb-1">Your Feedback</label>
+                <textarea id="feedback-message" name="message" rows="4" class="w-full rounded-lg border-gray-300 focus:border-ttu-green focus:ring focus:ring-ttu-light focus:ring-opacity-50" placeholder="Your feedback helps us improve. Feel free to share your thoughts..."></textarea>
+                <p class="feedback-error text-red-600 text-sm mt-1 hidden" data-field="message"></p>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Rate Your Experience (Optional)</label>
+                <div class="flex space-x-4">
+                    {% for i in "12345" %}
+                    <label class="flex items-center">
+                        <input type="radio" name="rating" value="{{ i }}" class="form-radio text-ttu-green focus:ring-ttu-green">
+                        <span class="ml-1">{{ i }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                <p class="feedback-error text-red-600 text-sm mt-1 hidden" data-field="rating"></p>
+            </div>
+            
+            <div id="feedback-success" class="hidden bg-green-100 text-green-800 p-3 rounded-md mb-4">
+                Thank you for your feedback! It has been submitted anonymously.
+            </div>
+            
+            <div id="feedback-error" class="hidden bg-red-100 text-red-800 p-3 rounded-md mb-4">
+                Sorry, there was a problem submitting your feedback. Please try again.
+            </div>
+            
+            <div class="flex justify-end">
+                <button type="submit" class="bg-ttu-green hover:bg-ttu-dark text-white font-medium py-2 px-4 rounded-lg flex items-center">
+                    <span>Submit Feedback</span>
+                    <span id="feedback-spinner" class="hidden ml-2">
+                        <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<button id="show-feedback-button" class="fixed right-4 bottom-4 md:right-8 md:bottom-8 bg-ttu-green hover:bg-ttu-dark text-white rounded-full p-3 shadow-lg transition-all duration-300">
+    <i class="fas fa-comment"></i>
+</button>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('feedback-modal');
+        const showButton = document.getElementById('show-feedback-button');
+        const closeButton = document.getElementById('close-feedback-modal');
+        const form = document.getElementById('feedback-form');
+        const pageUrlField = document.getElementById('feedback-page-url');
+        const successMessage = document.getElementById('feedback-success');
+        const errorMessage = document.getElementById('feedback-error');
+        const spinner = document.getElementById('feedback-spinner');
+        
+        // Update the page URL field with current page
+        pageUrlField.value = window.location.href;
+        
+        // Show modal when clicking the button
+        showButton.addEventListener('click', function() {
+            modal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+            resetForm();
+        });
+        
+        // Hide modal on close button click
+        closeButton.addEventListener('click', function() {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        });
+        
+        // Close modal when clicking outside
+        modal.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            }
+        });
+        
+        // Submit form via AJAX
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            // Reset errors
+            document.querySelectorAll('.feedback-error').forEach(el => {
+                el.textContent = '';
+                el.classList.add('hidden');
+            });
+            
+            successMessage.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+            spinner.classList.remove('hidden');
+            
+            // Get form data
+            const formData = new FormData(form);
+            
+            // Send AJAX request
+            fetch("{% url 'ajax_feedback_submit' %}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                spinner.classList.add('hidden');
+                
+                if (data.success) {
+                    form.reset();
+                    successMessage.classList.remove('hidden');
+                    
+                    // Close modal after 3 seconds
+                    setTimeout(() => {
+                        modal.classList.add('hidden');
+                        document.body.classList.remove('overflow-hidden');
+                    }, 3000);
+                } else {
+                    // Display validation errors
+                    for (const [field, errors] of Object.entries(data.errors)) {
+                        const errorEl = document.querySelector(`.feedback-error[data-field="${field}"]`);
+                        if (errorEl) {
+                            errorEl.textContent = errors[0];
+                            errorEl.classList.remove('hidden');
+                        }
+                    }
+                }
+            })
+            .catch(error => {
+                spinner.classList.add('hidden');
+                errorMessage.classList.remove('hidden');
+                console.error('Error submitting feedback:', error);
+            });
+        });
+        
+        function resetForm() {
+            form.reset();
+            successMessage.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+            document.querySelectorAll('.feedback-error').forEach(el => {
+                el.textContent = '';
+                el.classList.add('hidden');
+            });
+        }
+    });
+</script>
