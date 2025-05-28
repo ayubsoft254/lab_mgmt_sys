@@ -15,7 +15,7 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    padding: 20px;
+    padding: 1rem;
 }
 
 /* Card */
@@ -23,7 +23,7 @@ body {
     width: 100%;
     max-width: 400px;
     background-color: #ffffff;
-    padding: 30px;
+    padding: 1.5rem;
     border-radius: 12px;
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
     border-top: 5px solid #047857; /* Green top border */
@@ -33,9 +33,9 @@ body {
 .login-title {
     text-align: center;
     color: #047857; /* Green */
-    font-size: 28px;
+    font-size: 1.75rem;
     font-weight: bold;
-    margin-bottom: 20px;
+    margin-bottom: 1.25rem;
 }
 
 /* Form */
@@ -46,24 +46,26 @@ body {
 
 /* Group */
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 1rem;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 6px;
-    font-size: 14px;
+    margin-bottom: 0.375rem;
+    font-size: 0.875rem;
     color: #374151; /* Gray-700 */
 }
 
 .form-group input {
     width: 100%;
-    padding: 10px 12px;
+    padding: 0.625rem 0.75rem;
     border: 1px solid #d1d5db; /* Gray-300 */
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 1rem;
     color: #374151;
     background-color: #f9fafb;
+    box-sizing: border-box; /* Important for mobile */
+    -webkit-appearance: none; /* Remove iOS styling */
 }
 
 .form-group input:focus {
@@ -72,21 +74,41 @@ body {
     box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
 }
 
+/* Error messages */
+.form-group .errorlist {
+    list-style-type: none;
+    margin: 0.25rem 0 0;
+    padding: 0;
+    color: #b91c1c;
+    font-size: 0.75rem;
+}
+
 /* Options */
 .form-options {
     display: flex;
+    flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap; /* Allows wrapping on very small screens */
+    gap: 0.5rem; /* Spacing when wrapped */
 }
 
 .remember-me {
-    font-size: 14px;
+    font-size: 0.875rem;
     color: #6b7280; /* Gray-500 */
+    display: flex;
+    align-items: center;
+}
+
+.remember-me input[type="checkbox"] {
+    margin-right: 0.375rem;
+    width: 1rem;
+    height: 1rem;
 }
 
 .forgot-password {
-    font-size: 14px;
+    font-size: 0.875rem;
     color: #047857;
     text-decoration: none;
 }
@@ -97,7 +119,7 @@ body {
 
 /* Button */
 .submit-button {
-    padding: 10px;
+    padding: 0.75rem;
     background-color: #047857;
     color: #ffffff;
     border: none;
@@ -105,18 +127,25 @@ body {
     font-weight: bold;
     cursor: pointer;
     transition: background-color 0.3s;
-    font-size: 16px;
+    font-size: 1rem;
+    width: 100%; /* Full width for better mobile tap targets */
+    touch-action: manipulation; /* Better touch behavior */
 }
 
 .submit-button:hover {
     background-color: #065f46;
 }
 
+.submit-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.4);
+}
+
 /* Sign up link */
 .signup-link {
     text-align: center;
-    margin-top: 20px;
-    font-size: 14px;
+    margin-top: 1.25rem;
+    font-size: 0.875rem;
 }
 
 .signup-link a {
@@ -134,10 +163,47 @@ body {
     background-color: #fee2e2;
     color: #b91c1c;
     border: 1px solid #fca5a5;
-    padding: 10px;
+    padding: 0.75rem;
     border-radius: 8px;
-    margin-bottom: 15px;
-    font-size: 14px;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .login-card {
+        padding: 1.25rem;
+        border-radius: 10px;
+    }
+    
+    .login-title {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-group input {
+        padding: 0.625rem;
+        font-size: 0.9375rem;
+    }
+    
+    .form-options {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+}
+
+/* Accessibility focus styles */
+:focus {
+    outline: 2px solid rgba(4, 120, 87, 0.5);
+    outline-offset: 2px;
+}
+
+/* Fix for iOS zooming on input fields */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+    input {
+        font-size: 16px;
+    }
 }
 </style>
 
@@ -154,27 +220,39 @@ body {
       {% endif %}
 
       {% if form.non_field_errors %}
-        <div class="error-box">
+        <div class="error-box" role="alert">
           {{ form.non_field_errors }}
         </div>
       {% endif %}
 
       <div class="form-group">
         <label for="login">{% trans "Email or Username" %}</label>
-        <input type="text" name="login" id="login" required>
-        {{ form.login.errors }}
+        <input type="text" name="login" id="login" required autocomplete="username" autofocus>
+        {% if form.login.errors %}
+          <ul class="errorlist">
+            {% for error in form.login.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
       </div>
 
       <div class="form-group">
         <label for="password">{% trans "Password" %}</label>
-        <input type="password" name="password" id="password" required>
-        {{ form.password.errors }}
+        <input type="password" name="password" id="password" required autocomplete="current-password">
+        {% if form.password.errors %}
+          <ul class="errorlist">
+            {% for error in form.password.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
       </div>
 
       <div class="form-options">
         <label class="remember-me">
           <input type="checkbox" name="remember">
-          {% trans "Remember Me" %}
+          <span>{% trans "Remember Me" %}</span>
         </label>
         <a href="{% url 'account_reset_password' %}" class="forgot-password">
           {% trans "Forgot Password?" %}
