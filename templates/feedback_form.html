@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Provide Feedback - TTU Lab Management System{% endblock %}
+
+{% block content %}
+<div class="bg-gray-50 min-h-screen py-8">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6">
+        <div class="bg-white shadow rounded-lg overflow-hidden">
+            <div class="bg-ttu-green text-white px-6 py-4">
+                <h1 class="text-xl font-bold">Share Your Feedback</h1>
+                <p class="text-sm opacity-90">All submissions are anonymous - we don't collect any personally identifiable information</p>
+            </div>
+            
+            <form method="post" class="p-6">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                <div class="bg-red-50 text-red-700 p-4 rounded-md mb-6">
+                    {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <div class="mb-6">
+                    <label for="{{ form.category.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.category.label }}
+                    </label>
+                    {{ form.category }}
+                    {% if form.category.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.category.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-6">
+                    <label for="{{ form.message.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.message.label }}
+                    </label>
+                    {{ form.message }}
+                    {% if form.message.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.message.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ form.rating.label }}
+                    </label>
+                    <div class="flex space-x-4">
+                        {% for radio in form.rating %}
+                        <label class="flex items-center">
+                            {{ radio.tag }}
+                            <span class="ml-2">{{ radio.choice_label }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    {% if form.rating.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.rating.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                {{ form.page_url }}
+                
+                <div class="flex items-center justify-between mt-6">
+                    <a href="javascript:history.back()" class="text-ttu-green hover:underline">
+                        <i class="fas fa-arrow-left mr-1"></i> Go Back
+                    </a>
+                    <button type="submit" class="bg-ttu-green hover:bg-ttu-dark text-white font-medium py-2 px-4 rounded-lg">
+                        Submit Feedback
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
