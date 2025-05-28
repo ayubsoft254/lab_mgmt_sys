@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Feedback Submitted - TTU Lab Management System{% endblock %}
+
+{% block content %}
+<div class="bg-gray-50 min-h-screen py-8">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6">
+        <div class="bg-white shadow rounded-lg overflow-hidden">
+            <div class="bg-green-100 text-green-800 px-6 py-4">
+                <h1 class="text-xl font-bold">Feedback Submitted</h1>
+                <p class="text-sm opacity-90">Thank you for helping us improve!</p>
+            </div>
+            
+            <div class="p-6">
+                <div class="flex items-center justify-center mb-6">
+                    <div class="bg-green-100 rounded-full p-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                </div>
+                
+                <div class="text-center mb-6">
+                    <h2 class="text-xl font-medium text-gray-800">Thank you for your feedback!</h2>
+                    <p class="mt-2 text-gray-600">Your feedback has been submitted anonymously and will be reviewed by our team.</p>
+                    <p class="mt-2 text-gray-600">We appreciate your help in making our system better.</p>
+                </div>
+                
+                <div class="flex justify-center">
+                    <a href="{% url 'home' %}" class="bg-ttu-green hover:bg-ttu-dark text-white font-medium py-2 px-4 rounded-lg">
+                        Return to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
