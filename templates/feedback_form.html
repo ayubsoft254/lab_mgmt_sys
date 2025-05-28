@@ -5,7 +5,37 @@
 {% block title %}Provide Feedback - TTU Lab Management System{% endblock %}
 
 {% block extra_head %}
+{{ block.super }}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 <style>
+    /* Define TTU colors as CSS variables */
+    :root {
+        --ttu-green: #2c6e49;
+        --ttu-dark: #1e4c33;
+        --ttu-light: #f2f9f5;
+    }
+    
+    /* Add utility classes for these custom colors */
+    .bg-ttu-green { background-color: var(--ttu-green); }
+    .bg-ttu-dark { background-color: var(--ttu-dark); }
+    .text-ttu-green { color: var(--ttu-green); }
+    .from-ttu-green { --tw-gradient-from: var(--ttu-green); }
+    .to-ttu-dark { --tw-gradient-to: var(--ttu-dark); }
+    .hover\:bg-ttu-dark:hover { background-color: var(--ttu-dark); }
+    .hover\:text-ttu-green:hover { color: var(--ttu-green); }
+    .focus\:border-ttu-green:focus { border-color: var(--ttu-green); }
+    .focus\:ring-ttu-green:focus { --tw-ring-color: var(--ttu-green); }
+    .focus\:ring-ttu-light:focus { --tw-ring-color: var(--ttu-light); }
+    .bg-gradient-to-r { background-image: linear-gradient(to right, var(--ttu-green), var(--ttu-dark)); }
+    
+    /* Override any problematic margin from the base template */
+    body > main, 
+    body > div.content,
+    #content-wrapper {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+
     /* Custom animations */
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(10px); }
@@ -81,8 +111,9 @@
 {% endblock %}
 
 {% block content %}
-<div class="bg-gray-50 min-h-screen py-6 sm:py-8 md:py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-2xl mx-auto">
+<!-- Fixed padding approach -->
+<div class="bg-gray-50 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8" style="padding-top: 1rem; padding-bottom: 1rem; min-height: calc(100vh - 80px);">
+    <div class="w-full max-w-2xl">
         <div class="form-container bg-white shadow-lg sm:rounded-xl overflow-hidden">
             <!-- Header -->
             <div class="form-heading bg-gradient-to-r from-ttu-green to-ttu-dark text-white px-6 py-5">
