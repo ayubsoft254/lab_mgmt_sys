@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from django.utils.text import slugify
 
 class SystemVersion(models.Model):
@@ -115,3 +116,38 @@ class ContactInfo(models.Model):
         ordering = ['order']
         verbose_name = "Contact Information"
         verbose_name_plural = "Contact Information"
+
+
+class AnonymousFeedback(models.Model):
+    """Model for storing anonymous user feedback"""
+    CATEGORY_CHOICES = [
+        ('general', 'General Feedback'),
+        ('bug', 'Bug Report'),
+        ('feature', 'Feature Request'),
+        ('usability', 'Usability Issue'),
+        ('experience', 'User Experience'),
+    ]
+    
+    RATING_CHOICES = [
+        (1, '1 - Poor'),
+        (2, '2 - Fair'),
+        (3, '3 - Average'),
+        (4, '4 - Good'),
+        (5, '5 - Excellent'),
+    ]
+    
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    message = models.TextField()
+    rating = models.IntegerField(choices=RATING_CHOICES, null=True, blank=True)
+    submission_date = models.DateTimeField(default=timezone.now)
+    is_addressed = models.BooleanField(default=False)
+    admin_notes = models.TextField(blank=True)
+    page_url = models.CharField(max_length=255, blank=True, help_text="URL where feedback was submitted from")
+    
+    class Meta:
+        verbose_name = "Anonymous Feedback"
+        verbose_name_plural = "Anonymous Feedback"
+        ordering = ['-submission_date']
+    
+    def __str__(self):
+        return f"{self.get_category_display()} - {self.submission_date.strftime('%Y-%m-%d %H:%M')}"
