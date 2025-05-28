@@ -4,7 +4,8 @@ from .models import (
     DocumentationSection, 
     SubSection, 
     DocumentationItem, 
-    ContactInfo
+    ContactInfo,
+    AnonymousFeedback
 )
 
 @admin.register(SystemVersion)
@@ -80,3 +81,28 @@ class ContactInfoAdmin(admin.ModelAdmin):
     list_display = ('title', 'email', 'phone', 'section')
     list_filter = ('section',)
     search_fields = ('title', 'email', 'phone', 'additional_info')
+
+
+@admin.register(AnonymousFeedback)
+class AnonymousFeedbackAdmin(admin.ModelAdmin):
+    list_display = ('category', 'submission_date', 'rating', 'is_addressed')
+    list_filter = ('category', 'is_addressed', 'rating', 'submission_date')
+    search_fields = ('message', 'admin_notes')
+    readonly_fields = ('submission_date', 'page_url')
+    fieldsets = (
+        ('Feedback Information', {
+            'fields': ('category', 'message', 'rating', 'submission_date', 'page_url')
+        }),
+        ('Administrative', {
+            'fields': ('is_addressed', 'admin_notes')
+        }),
+    )
+    actions = ['mark_as_addressed', 'mark_as_unaddressed']
+    
+    def mark_as_addressed(self, request, queryset):
+        queryset.update(is_addressed=True)
+    mark_as_addressed.short_description = "Mark selected feedback as addressed"
+    
+    def mark_as_unaddressed(self, request, queryset):
+        queryset.update(is_addressed=False)
+    mark_as_unaddressed.short_description = "Mark selected feedback as unaddressed"
