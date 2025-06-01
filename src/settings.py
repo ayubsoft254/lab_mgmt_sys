@@ -13,6 +13,7 @@ from decouple import config
 from pathlib import Path
 from dj_database_url import parse as db_url
 from celery.schedules import crontab
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -222,6 +223,10 @@ CELERY_BEAT_SCHEDULE = {
 # Add these settings for the host validation middleware
 MAX_SUSPICIOUS_HOST_REQUESTS = 10
 
+# Ensure logs directory exists
+LOGS_DIR = BASE_DIR / 'logs'
+os.makedirs(LOGS_DIR, exist_ok=True)
+
 # Configure logging for security events
 LOGGING = {
     'version': 1,
@@ -236,7 +241,7 @@ LOGGING = {
         'security_file': {
             'level': 'WARNING',
             'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs' / 'security.log',
+            'filename': LOGS_DIR / 'security.log',  # Using LOGS_DIR variable
             'formatter': 'verbose',
         },
         'console': {
