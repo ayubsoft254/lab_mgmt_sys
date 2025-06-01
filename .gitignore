@@ -1,6 +1,7 @@
 study-sync.code-workspace
 
 # Django
+log
 *.log
 *.pot
 *.pyc
