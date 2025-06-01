@@ -80,6 +80,7 @@ SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'src.middleware.HostValidationMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     "allauth.account.middleware.AccountMiddleware",
@@ -215,5 +216,40 @@ CELERY_BEAT_SCHEDULE = {
     'check-ending-bookings': {
         'task': 'booking.tasks.check_ending_bookings',
         'schedule': crontab(minute='*/1'),  # Run every minute
+    },
+}
+
+# Add these settings for the host validation middleware
+MAX_SUSPICIOUS_HOST_REQUESTS = 10
+
+# Configure logging for security events
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'security_file': {
+            'level': 'WARNING',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'security.log',
+            'formatter': 'verbose',
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'src.middleware': {
+            'handlers': ['security_file', 'console'],
+            'level': 'WARNING',
+            'propagate': True,
+        },
     },
 }
