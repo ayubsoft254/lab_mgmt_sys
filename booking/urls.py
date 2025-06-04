@@ -1,11 +1,12 @@
 from django.urls import path
 from . import views
-from .views import LandingPageView
+from .views import LandingPageView, SupportPageView
 from newsletter.views import subscribe_newsletter
 
 urlpatterns = [
     path('', LandingPageView.as_view(), name='landing'),
     path('home', views.home_view, name='home'),
+    path('support/', SupportPageView.as_view(), name='support'),
     path('labs/', views.lab_list_view, name='lab_list'),
     path('labs/<int:lab_id>/', views.lab_detail_view, name='lab_detail'),
     path('labs/<int:lab_id>/book/', views.student_booking_view, name='student_booking'),

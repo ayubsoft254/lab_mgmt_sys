@@ -84,7 +84,10 @@ class LandingPageView(TemplateView):
             context['total_hours'] = 1899
         
         return context
-
+    
+class SupportPageView(TemplateView):
+    template_name = 'support.html'   
+    
 @login_required
 def home_view(request):
     upcoming_bookings = None

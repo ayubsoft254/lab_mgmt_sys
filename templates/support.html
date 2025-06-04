@@ -1,0 +1,290 @@
+{% extends "landing.html" %}
+
+{% block title %}Support{% endblock %}
+
+{% block body %}
+<!-- FAQ Section -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="inline-block px-3 py-1 text-sm font-semibold text-ttu-green bg-green-100 rounded-full mb-4">FAQ</span>
+                <h2 class="section-title text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Frequently Asked <span class="text-ttu-green">Questions</span></h2>
+                <p class="max-w-2xl mx-auto text-lg text-gray-600">
+                    Find answers to common questions about our lab management system.
+                </p>
+            </div>
+
+            <div class="max-w-3xl mx-auto">
+                <!-- FAQ Item 1 -->
+                <div class="mb-6 border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md">
+                    <button class="faq-toggle w-full flex justify-between items-center p-6 text-left focus:outline-none">
+                        <h3 class="text-lg font-medium text-gray-900">How do I book a lab session?</h3>
+                        <i class="fas fa-chevron-down text-ttu-green transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-6 pt-0 text-gray-600">
+                        <p>Booking a lab session is simple. Log in to your account, select the lab you need, choose an available time slot, and confirm your booking. You'll receive a confirmation email with all the details.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 2 -->
+                <div class="mb-6 border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md">
+                    <button class="faq-toggle w-full flex justify-between items-center p-6 text-left focus:outline-none">
+                        <h3 class="text-lg font-medium text-gray-900">What happens if I miss my booked session?</h3>
+                        <i class="fas fa-chevron-down text-ttu-green transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-6 pt-0 text-gray-600">
+                        <p>If you miss a session without canceling at least 2 hours in advance, your account may receive a strike. After 3 strikes within a semester, you may lose booking privileges for 2 weeks.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 3 -->
+                <div class="mb-6 border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md">
+                    <button class="faq-toggle w-full flex justify-between items-center p-6 text-left focus:outline-none">
+                        <h3 class="text-lg font-medium text-gray-900">Can I access specialized software from any lab?</h3>
+                        <i class="fas fa-chevron-down text-ttu-green transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-6 pt-0 text-gray-600">
+                        <p>Specialized software is only available in designated labs. Please check the lab descriptions before booking to ensure the software you need is available in that location.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 4 -->
+                <div class="mb-6 border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md">
+                    <button class="faq-toggle w-full flex justify-between items-center p-6 text-left focus:outline-none">
+                        <h3 class="text-lg font-medium text-gray-900">How do I report equipment issues?</h3>
+                        <i class="fas fa-chevron-down text-ttu-green transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-6 pt-0 text-gray-600">
+                        <p>You can report equipment issues directly through the system by clicking the "Report Issue" button on your dashboard or by notifying lab staff immediately.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-16 bg-ttu-lighter">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="inline-block px-3 py-1 text-sm font-semibold text-ttu-green bg-green-100 rounded-full mb-4">CONTACT US</span>
+                <h2 class="section-title text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Get In <span class="text-ttu-green">Touch</span></h2>
+                <p class="max-w-2xl mx-auto text-lg text-gray-600">
+                    Have questions or need support? Our team is here to help you.
+                </p>
+            </div>
+
+            {% if messages %}
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+                {% for message in messages %}
+                    <div class="p-4 {% if message.tags == 'success' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %} rounded-lg">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="grid md:grid-cols-2 gap-12">
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="p-8">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-6">Send us a message</h3>
+                        <form method="post" action="{% url 'contact_submit' %}">
+                            {% csrf_token %}
+                            <div class="mb-6">
+                                <label for="name" class="block text-gray-700 font-medium mb-2">Your Name</label>
+                                <input type="text" id="name" name="name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ttu-green focus:border-transparent" placeholder="John Doe" required>
+                            </div>
+                            <div class="mb-6">
+                                <label for="email" class="block text-gray-700 font-medium mb-2">Email Address</label>
+                                <input type="email" id="email" name="email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ttu-green focus:border-transparent" placeholder="you@example.com" required>
+                            </div>
+                            <div class="mb-6">
+                                <label for="subject" class="block text-gray-700 font-medium mb-2">Subject</label>
+                                <select id="subject" name="subject" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ttu-green focus:border-transparent" required>
+                                    <option>General Inquiry</option>
+                                    <option>Technical Support</option>
+                                    <option>Booking Assistance</option>
+                                    <option>Feedback</option>
+                                </select>
+                            </div>
+                            <div class="mb-6">
+                                <label for="message" class="block text-gray-700 font-medium mb-2">Message</label>
+                                <textarea id="message" name="message" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ttu-green focus:border-transparent" placeholder="Your message here..." required></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-ttu-green text-white py-3 px-6 rounded-lg font-semibold hover:bg-ttu-dark transition-colors duration-300">
+                                Send Message <i class="fas fa-paper-plane ml-2"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+                        <div class="p-8">
+                            <h3 class="text-2xl font-bold text-gray-900 mb-6">Contact Information</h3>
+                            <div class="space-y-6">
+                                <div class="flex items-start">
+                                    <div class="w-10 h-10 bg-ttu-light rounded-lg flex items-center justify-center mr-4 text-ttu-green">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium text-gray-900">Location</h4>
+                                        <p class="text-gray-600">IC Department, Main Campus<br>Taita Taveta University</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <div class="w-10 h-10 bg-ttu-light rounded-lg flex items-center justify-center mr-4 text-ttu-green">
+                                        <i class="fas fa-envelope"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium text-gray-900">Email</h4>
+                                        <p class="text-gray-600">ictlabs@ttu.ac.ke</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <div class="w-10 h-10 bg-ttu-light rounded-lg flex items-center justify-center mr-4 text-ttu-green">
+                                        <i class="fas fa-phone-alt"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium text-gray-900">Phone</h4>
+                                        <p class="text-gray-600">+254 700 000 000</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <div class="w-10 h-10 bg-ttu-light rounded-lg flex items-center justify-center mr-4 text-ttu-green">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium text-gray-900">Support Hours</h4>
+                                        <p class="text-gray-600">Monday - Friday: 8:00 AM - 5:00 PM<br>Saturday: 9:00 AM - 1:00 PM</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                        <div class="p-8">
+                            <h3 class="text-2xl font-bold text-gray-900 mb-6">Visit Our Socials</h3>
+                            <div class="flex space-x-4">
+                                <a href="" class="w-12 h-12 bg-ttu-light rounded-full flex items-center justify-center text-ttu-green hover:bg-ttu-green hover:text-white transition-colors duration-300">
+                                    <i class="fab fa-facebook-f"></i>
+                                </a>
+                                <a href="/" class="w-12 h-12 bg-ttu-light rounded-full flex items-center justify-center text-ttu-green hover:bg-ttu-green hover:text-white transition-colors duration-300">
+                                    <i class="fab fa-twitter"></i>
+                                </a>
+                                <a href="/" class="w-12 h-12 bg-ttu-light rounded-full flex items-center justify-center text-ttu-green hover:bg-ttu-green hover:text-white transition-colors duration-300">
+                                    <i class="fab fa-instagram"></i>
+                                </a>
+                                <a href="/" class="w-12 h-12 bg-ttu-light rounded-full flex items-center justify-center text-ttu-green hover:bg-ttu-green hover:text-white transition-colors duration-300">
+                                    <i class="fab fa-linkedin-in"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<!-- Newsletter Section -->
+    <section class="py-16 bg-ttu-green text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row items-center justify-between rounded-2xl bg-white/10 backdrop-blur-sm p-8 shadow-xl">
+                <div class="lg:w-1/2 mb-8 lg:mb-0 lg:pr-8">
+                    <span class="inline-block px-3 py-1 text-sm font-semibold bg-white/20 text-white rounded-full mb-4">STAY UPDATED</span>
+                    <h2 class="text-3xl sm:text-4xl font-bold mb-4">Subscribe to Our Newsletter</h2>
+                    <p class="text-green-100 text-lg mb-6">
+                        Get the latest updates on lab availability, new features, maintenance schedules, and tech tips directly in your inbox.
+                    </p>
+                    <div class="flex flex-wrap items-center gap-4">
+                        <div class="flex -space-x-2">
+                            <div class="w-10 h-10 rounded-full bg-green-200 text-ttu-green flex items-center justify-center border-2 border-white">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-green-200 text-ttu-green flex items-center justify-center border-2 border-white">
+                                <i class="fas fa-calendar"></i>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-green-200 text-ttu-green flex items-center justify-center border-2 border-white">
+                                <i class="fas fa-laptop"></i>
+                            </div>
+                        </div>
+                        <p class="text-sm text-green-100">Join over 500+ subscribers</p>
+                    </div>
+                    
+                    <!-- Add benefit points -->
+                    <div class="mt-6">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-check-circle text-green-200 mr-2"></i>
+                            <span class="text-green-100">Get notified about lab maintenance</span>
+                        </div>
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-check-circle text-green-200 mr-2"></i>
+                            <span class="text-green-100">Receive tips on efficient lab booking</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle text-green-200 mr-2"></i>
+                            <span class="text-green-100">Stay updated on new system features</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="lg:w-1/2 w-full">
+                    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                        <form id="newsletter-form" method="post" action="{% url 'subscribe_newsletter' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="form_location" value="main">
+                            
+                            <div class="mb-4">
+                                <label for="newsletter-name" class="block text-green-100 font-medium mb-2">Full Name</label>
+                                <input type="text" id="newsletter-name" name="name" placeholder="John Doe" class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-green-100/70 focus:outline-none focus:ring-2 focus:ring-white/50">
+                            </div>
+                            <div class="mb-4">
+                                <label for="newsletter-email" class="block text-green-100 font-medium mb-2">Email Address</label>
+                                <input type="email" id="newsletter-email" name="email" placeholder="you@example.com" required class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-green-100/70 focus:outline-none focus:ring-2 focus:ring-white/50">
+                            </div>
+                            
+                            <div class="mb-6">
+                                <p class="block text-green-100 font-medium mb-2">I'm interested in:</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <div class="flex items-center">
+                                        <input id="newsletter-updates" type="checkbox" name="email_type" value="updates" class="h-4 w-4 accent-green-200">
+                                        <label for="newsletter-updates" class="ml-2 block text-sm text-green-100">
+                                            System Updates
+                                        </label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input id="newsletter-lab" type="checkbox" name="email_type" value="lab_news" checked class="h-4 w-4 accent-green-200">
+                                        <label for="newsletter-lab" class="ml-2 block text-sm text-green-100">
+                                            Lab News & Announcements
+                                        </label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input id="newsletter-tips" type="checkbox" name="email_type" value="tips" class="h-4 w-4 accent-green-200">
+                                        <label for="newsletter-tips" class="ml-2 block text-sm text-green-100">
+                                            Tips & Best Practices
+                                        </label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input id="newsletter-events" type="checkbox" name="email_type" value="events" class="h-4 w-4 accent-green-200">
+                                        <label for="newsletter-events" class="ml-2 block text-sm text-green-100">
+                                            Events & Workshops
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="w-full bg-white text-ttu-green font-bold py-3 px-6 rounded-lg hover:bg-green-100 transition-colors duration-300 flex items-center justify-center">
+                                Subscribe Now
+                                <i class="fas fa-paper-plane ml-2"></i>
+                            </button>
+                            
+                            <p class="text-xs text-center text-green-100 mt-4">
+                                By subscribing, you agree to our <a href="#" class="underline hover:text-white">Privacy Policy</a>. You can unsubscribe at any time.
+                            </p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
