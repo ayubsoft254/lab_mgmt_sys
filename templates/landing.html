@@ -6,8 +6,7 @@
     <title>TTU Lab Management System</title>
     {% load static %}
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">    
     <style>
         :root {
             --ttu-green: #2c6e49;
@@ -94,7 +93,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 <div class="flex items-center">
-                    <!-- Desktop Navigation Logo (Replace the laptop icon) -->
+                    <!-- Desktop Navigation Logo -->
                     <div class="flex-shrink-0 flex items-center">
                         <img src="{% static 'img/logo.jpg' %}" alt="TTU Logo" class="h-10 w-auto mr-2">
                         <span class="text-white text-xl font-bold hidden sm:inline">Lab Management</span>
@@ -104,7 +103,6 @@
                             <a href="/" class="text-white hover:text-green-200 px-3 py-2 text-sm font-medium transition-colors duration-300">Home</a>
                             <a href="#labs" class="text-white hover:text-green-200 px-3 py-2 text-sm font-medium transition-colors duration-300">Labs</a>
                             <a href="#features" class="text-white hover:text-green-200 px-3 py-2 text-sm font-medium transition-colors duration-300">Features</a>
-                            <a href="#testimonials" class="text-white hover:text-green-200 px-3 py-2 text-sm font-medium transition-colors duration-300">Testimonials</a>
                             <a href="#contact" class="text-white hover:text-green-200 px-3 py-2 text-sm font-medium transition-colors duration-300">Contact</a>
                         </div>
                     </div>
@@ -127,7 +125,6 @@
                 <a href="/" class="block px-3 py-2 text-white hover:text-green-200">Home</a>
                 <a href="#labs" class="block px-3 py-2 text-white hover:text-green-200">Labs</a>
                 <a href="#features" class="block px-3 py-2 text-white hover:text-green-200">Features</a>
-                <a href="#testimonials" class="block px-3 py-2 text-white hover:text-green-200">Testimonials</a>
                 <a href="#contact" class="block px-3 py-2 text-white hover:text-green-200">Contact</a>
                 <div class="pt-4 border-t border-green-700">
                     <a href="{% url 'account_login' %}" class="block px-3 py-2 text-white hover:text-green-200">Student Sign In</a>
@@ -177,9 +174,6 @@
 
             <div class="md:w-1/2 mt-12 md:mt-0 animate-fade-in delay-100">
                 <div class="relative">
-                    <div class="absolute -top-6 -left-6 w-64 h-64 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-                    <div class="absolute -bottom-8 -right-8 w-64 h-64 bg-green-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-
                     <div class="relative glass-card rounded-2xl shadow-2xl overflow-hidden">
                         <img src="{% static 'img/hero.jpg' %}" alt="Computer Lab" class="w-full h-auto">
                         <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6">
@@ -366,31 +360,7 @@
                 </div>
             </div>           
         </div>
-    </section>
-
-    <!-- Stats Section -->
-    <section class="py-16 bg-ttu-green text-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid md:grid-cols-4 gap-8 text-center">
-                <div class="p-6">
-                    <div class="text-4xl font-bold mb-2" data-count="{{ active_students|stringformat:'d' }}">0</div>
-                    <div class="text-green-200 font-medium">Active Students</div>
-                </div>
-                <div class="p-6">
-                    <div class="text-4xl font-bold mb-2" data-count="{{ lab_count|stringformat:'d' }}">0</div>
-                    <div class="text-green-200 font-medium">Specialized Labs</div>
-                </div>
-                <div class="p-6">
-                    <div class="text-4xl font-bold mb-2" data-count="{{ uptime_percentage }}">0</div>
-                    <div class="text-green-200 font-medium">% Uptime</div>
-                </div>
-                <div class="p-6">
-                    <div class="text-4xl font-bold mb-2" data-count="{{ total_hours }}">0</div>
-                    <div class="text-green-200 font-medium">Hours Used This Month</div>
-                </div>
-            </div>
-        </div>
-    </section>                
+    </section>                 
 
     <!-- CTA Section -->
     <section id="student-login" class="py-16 text-white text-center" style="background: linear-gradient(to right, var(--ttu-green), var(--ttu-dark-green));">
@@ -472,26 +442,10 @@
     </button>
 
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
     <script>
-        // Add this line at the beginning of your script
-        let countersInitialized = false;
-        
         // Mobile menu toggle
         document.querySelector('.mobile-menu-button').addEventListener('click', function() {
             document.querySelector('.mobile-menu').classList.toggle('hidden');
-        });
-
-        // FAQ toggle
-        document.querySelectorAll('.faq-toggle').forEach(button => {
-            button.addEventListener('click', () => {
-                const content = button.nextElementSibling;
-                const icon = button.querySelector('i');
-                
-                content.classList.toggle('hidden');
-                icon.classList.toggle('transform');
-                icon.classList.toggle('rotate-180');
-            });
         });
 
         // Back to top button
@@ -509,82 +463,6 @@
         backToTopButton.addEventListener('click', () => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
-
-        // Initialize testimonial slider
-        new Splide('.splide', {
-            type: 'loop',
-            perPage: 1,
-            perMove: 1,
-            gap: '2rem',
-            pagination: false,
-            breakpoints: {
-                768: {
-                    perPage: 1,
-                }
-            }
-        }).mount();
-
-        // Show loading state for counters
-        function showLoadingState() {
-            const counters = document.querySelectorAll('[data-count]');
-            counters.forEach(counter => {
-                counter.innerHTML = '<span class="animate-pulse">...</span>';
-            });
-        }
-
-        // Call this at page load
-        showLoadingState();
-
-        // Animated counter for stats
-        function animateCounters() {
-            const counters = document.querySelectorAll('[data-count]');
-            
-            counters.forEach(counter => {
-                const target = parseFloat(counter.getAttribute('data-count'));
-                let count = 0;
-                const duration = 2000; // 2 seconds
-                const frameDuration = 1000/60; // 60 fps
-                const totalFrames = Math.round(duration / frameDuration);
-                const increment = target / totalFrames;
-                
-                // Use requestAnimationFrame for smoother animation
-                let frame = 0;
-                const animate = () => {
-                    frame++;
-                    const currentValue = Math.min(increment * frame, target);
-                    
-                    // Handle different types of values:
-                    // 1. Use toFixed(1) for uptime percentage (value between 0-100)
-                    // 2. Use integers for student counts and lab counts
-                    if (counter.parentElement.querySelector('.text-green-200').textContent.includes('Uptime')) {
-                        counter.textContent = currentValue.toFixed(1);
-                    } else {
-                        counter.textContent = Math.floor(currentValue);
-                    }
-                    
-                    if (frame < totalFrames) {
-                        requestAnimationFrame(animate);
-                    }
-                };
-                
-                requestAnimationFrame(animate);
-            });
-        }
-
-        // Only run animation when section is visible
-        const statsSection = document.querySelector('.py-16.bg-ttu-green');
-        if (statsSection) {
-            const statsObserver = new IntersectionObserver((entries) => {
-                if (entries[0].isIntersecting && !countersInitialized) {
-                    animateCounters();
-                    countersInitialized = true;
-                }
-            }, { threshold: 0.1 });
-
-            statsObserver.observe(statsSection);
-        } else {
-            console.warn("Stats section not found");
-        }
     </script>
 </body>
 </html>
