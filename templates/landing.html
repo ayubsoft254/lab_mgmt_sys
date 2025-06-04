@@ -137,6 +137,8 @@
         </div>
     </nav>
 
+    {% block body %}  
+    
     <!-- Hero Section -->
     <section class="pt-24 pb-16 md:pt-32 md:pb-24 text-white" style="background: linear-gradient(to bottom, var(--ttu-green), var(--ttu-dark-green));">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center">
@@ -188,66 +190,7 @@
                 </div>
             </div>
         </div>
-    </section>
-
-
-    <!-- Trusted By Section -->
-    <div class="py-12 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center">
-                <span class="inline-block px-3 py-1 text-sm font-semibold text-ttu-green bg-green-100 rounded-full mb-4">OFFICIAL LAB MANAGEMENT SYSTEM OF</span>
-                
-                <!-- Single Department Showcase -->
-                <div class="max-w-md mx-auto bg-ttu-lighter rounded-2xl p-6 shadow-md transition-all duration-300 hover:shadow-xl mb-10">
-                    <div class="flex flex-col items-center">
-                        <div class="w-20 h-20 bg-ttu-green bg-opacity-10 rounded-full flex items-center justify-center mb-4">
-                            <i class="fas fa-laptop-code text-ttu-green text-2xl"></i>
-                        </div>
-                        
-                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Informatics & Computing</h3>
-                        <p class="text-gray-500 mb-4">School of Science and Informatics</p>
-                        
-                        <div class="flex items-center justify-center gap-2 text-ttu-green">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                        </div>
-                        
-                        <div class="mt-6 px-8 py-2 bg-ttu-green bg-opacity-10 rounded-full text-sm text-ttu-green font-medium">
-                            #1 Rated Department System
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Statistics Row -->
-                <div class="flex flex-wrap justify-center items-center mt-6 gap-8">
-                    <div class="flex items-center">
-                        <span class="text-xl font-bold text-ttu-green mr-2">4</span>
-                        <span class="text-sm text-gray-600">Labs</span>
-                    </div>
-                    <div class="w-px h-8 bg-gray-200"></div>
-                    <div class="flex items-center">
-                        <span class="text-xl font-bold text-ttu-green mr-2">500+</span>
-                        <span class="text-sm text-gray-600">Students</span>
-                    </div>
-                    <div class="w-px h-8 bg-gray-200"></div>
-                    <div class="flex items-center">
-                        <span class="text-xl font-bold text-ttu-green mr-2">98%</span>
-                        <span class="text-sm text-gray-600">Satisfaction</span>
-                    </div>
-                    <div class="w-px h-8 bg-gray-200"></div>
-                    <div class="flex items-center">
-                        <span class="text-xl font-bold text-ttu-green mr-2">24/7</span>
-                        <span class="text-sm text-gray-600">Support</span>
-                    </div>
-                </div>
-                
-                <p class="text-gray-500 text-sm mt-6 font-medium">POWERING THE FUTURE OF TECHNICAL EDUCATION</p>
-            </div>
-        </div>
-    </div>
+    </section>    
 
     <!-- Labs Section -->
     <section id="labs" class="py-16 bg-ttu-lighter">
@@ -421,44 +364,7 @@
                         </li>
                     </ul>
                 </div>
-            </div>
-            
-            <!-- Additional feature showcase -->
-            <div class="mt-16 grid md:grid-cols-2 gap-12 items-center">
-                <div class="animate-fade-in delay-200">
-                    <div class="w-14 h-14 bg-ttu-green rounded-xl flex items-center justify-center mb-6 text-white text-2xl">
-                        <i class="fas fa-fingerprint"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Secure Access Control</h3>
-                    <p class="text-gray-600 mb-6">
-                        Our biometric and RFID authentication ensures only authorized users can access lab resources, with detailed logs of all access attempts.
-                    </p>
-                    <ul class="space-y-3">
-                        <li class="flex items-start">
-                            <i class="fas fa-check-circle text-ttu-green mt-1 mr-3"></i>
-                            <span class="text-gray-700">Multi-factor authentication options</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fas fa-check-circle text-ttu-green mt-1 mr-3"></i>
-                            <span class="text-gray-700">Time-based access restrictions</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fas fa-check-circle text-ttu-green mt-1 mr-3"></i>
-                            <span class="text-gray-700">Emergency lockdown capability</span>
-                        </li>
-                    </ul>
-                </div>
-                <div class="animate-fade-in delay-300">
-                    <div class="relative rounded-xl overflow-hidden shadow-lg">
-                        <img src="https://images.unsplash.com/photo-1614064641938-3bbee52942c7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" alt="Access Control" class="w-full h-auto">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
-                        <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
-                            <h4 class="font-bold text-lg">Real-time Monitoring Dashboard</h4>
-                            <p class="text-sm opacity-90">View lab status at any time</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            </div>           
         </div>
     </section>
 
@@ -485,6 +391,64 @@
             </div>
         </div>
     </section>
+
+    <!-- Trusted By Section -->
+    <div class="py-12 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <span class="inline-block px-3 py-1 text-sm font-semibold text-ttu-green bg-green-100 rounded-full mb-4">OFFICIAL LAB MANAGEMENT SYSTEM OF</span>
+                
+                <!-- Single Department Showcase -->
+                <div class="max-w-md mx-auto bg-ttu-lighter rounded-2xl p-6 shadow-md transition-all duration-300 hover:shadow-xl mb-10">
+                    <div class="flex flex-col items-center">
+                        <div class="w-20 h-20 bg-ttu-green bg-opacity-10 rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-laptop-code text-ttu-green text-2xl"></i>
+                        </div>
+                        
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Informatics & Computing</h3>
+                        <p class="text-gray-500 mb-4">School of Science and Informatics</p>
+                        
+                        <div class="flex items-center justify-center gap-2 text-ttu-green">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        
+                        <div class="mt-6 px-8 py-2 bg-ttu-green bg-opacity-10 rounded-full text-sm text-ttu-green font-medium">
+                            #1 Rated Department System
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Statistics Row -->
+                <div class="flex flex-wrap justify-center items-center mt-6 gap-8">
+                    <div class="flex items-center">
+                        <span class="text-xl font-bold text-ttu-green mr-2">4</span>
+                        <span class="text-sm text-gray-600">Labs</span>
+                    </div>
+                    <div class="w-px h-8 bg-gray-200"></div>
+                    <div class="flex items-center">
+                        <span class="text-xl font-bold text-ttu-green mr-2">500+</span>
+                        <span class="text-sm text-gray-600">Students</span>
+                    </div>
+                    <div class="w-px h-8 bg-gray-200"></div>
+                    <div class="flex items-center">
+                        <span class="text-xl font-bold text-ttu-green mr-2">98%</span>
+                        <span class="text-sm text-gray-600">Satisfaction</span>
+                    </div>
+                    <div class="w-px h-8 bg-gray-200"></div>
+                    <div class="flex items-center">
+                        <span class="text-xl font-bold text-ttu-green mr-2">24/7</span>
+                        <span class="text-sm text-gray-600">Support</span>
+                    </div>
+                </div>
+                
+                <p class="text-gray-500 text-sm mt-6 font-medium">POWERING THE FUTURE OF TECHNICAL EDUCATION</p>
+            </div>
+        </div>
+    </div>
 
     <!-- Testimonials Section -->
     <section id="testimonials" class="py-16 bg-ttu-lighter">
@@ -899,6 +863,7 @@
         </div>
     </section>
 
+    {% endblock body %}
     <!-- Footer -->
     <footer class="bg-ttu-dark text-white pt-16 pb-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
