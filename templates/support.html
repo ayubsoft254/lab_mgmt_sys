@@ -28,12 +28,23 @@
         opacity: 0.7;
         pointer-events: none;
     }
+    
+    /* Fix for navigation overlap */
+    .support-content {
+        padding-top: 6rem; /* Add space for fixed navigation */
+    }
+    
+    @media (max-width: 768px) {
+        .support-content {
+            padding-top: 5rem; /* Slightly less on mobile */
+        }
+    }
 </style>
 {% endblock %}
 
 {% block body %}
 <!-- FAQ Section -->
-<section class="py-16 bg-white">
+<section class="support-content py-16 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
             <span class="inline-block px-3 py-1 text-sm font-semibold text-ttu-green bg-green-100 rounded-full mb-4">FAQ</span>
@@ -220,7 +231,7 @@
                             <a href="https://www.facebook.com/TaitaTavetaUniversity" target="_blank" rel="noopener noreferrer" class="w-12 h-12 bg-ttu-light rounded-full flex items-center justify-center text-ttu-green hover:bg-ttu-green hover:text-white transition-colors duration-300">
                                 <i class="fab fa-facebook-f"></i>
                             </a>
-                            <a href="https://twitter.com/TTU_Kenya" target="_blank" rel="noopener noreferrer" class="w-12 h-12 bg-ttu-light rounded-full flex items-center justify-center text-ttu-green hover:bg-ttu-green hover:text-white transition-colors duration-300">
+                            <a href="https://twitter.com/TaitaTavetaUni" target="_blank" rel="noopener noreferrer" class="w-12 h-12 bg-ttu-light rounded-full flex items-center justify-center text-ttu-green hover:bg-ttu-green hover:text-white transition-colors duration-300">
                                 <i class="fab fa-twitter"></i>
                             </a>
                             <a href="https://www.instagram.com/taitatavetauniversity" target="_blank" rel="noopener noreferrer" class="w-12 h-12 bg-ttu-light rounded-full flex items-center justify-center text-ttu-green hover:bg-ttu-green hover:text-white transition-colors duration-300">
