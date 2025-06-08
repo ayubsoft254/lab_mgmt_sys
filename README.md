@@ -9,6 +9,8 @@ A comprehensive Django-based web application designed specifically for managing 
 
 ## 🔍 Overview
 The Lab Management System (LMS) provides an intuitive platform for students, lecturers, and administrators to coordinate the use of computer labs and equipment. With features like real-time availability tracking, automated notifications, and comprehensive analytics, LMS streamlines the entire lab management workflow.
+**Live link:**
+[EduSauti](https://ttulabs.ayubsoft-inc.systems)
 
 ## 🚀 Key Features
 
