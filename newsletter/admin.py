@@ -242,6 +242,26 @@ class EmailCampaignAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at', 'started_at', 'completed_at', 'total_recipients', 'sent_count', 'open_count', 'click_count')
     actions = ['send_campaign_now']
     
+    def recipient_count(self, obj):
+        """Display the number of recipients for this campaign"""
+        if obj.recipient_type == 'csv_upload':
+            return obj.csv_recipients.count()
+        else:
+            return obj.total_recipients
+    recipient_count.short_description = 'Recipients'
+    
+    def campaign_progress(self, obj):
+        """Display campaign progress as a percentage"""
+        if obj.total_recipients == 0:
+            return "0%"
+        progress = (obj.sent_count / obj.total_recipients) * 100
+        color = "green" if progress == 100 else "orange" if progress > 0 else "red"
+        return format_html(
+            '<span style="color: {};">{:.1f}% ({}/{})</span>',
+            color, progress, obj.sent_count, obj.total_recipients
+        )
+    campaign_progress.short_description = 'Progress'
+    
     def get_fieldsets(self, request, obj=None):
         if obj:  # Editing existing object
             fieldsets = [
@@ -333,6 +353,101 @@ class EmailCampaignAdmin(admin.ModelAdmin):
             'title': 'Create CSV Email Campaign',
             'opts': EmailCampaign._meta,
         })
+    
+    def send_campaign(self, request, campaign_id):
+        """Send a campaign immediately"""
+        campaign = get_object_or_404(EmailCampaign, id=campaign_id)
+        
+        if campaign.status not in ['draft', 'scheduled']:
+            messages.error(request, f"Campaign '{campaign.name}' cannot be sent. Current status: {campaign.get_status_display()}")
+            return redirect('admin:newsletter_emailcampaign_change', campaign_id)
+        
+        # Process the campaign
+        self.process_campaign(campaign)
+        
+        messages.success(request, f"Campaign '{campaign.name}' has been queued for sending!")
+        return redirect('admin:newsletter_emailcampaign_change', campaign_id)
+    
+    def preview_campaign(self, request, campaign_id):
+        """Preview campaign content"""
+        campaign = get_object_or_404(EmailCampaign, id=campaign_id)
+        
+        # Create sample context for preview
+        if campaign.recipient_type == 'csv_upload':
+            # Use first CSV recipient for preview
+            csv_recipient = campaign.csv_recipients.first()
+            if csv_recipient:
+                context = {
+                    'email': csv_recipient.email,
+                    **csv_recipient.data,
+                }
+            else:
+                context = {'email': 'example@example.com', 'first_name': 'John', 'last_name': 'Doe'}
+        else:
+            # Use a sample user context
+            context = {
+                'first_name': 'John',
+                'last_name': 'Doe',
+                'email': 'john.doe@example.com',
+            }
+        
+        # Render content with context
+        try:
+            subject = Template(campaign.subject).render(Context(context))
+            html_content = Template(campaign.html_content).render(Context(context))
+            text_content = Template(campaign.text_content).render(Context(context))
+        except Exception as e:
+            messages.error(request, f"Error rendering template: {str(e)}")
+            return redirect('admin:newsletter_emailcampaign_change', campaign_id)
+        
+        return render(request, 'admin/newsletter/emailcampaign/preview.html', {
+            'campaign': campaign,
+            'subject': subject,
+            'html_content': html_content,
+            'text_content': text_content,
+            'context': context,
+            'title': f'Preview: {campaign.name}',
+            'opts': EmailCampaign._meta,
+        })
+    
+    def campaign_status(self, request, campaign_id):
+        """View campaign status and statistics"""
+        campaign = get_object_or_404(EmailCampaign, id=campaign_id)
+        
+        context = {
+            'campaign': campaign,
+            'title': f'Status: {campaign.name}',
+            'opts': EmailCampaign._meta,
+        }
+        
+        if campaign.recipient_type == 'csv_upload':
+            context['csv_recipients'] = campaign.csv_recipients.all()[:10]  # Show first 10
+            context['total_csv_recipients'] = campaign.csv_recipients.count()
+        else:
+            context['deliveries'] = EmailDelivery.objects.filter(campaign=campaign)[:10]  # Show first 10
+            context['delivery_stats'] = {
+                'pending': EmailDelivery.objects.filter(campaign=campaign, status='pending').count(),
+                'sent': EmailDelivery.objects.filter(campaign=campaign, status='sent').count(),
+                'opened': EmailDelivery.objects.filter(campaign=campaign, status='opened').count(),
+                'clicked': EmailDelivery.objects.filter(campaign=campaign, status='clicked').count(),
+                'failed': EmailDelivery.objects.filter(campaign=campaign, status='failed').count(),
+            }
+        
+        return render(request, 'admin/newsletter/emailcampaign/status.html', context)
+    
+    def send_campaign_now(self, request, queryset):
+        """Admin action to send selected campaigns immediately"""
+        sent_count = 0
+        for campaign in queryset:
+            if campaign.status in ['draft', 'scheduled']:
+                self.process_campaign(campaign)
+                sent_count += 1
+            else:
+                messages.warning(request, f"Campaign '{campaign.name}' could not be sent (status: {campaign.get_status_display()})")
+        
+        if sent_count > 0:
+            messages.success(request, f"{sent_count} campaign(s) queued for sending!")
+    send_campaign_now.short_description = "Send selected campaigns now"
     
     def process_csv_file(self, campaign, csv_file):
         """Process uploaded CSV file and create CsvRecipient records"""
