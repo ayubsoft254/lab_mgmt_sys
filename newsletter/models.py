@@ -135,7 +135,14 @@ class EmailCampaign(models.Model):
         elif self.recipient_type == 'subscribers':
             return User.objects.filter(email__in=NewsletterSubscription.objects.filter(
                 is_active=True).values_list('email', flat=True))
+        elif self.recipient_type == 'csv_upload':
+            # For CSV uploads, we'll handle this differently in the tasks
+            return User.objects.none()
         return User.objects.none()
+    
+    def get_csv_recipients(self):
+        """Get CSV recipients for this campaign"""
+        return self.csv_recipients.all()
     
     class Meta:
         ordering = ['-created_at']
