@@ -63,23 +63,31 @@ def track_email_open(request, tracking_id):
     Track when an email is opened via a tracking pixel
     Returns a 1x1 transparent GIF
     """
-    from .models import EmailDelivery
+    from .models import EmailDelivery, CsvRecipient
     
     try:
-        # Find the delivery by tracking ID
-        delivery = EmailDelivery.objects.get(tracking_id=tracking_id)
-        
-        # Only update if this is the first time it's opened
-        if delivery.status != 'opened' and not delivery.opened_at:
-            delivery.status = 'opened'
-            delivery.opened_at = timezone.now()
-            delivery.save()
-            
-            # Update campaign stats
-            campaign = delivery.campaign
+        # Check if it's a CSV recipient tracking
+        if tracking_id.startswith('csv_'):
+            csv_id = tracking_id.replace('csv_', '')
+            csv_recipient = CsvRecipient.objects.get(id=csv_id)
+            campaign = csv_recipient.campaign
             campaign.open_count += 1
             campaign.save()
-    except EmailDelivery.DoesNotExist:
+        else:
+            # Regular delivery tracking
+            delivery = EmailDelivery.objects.get(tracking_id=tracking_id)
+            
+            # Only update if this is the first time it's opened
+            if delivery.status != 'opened' and not delivery.opened_at:
+                delivery.status = 'opened'
+                delivery.opened_at = timezone.now()
+                delivery.save()
+                
+                # Update campaign stats
+                campaign = delivery.campaign
+                campaign.open_count += 1
+                campaign.save()
+    except (EmailDelivery.DoesNotExist, CsvRecipient.DoesNotExist):
         pass
         
     # Return a transparent 1x1 pixel GIF
