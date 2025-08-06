@@ -1,0 +1,87 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | {{ site_title|default:"Django site admin" }}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">Home</a>
+    &rsaquo; <a href="{% url 'admin:auth_user_changelist' %}">Users</a>
+    &rsaquo; {{ title }}
+</div>
+{% endblock %}
+
+{% block content %}
+<h1>{{ title }}</h1>
+
+<p>You are about to send an email to <strong>{{ user_count }}</strong> selected users.</p>
+
+<form method="post">
+    {% csrf_token %}
+    
+    <fieldset class="module aligned">
+        <h2>Email Details</h2>
+        
+        <div class="form-row">
+            <label for="id_subject">Subject:</label>
+            <input type="text" name="subject" id="id_subject" required maxlength="200" style="width: 400px;">
+        </div>
+        
+        <div class="form-row">
+            {{ sender_form.sender_email_choice.label_tag }}
+            {{ sender_form.sender_email_choice }}
+            {% if sender_form.sender_email_choice.errors %}
+                <ul class="errorlist">
+                    {% for error in sender_form.sender_email_choice.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <div class="help">{{ sender_form.sender_email_choice.help_text }}</div>
+        </div>
+        
+        <div class="form-row" id="custom-email-row" style="display: none;">
+            {{ sender_form.custom_sender_email.label_tag }}
+            {{ sender_form.custom_sender_email }}
+            {% if sender_form.custom_sender_email.errors %}
+                <ul class="errorlist">
+                    {% for error in sender_form.custom_sender_email.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <div class="help">{{ sender_form.custom_sender_email.help_text }}</div>
+        </div>
+        
+        <div class="form-row">
+            <label for="id_message">Message:</label>
+            <textarea name="message" id="id_message" rows="10" cols="60" required></textarea>
+        </div>
+    </fieldset>
+    
+    <div class="submit-row">
+        <input type="submit" value="Send Email" class="default" />
+        <a href="{% url 'admin:auth_user_changelist' %}" class="button cancel-link">Cancel</a>
+    </div>
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const senderChoice = document.querySelector('#id_sender_email_choice');
+    const customEmailRow = document.querySelector('#custom-email-row');
+    
+    function toggleCustomEmailField() {
+        if (senderChoice.value === 'custom') {
+            customEmailRow.style.display = 'block';
+        } else {
+            customEmailRow.style.display = 'none';
+        }
+    }
+    
+    if (senderChoice) {
+        senderChoice.addEventListener('change', toggleCustomEmailField);
+        toggleCustomEmailField(); // Initial call
+    }
+});
+</script>
+{% endblock %}
