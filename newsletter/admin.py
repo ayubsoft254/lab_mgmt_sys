@@ -240,7 +240,7 @@ class EmailCampaignAdmin(admin.ModelAdmin):
         if obj:  # Editing existing object
             fieldsets = [
                 ('Campaign Information', {
-                    'fields': ('name', 'subject', 'recipient_type', 'sender_email_choice', 'custom_sender_email', 'created_by', 'created_at')
+                    'fields': ('name', 'subject', 'recipient_type', 'sender_email', 'created_by', 'created_at')
                 }),
                 ('Content', {
                     'fields': ('template', 'custom_html_content', 'custom_text_content')
@@ -375,9 +375,27 @@ class EmailCampaignAdmin(admin.ModelAdmin):
         
         # Render content with context
         try:
-            subject = Template(campaign.subject).render(Context(context))
-            html_content = Template(campaign.html_content).render(Context(context))
-            text_content = Template(campaign.text_content).render(Context(context))
+            # Use the subject from campaign (not template)
+            rendered_subject = campaign.subject
+            if rendered_subject:
+                subject = Template(rendered_subject).render(Context(context))
+            else:
+                subject = "No subject"
+            
+            # Get HTML content (from template or custom)
+            html_content_raw = campaign.html_content
+            if html_content_raw:
+                html_content = Template(html_content_raw).render(Context(context))
+            else:
+                html_content = "No HTML content"
+            
+            # Get text content (from template or custom)
+            text_content_raw = campaign.text_content
+            if text_content_raw:
+                text_content = Template(text_content_raw).render(Context(context))
+            else:
+                text_content = "No text content"
+                
         except Exception as e:
             messages.error(request, "Error rendering template: {}".format(str(e)))
             return redirect('admin:newsletter_emailcampaign_change', campaign_id)
@@ -521,7 +539,7 @@ class CsvRecipientAdmin(admin.ModelAdmin):
     def data_preview(self, obj):
         """Show a preview of the data"""
         if obj.data:
-            preview = ', '.join([f"{k}: {v}" for k, v in list(obj.data.items())[:3]])
+            preview = ', '.join(["{}: {}".format(k, v) for k, v in list(obj.data.items())[:3]])
             if len(obj.data) > 3:
                 preview += "..."
             return preview

@@ -86,39 +86,25 @@ class EmailCampaign(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     
     # Campaign statistics
-    total_recipients = models.PositiveIntegerField(default=0)
-    sent_count = models.PositiveIntegerField(default=0)
-    open_count = models.PositiveIntegerField(default=0)
-    click_count = models.PositiveIntegerField(default=0)
+    total_recipients = models.IntegerField(default=0)
+    sent_count = models.IntegerField(default=0)
+    open_count = models.IntegerField(default=0)
+    click_count = models.IntegerField(default=0)
     
     def __str__(self):
-        return f"{self.name} ({self.get_status_display()})"
-    
-    @property
-    def progress_percentage(self):
-        """Calculate the percentage of emails sent"""
-        if self.total_recipients == 0:
-            return 0
-        return int((self.sent_count / self.total_recipients) * 100)
-    
-    @property
-    def is_scheduled_for_future(self):
-        """Check if campaign is scheduled for the future"""
-        if not self.scheduled_time:
-            return False
-        return self.scheduled_time > timezone.now()
+        return self.name
     
     @property
     def html_content(self):
-        """Get the HTML content for the email (template or custom)"""
-        if self.template and not self.custom_html_content:
+        """Get HTML content from template or custom content"""
+        if self.template:
             return self.template.html_content
         return self.custom_html_content
     
     @property
     def text_content(self):
-        """Get the text content for the email (template or custom)"""
-        if self.template and not self.custom_text_content:
+        """Get text content from template or custom content"""
+        if self.template:
             return self.template.text_content
         return self.custom_text_content
     
@@ -146,6 +132,8 @@ class EmailCampaign(models.Model):
     
     class Meta:
         ordering = ['-created_at']
+        verbose_name = 'Email Campaign'
+        verbose_name_plural = 'Email Campaigns'
 
 class EmailDelivery(models.Model):
     """Tracks individual email deliveries for a campaign"""
