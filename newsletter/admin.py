@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import NewsletterSubscription, EmailTemplate, EmailCampaign, EmailDelivery
+from .models import NewsletterSubscription, EmailTemplate, EmailCampaign, EmailDelivery, CsvRecipient
+from .forms import CsvEmailCampaignForm, SenderEmailForm
 from django.utils.html import format_html
 from django.urls import reverse, path
 from django import forms
@@ -237,14 +238,17 @@ class EmailCampaignAdminForm(forms.ModelForm):
         widget=forms.SplitDateTimeWidget(date_attrs={'type': 'date'}, time_attrs={'type': 'time'}),
         required=False
     )
+    sender_email = forms.EmailField(
+        required=False,
+        help_text="Leave blank to use default sender email"
+    )
     
     class Meta:
         model = EmailCampaign
         fields = [
             'name', 'subject', 'template', 'custom_html_content', 'custom_text_content',
-            'recipient_type', 'scheduled_time'
+            'recipient_type', 'sender_email', 'csv_file', 'scheduled_time'
         ]
-        # Don't use exclude, use fields instead to explicitly list allowed fields
 
 @admin.register(EmailCampaign)
 class EmailCampaignAdmin(admin.ModelAdmin):
@@ -257,10 +261,9 @@ class EmailCampaignAdmin(admin.ModelAdmin):
     
     def get_fieldsets(self, request, obj=None):
         if obj:  # Editing existing object
-            return (
+            fieldsets = [
                 ('Campaign Information', {
-                    'fields': ('name', 'subject', 'recipient_type', 'created_by', 'created_at'
-                    )
+                    'fields': ('name', 'subject', 'recipient_type', 'sender_email', 'created_by', 'created_at')
                 }),
                 ('Content', {
                     'fields': ('template', 'custom_html_content', 'custom_text_content')
@@ -271,40 +274,41 @@ class EmailCampaignAdmin(admin.ModelAdmin):
                 ('Status & Statistics', {
                     'fields': ('status', 'started_at', 'completed_at', 'total_recipients', 'sent_count', 'open_count', 'click_count')
                 }),
-            )
+            ]
+            
+            if obj.recipient_type == 'csv_upload' and obj.csv_file:
+                fieldsets.insert(2, ('CSV Upload', {
+                    'fields': ('csv_file',),
+                    'description': f'CSV file uploaded: {obj.csv_file.name}'
+                }))
+            
+            return fieldsets
+        
         return (  # Creating new object
             ('Campaign Information', {
-                'fields': ('name', 'subject', 'recipient_type')
+                'fields': ('name', 'subject', 'recipient_type', 'sender_email')
             }),
             ('Content', {
                 'fields': ('template', 'custom_html_content', 'custom_text_content')
+            }),
+            ('CSV Upload', {
+                'fields': ('csv_file',),
+                'classes': ('collapse',),
+                'description': 'Only required when recipient type is "CSV Upload Recipients"'
             }),
             ('Schedule', {
                 'fields': ('scheduled_time',)
             }),
         )
-        
-    def save_model(self, request, obj, form, change):
-        if not change:  # Creating new object
-            obj.created_by = request.user
-            obj.status = 'draft'  # Ensure new campaigns start as drafts
-        super().save_model(request, obj, form, change)
-    
-    def recipient_count(self, obj):
-        if obj.status == 'draft':
-            return obj.get_recipients_queryset().count()
-        return obj.total_recipients
-    recipient_count.short_description = 'Recipients'
-    
-    def campaign_progress(self, obj):
-        if obj.status in ['draft', 'scheduled']:
-            return '-'
-        return f"{obj.progress_percentage}% ({obj.sent_count}/{obj.total_recipients})"
-    campaign_progress.short_description = 'Progress'
     
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
+            path(
+                'csv-campaign/',
+                self.admin_site.admin_view(self.csv_campaign_view),
+                name='csv_campaign',
+            ),
             path(
                 '<int:campaign_id>/send/',
                 self.admin_site.admin_view(self.send_campaign),
@@ -322,52 +326,58 @@ class EmailCampaignAdmin(admin.ModelAdmin):
             ),
         ]
         return custom_urls + urls
-        
-    def send_campaign_now(self, request, queryset):
-        """Admin action to send selected campaigns immediately"""
-        for campaign in queryset:
-            if campaign.status in ['draft', 'scheduled']:
-                self.process_campaign(campaign)
-                self.message_user(request, f"Campaign '{campaign.name}' has been queued for sending.")
-            else:
-                self.message_user(
-                    request, 
-                    f"Cannot send campaign '{campaign.name}' because it's already {campaign.get_status_display()}.",
-                    level='warning'
-                )
-    send_campaign_now.short_description = "Send selected campaigns now"
-        
-    def send_campaign(self, request, campaign_id):
-        """View for sending a campaign manually"""
-        campaign = get_object_or_404(EmailCampaign, id=campaign_id)
-        if campaign.status in ['draft', 'scheduled']:
-            self.process_campaign(campaign)
-            messages.success(request, f"Campaign '{campaign.name}' has been queued for sending.")
+    
+    def csv_campaign_view(self, request):
+        """View for creating CSV-based email campaigns"""
+        if request.method == 'POST':
+            form = CsvEmailCampaignForm(request.POST, request.FILES)
+            if form.is_valid():
+                campaign = form.save(commit=False)
+                campaign.created_by = request.user
+                campaign.recipient_type = 'csv_upload'
+                campaign.save()
+                
+                # Process CSV file
+                self.process_csv_file(campaign, form.cleaned_data['csv_file'])
+                
+                messages.success(request, f"CSV campaign '{campaign.name}' created successfully!")
+                return redirect('admin:newsletter_emailcampaign_change', campaign.id)
         else:
-            messages.warning(request, f"Cannot send campaign because it's already {campaign.get_status_display()}.")
+            form = CsvEmailCampaignForm()
         
-        return redirect('admin:newsletter_emailcampaign_change', campaign_id)
-        
-    def preview_campaign(self, request, campaign_id):
-        """View for previewing a campaign"""
-        campaign = get_object_or_404(EmailCampaign, id=campaign_id)
-        
-        return render(request, 'admin/newsletter/emailcampaign/preview.html', {
-            'campaign': campaign,
+        return render(request, 'admin/newsletter/emailcampaign/csv_campaign.html', {
+            'form': form,
+            'title': 'Create CSV Email Campaign',
+            'opts': EmailCampaign._meta,
         })
+    
+    def process_csv_file(self, campaign, csv_file):
+        """Process uploaded CSV file and create CsvRecipient records"""
+        import csv
+        import io
         
-    def campaign_status(self, request, campaign_id):
-        """API endpoint to check campaign status for AJAX polling"""
-        campaign = get_object_or_404(EmailCampaign, id=campaign_id)
+        csv_file.seek(0)
+        content = csv_file.read().decode('utf-8')
+        reader = csv.DictReader(io.StringIO(content))
         
-        data = {
-            'status': campaign.status,
-            'progress': campaign.progress_percentage,
-            'sent_count': campaign.sent_count,
-            'total_recipients': campaign.total_recipients,
-        }
+        recipients = []
+        for row in reader:
+            email = row.get('email', '').strip()
+            if email:
+                # Remove email from row data to avoid duplication
+                row_data = {k: v for k, v in row.items() if k != 'email'}
+                recipients.append(CsvRecipient(
+                    campaign=campaign,
+                    email=email,
+                    data=row_data
+                ))
         
-        return JsonResponse(data)
+        # Bulk create recipients
+        CsvRecipient.objects.bulk_create(recipients, ignore_conflicts=True)
+        
+        # Update campaign recipient count
+        campaign.total_recipients = campaign.csv_recipients.count()
+        campaign.save()
     
     def process_campaign(self, campaign):
         """Start processing a campaign in the background"""
@@ -377,30 +387,34 @@ class EmailCampaignAdmin(admin.ModelAdmin):
         campaign.status = 'sending'
         campaign.started_at = timezone.now()
         
-        # Get recipients
-        recipients = campaign.get_recipients_queryset()
-        campaign.total_recipients = recipients.count()
+        if campaign.recipient_type == 'csv_upload':
+            # For CSV campaigns, recipients are already stored
+            campaign.total_recipients = campaign.csv_recipients.count()
+        else:
+            # Get recipients for other types
+            recipients = campaign.get_recipients_queryset()
+            campaign.total_recipients = recipients.count()
+            
+            # Create EmailDelivery records for each recipient
+            batch_size = 1000
+            recipient_ids = list(recipients.values_list('id', flat=True))
+            
+            for i in range(0, len(recipient_ids), batch_size):
+                batch = recipient_ids[i:i+batch_size]
+                batch_users = User.objects.filter(id__in=batch)
+                
+                deliveries = []
+                for user in batch_users:
+                    deliveries.append(EmailDelivery(
+                        campaign=campaign,
+                        recipient=user,
+                        email_address=user.email,
+                        status='pending'
+                    ))
+                
+                EmailDelivery.objects.bulk_create(deliveries)
+        
         campaign.save()
-        
-        # Create EmailDelivery records for each recipient
-        batch_size = 1000  # Process in chunks to avoid memory issues
-        recipient_ids = list(recipients.values_list('id', flat=True))
-        
-        for i in range(0, len(recipient_ids), batch_size):
-            batch = recipient_ids[i:i+batch_size]
-            batch_users = User.objects.filter(id__in=batch)
-            
-            deliveries = []
-            for user in batch_users:
-                deliveries.append(EmailDelivery(
-                    campaign=campaign,
-                    recipient=user,
-                    email_address=user.email,
-                    status='pending'
-                ))
-            
-            # Bulk create delivery records
-            EmailDelivery.objects.bulk_create(deliveries)
         
         # Queue task to process the campaign
         process_email_campaign.delay(campaign.id)
@@ -412,6 +426,26 @@ class EmailDeliveryAdmin(admin.ModelAdmin):
     search_fields = ('email_address', 'recipient__username', 'recipient__first_name', 'recipient__last_name')
     readonly_fields = ('campaign', 'recipient', 'email_address', 'status', 'tracking_id', 
                       'sent_at', 'opened_at', 'clicked_at', 'error_message')
+    
+    def has_add_permission(self, request):
+        return False
+
+@admin.register(CsvRecipient)
+class CsvRecipientAdmin(admin.ModelAdmin):
+    list_display = ('email', 'campaign', 'data_preview', 'created_at')
+    list_filter = ('campaign', 'created_at')
+    search_fields = ('email', 'campaign__name')
+    readonly_fields = ('campaign', 'email', 'data', 'created_at')
+    
+    def data_preview(self, obj):
+        """Show a preview of the data"""
+        if obj.data:
+            preview = ', '.join([f"{k}: {v}" for k, v in list(obj.data.items())[:3]])
+            if len(obj.data) > 3:
+                preview += "..."
+            return preview
+        return "No data"
+    data_preview.short_description = 'Data Preview'
     
     def has_add_permission(self, request):
         return False
