@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import NewsletterSubscription, EmailTemplate, EmailCampaign, EmailDelivery, CsvRecipient
-from .forms import CsvEmailCampaignForm, SenderEmailForm
+from .forms import CsvEmailCampaignForm, SenderEmailForm, EmailCampaignAdminForm
 from django.utils.html import format_html
 from django.urls import reverse, path
 from django import forms
@@ -233,23 +233,6 @@ class EmailTemplateAdmin(admin.ModelAdmin):
             'template': template,
         })
 
-class EmailCampaignAdminForm(forms.ModelForm):
-    scheduled_time = forms.SplitDateTimeField(
-        widget=forms.SplitDateTimeWidget(date_attrs={'type': 'date'}, time_attrs={'type': 'time'}),
-        required=False
-    )
-    sender_email = forms.EmailField(
-        required=False,
-        help_text="Leave blank to use default sender email"
-    )
-    
-    class Meta:
-        model = EmailCampaign
-        fields = [
-            'name', 'subject', 'template', 'custom_html_content', 'custom_text_content',
-            'recipient_type', 'sender_email', 'csv_file', 'scheduled_time'
-        ]
-
 @admin.register(EmailCampaign)
 class EmailCampaignAdmin(admin.ModelAdmin):
     form = EmailCampaignAdminForm
@@ -263,7 +246,7 @@ class EmailCampaignAdmin(admin.ModelAdmin):
         if obj:  # Editing existing object
             fieldsets = [
                 ('Campaign Information', {
-                    'fields': ('name', 'subject', 'recipient_type', 'sender_email', 'created_by', 'created_at')
+                    'fields': ('name', 'subject', 'recipient_type', 'sender_email_choice', 'custom_sender_email', 'created_by', 'created_at')
                 }),
                 ('Content', {
                     'fields': ('template', 'custom_html_content', 'custom_text_content')
@@ -286,7 +269,7 @@ class EmailCampaignAdmin(admin.ModelAdmin):
         
         return (  # Creating new object
             ('Campaign Information', {
-                'fields': ('name', 'subject', 'recipient_type', 'sender_email')
+                'fields': ('name', 'subject', 'recipient_type', 'sender_email_choice', 'custom_sender_email')
             }),
             ('Content', {
                 'fields': ('template', 'custom_html_content', 'custom_text_content')
