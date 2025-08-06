@@ -191,9 +191,9 @@ def send_bulk_email(request):
             # Bulk create delivery records
             EmailDelivery.objects.bulk_create(deliveries)
             
-            # Process the campaign
+            # Process the campaign using Celery task
             from .tasks import process_email_campaign
-            process_email_campaign(campaign.id)
+            process_email_campaign.delay(campaign.id)
             
             messages.success(request, f"Email is being sent to {users.count()} users from {sender_email}.")
             return redirect('admin:newsletter_emailcampaign_changelist')
