@@ -3,25 +3,89 @@ from .models import EmailCampaign
 import csv
 import io
 from django.core.exceptions import ValidationError
+from django.conf import settings
+
+def get_email_choices():
+    """Get available email choices from settings"""
+    choices = []
+    
+    # Add default email if available
+    if hasattr(settings, 'EMAIL_HOST_USER') and settings.EMAIL_HOST_USER:
+        choices.append((settings.EMAIL_HOST_USER, f"Host Email ({settings.EMAIL_HOST_USER})"))
+    
+    # Add admissions email if available
+    if hasattr(settings, 'EMAIL_HOST_USER_ADMISSIONS') and settings.EMAIL_HOST_USER_ADMISSIONS:
+        choices.append((settings.EMAIL_HOST_USER_ADMISSIONS, f"Admissions Email ({settings.EMAIL_HOST_USER_ADMISSIONS})"))
+    
+    # Add a custom option
+    choices.append(('custom', 'Custom Email (enter below)'))
+    
+    return choices
 
 class CsvEmailCampaignForm(forms.ModelForm):
     csv_file = forms.FileField(
         required=True,
         help_text="CSV file with email addresses and additional data. First column must be 'email'."
     )
-    sender_email = forms.EmailField(
+    sender_email_choice = forms.ChoiceField(
+        choices=[],  # Will be populated in __init__
+        required=True,
+        label="Sender Email",
+        help_text="Select sender email from available options"
+    )
+    custom_sender_email = forms.EmailField(
         required=False,
-        help_text="Leave blank to use default sender email"
+        label="Custom Sender Email",
+        help_text="Only required if 'Custom Email' is selected above"
     )
     
     class Meta:
         model = EmailCampaign
-        fields = ['name', 'subject', 'template', 'custom_html_content', 'custom_text_content', 'sender_email', 'csv_file', 'scheduled_time']
+        fields = ['name', 'subject', 'template', 'custom_html_content', 'custom_text_content', 'csv_file', 'scheduled_time']
         widgets = {
             'custom_html_content': forms.Textarea(attrs={'rows': 10}),
             'custom_text_content': forms.Textarea(attrs={'rows': 8}),
             'scheduled_time': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['sender_email_choice'].choices = get_email_choices()
+        
+        # Set initial value if editing existing campaign
+        if self.instance and self.instance.pk and self.instance.sender_email:
+            sender_email = self.instance.sender_email
+            # Check if it matches one of our predefined emails
+            choice_values = [choice[0] for choice in get_email_choices()]
+            if sender_email in choice_values:
+                self.fields['sender_email_choice'].initial = sender_email
+            else:
+                self.fields['sender_email_choice'].initial = 'custom'
+                self.fields['custom_sender_email'].initial = sender_email
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        sender_choice = cleaned_data.get('sender_email_choice')
+        custom_email = cleaned_data.get('custom_sender_email')
+        
+        if sender_choice == 'custom':
+            if not custom_email:
+                raise ValidationError("Custom sender email is required when 'Custom Email' is selected.")
+            # Set the sender_email for the model
+            cleaned_data['sender_email'] = custom_email
+        else:
+            # Use the selected predefined email
+            cleaned_data['sender_email'] = sender_choice
+        
+        return cleaned_data
+    
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        # Set the sender_email from our cleaned data
+        instance.sender_email = self.cleaned_data.get('sender_email')
+        if commit:
+            instance.save()
+        return instance
     
     def clean_csv_file(self):
         csv_file = self.cleaned_data['csv_file']
@@ -64,8 +128,93 @@ class CsvEmailCampaignForm(forms.ModelForm):
         return csv_file
 
 class SenderEmailForm(forms.Form):
-    sender_email = forms.EmailField(
+    sender_email_choice = forms.ChoiceField(
+        choices=[],  # Will be populated in __init__
+        required=True,
+        label="Sender Email",
+        help_text="Select sender email from available options"
+    )
+    custom_sender_email = forms.EmailField(
         required=False,
-        help_text="Leave blank to use default sender email",
+        label="Custom Sender Email",
+        help_text="Only required if 'Custom Email' is selected above",
         widget=forms.EmailInput(attrs={'placeholder': 'sender@example.com'})
     )
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['sender_email_choice'].choices = get_email_choices()
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        sender_choice = cleaned_data.get('sender_email_choice')
+        custom_email = cleaned_data.get('custom_sender_email')
+        
+        if sender_choice == 'custom':
+            if not custom_email:
+                raise ValidationError("Custom sender email is required when 'Custom Email' is selected.")
+            cleaned_data['final_sender_email'] = custom_email
+        else:
+            cleaned_data['final_sender_email'] = sender_choice
+        
+        return cleaned_data
+
+class EmailCampaignAdminForm(forms.ModelForm):
+    sender_email_choice = forms.ChoiceField(
+        choices=[],  # Will be populated in __init__
+        required=True,
+        label="Sender Email",
+        help_text="Select sender email from available options"
+    )
+    custom_sender_email = forms.EmailField(
+        required=False,
+        label="Custom Sender Email",
+        help_text="Only required if 'Custom Email' is selected above"
+    )
+    scheduled_time = forms.SplitDateTimeField(
+        widget=forms.SplitDateTimeWidget(date_attrs={'type': 'date'}, time_attrs={'type': 'time'}),
+        required=False
+    )
+    
+    class Meta:
+        model = EmailCampaign
+        fields = [
+            'name', 'subject', 'template', 'custom_html_content', 'custom_text_content',
+            'recipient_type', 'csv_file', 'scheduled_time'
+        ]
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['sender_email_choice'].choices = get_email_choices()
+        
+        # Set initial value if editing existing campaign
+        if self.instance and self.instance.pk and self.instance.sender_email:
+            sender_email = self.instance.sender_email
+            # Check if it matches one of our predefined emails
+            choice_values = [choice[0] for choice in get_email_choices()]
+            if sender_email in choice_values:
+                self.fields['sender_email_choice'].initial = sender_email
+            else:
+                self.fields['sender_email_choice'].initial = 'custom'
+                self.fields['custom_sender_email'].initial = sender_email
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        sender_choice = cleaned_data.get('sender_email_choice')
+        custom_email = cleaned_data.get('custom_sender_email')
+        
+        if sender_choice == 'custom':
+            if not custom_email:
+                raise ValidationError("Custom sender email is required when 'Custom Email' is selected.")
+            cleaned_data['sender_email'] = custom_email
+        else:
+            cleaned_data['sender_email'] = sender_choice
+        
+        return cleaned_data
+    
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.sender_email = self.cleaned_data.get('sender_email')
+        if commit:
+            instance.save()
+        return instance
