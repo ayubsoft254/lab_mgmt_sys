@@ -167,3 +167,17 @@ class EmailDelivery(models.Model):
     class Meta:
         ordering = ['-sent_at']
         verbose_name_plural = "Email deliveries"
+
+class CsvRecipient(models.Model):
+    """Store recipients from CSV uploads for campaigns"""
+    campaign = models.ForeignKey(EmailCampaign, on_delete=models.CASCADE, related_name='csv_recipients')
+    email = models.EmailField()
+    data = models.JSONField(default=dict, help_text="Additional data from CSV for placeholders")
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.email} - {self.campaign.name}"
+    
+    class Meta:
+        ordering = ['email']
+        unique_together = ['campaign', 'email']
