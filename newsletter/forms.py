@@ -1,5 +1,5 @@
 from django import forms
-from .models import EmailCampaign
+from .models import EmailCampaign, EmailTemplate
 import csv
 import io
 from django.core.exceptions import ValidationError
@@ -25,7 +25,7 @@ def get_email_choices():
 class CsvEmailCampaignForm(forms.ModelForm):
     csv_file = forms.FileField(
         required=True,
-        help_text="CSV file with email addresses and additional data. First column must be 'email'."
+        help_text="CSV file with columns: email, name, reg, course, hostel, room"
     )
     sender_email_choice = forms.ChoiceField(
         choices=[],  # Will be populated in __init__
@@ -102,16 +102,23 @@ class CsvEmailCampaignForm(forms.ModelForm):
             reader = csv.DictReader(io.StringIO(content))
             headers = reader.fieldnames
             
-            if not headers or 'email' not in headers:
-                raise ValidationError("CSV file must have an 'email' column.")
+            # Check for required columns
+            required_columns = ['email', 'name', 'reg', 'course', 'hostel', 'room']
+            if not headers:
+                raise ValidationError("CSV file appears to be empty or invalid.")
+            
+            missing_columns = [col for col in required_columns if col not in headers]
+            if missing_columns:
+                raise ValidationError(f"CSV file is missing required columns: {', '.join(missing_columns)}. Required columns are: {', '.join(required_columns)}")
             
             # Validate at least one row exists
             rows = list(reader)
             if not rows:
                 raise ValidationError("CSV file cannot be empty.")
             
-            # Validate email addresses
+            # Validate data in each row
             for i, row in enumerate(rows, 1):
+                # Check email
                 email = row.get('email', '').strip()
                 if not email:
                     raise ValidationError(f"Row {i}: Email address is required.")
@@ -119,6 +126,31 @@ class CsvEmailCampaignForm(forms.ModelForm):
                 # Basic email validation
                 if '@' not in email or '.' not in email.split('@')[1]:
                     raise ValidationError(f"Row {i}: Invalid email address '{email}'.")
+                
+                # Check name
+                name = row.get('name', '').strip()
+                if not name:
+                    raise ValidationError(f"Row {i}: Name is required.")
+                
+                # Check registration number
+                reg = row.get('reg', '').strip()
+                if not reg:
+                    raise ValidationError(f"Row {i}: Registration number is required.")
+                
+                # Check course
+                course = row.get('course', '').strip()
+                if not course:
+                    raise ValidationError(f"Row {i}: Course is required.")
+                
+                # Check hostel
+                hostel = row.get('hostel', '').strip()
+                if not hostel:
+                    raise ValidationError(f"Row {i}: Hostel is required.")
+                
+                # Check room
+                room = row.get('room', '').strip()
+                if not room:
+                    raise ValidationError(f"Row {i}: Room number is required.")
             
         except UnicodeDecodeError:
             raise ValidationError("CSV file must be UTF-8 encoded.")
