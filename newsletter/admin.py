@@ -230,9 +230,10 @@ class EmailCampaignAdmin(admin.ModelAdmin):
             return "0%"
         progress = (obj.sent_count / obj.total_recipients) * 100
         color = "green" if progress == 100 else "orange" if progress > 0 else "red"
+        progress_text = "{:.1f}".format(progress)  # Format the percentage first
         return format_html(
-            '<span style="color: {};">{:.1f}% ({}/{})</span>',
-            color, progress, obj.sent_count, obj.total_recipients
+            '<span style="color: {};">{}% ({}/{})</span>',
+            color, progress_text, obj.sent_count, obj.total_recipients
         )
     campaign_progress.short_description = 'Progress'
     
