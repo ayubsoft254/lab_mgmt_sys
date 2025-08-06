@@ -1,0 +1,106 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | {{ site_title|default:"Django site admin" }}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">Home</a>
+    &rsaquo; <a href="{% url 'admin:newsletter_emailcampaign_changelist' %}">Email campaigns</a>
+    &rsaquo; <a href="{% url 'admin:newsletter_emailcampaign_change' campaign.id %}">{{ campaign.name }}</a>
+    &rsaquo; Status
+</div>
+{% endblock %}
+
+{% block content %}
+<h1>{{ title }}</h1>
+
+<fieldset class="module">
+    <h2>Campaign Overview</h2>
+    <table>
+        <tr><th>Status:</th><td><strong>{{ campaign.get_status_display }}</strong></td></tr>
+        <tr><th>Total Recipients:</th><td>{{ campaign.total_recipients }}</td></tr>
+        <tr><th>Sent:</th><td>{{ campaign.sent_count }}</td></tr>
+        <tr><th>Opened:</th><td>{{ campaign.open_count }}</td></tr>
+        <tr><th>Clicked:</th><td>{{ campaign.click_count }}</td></tr>
+        <tr><th>Created:</th><td>{{ campaign.created_at }}</td></tr>
+        {% if campaign.started_at %}
+        <tr><th>Started:</th><td>{{ campaign.started_at }}</td></tr>
+        {% endif %}
+        {% if campaign.completed_at %}
+        <tr><th>Completed:</th><td>{{ campaign.completed_at }}</td></tr>
+        {% endif %}
+    </table>
+</fieldset>
+
+{% if campaign.recipient_type == 'csv_upload' %}
+<fieldset class="module">
+    <h2>CSV Recipients (First 10)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Data</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for recipient in csv_recipients %}
+            <tr>
+                <td>{{ recipient.email }}</td>
+                <td>{{ recipient.data }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="2">No recipients found</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if total_csv_recipients > 10 %}
+    <p><em>Showing 10 of {{ total_csv_recipients }} total recipients</em></p>
+    {% endif %}
+</fieldset>
+{% else %}
+<fieldset class="module">
+    <h2>Delivery Statistics</h2>
+    <table>
+        <tr><th>Pending:</th><td>{{ delivery_stats.pending }}</td></tr>
+        <tr><th>Sent:</th><td>{{ delivery_stats.sent }}</td></tr>
+        <tr><th>Opened:</th><td>{{ delivery_stats.opened }}</td></tr>
+        <tr><th>Clicked:</th><td>{{ delivery_stats.clicked }}</td></tr>
+        <tr><th>Failed:</th><td>{{ delivery_stats.failed }}</td></tr>
+    </table>
+</fieldset>
+
+<fieldset class="module">
+    <h2>Recent Deliveries (First 10)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Sent At</th>
+                <th>Opened At</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for delivery in deliveries %}
+            <tr>
+                <td>{{ delivery.email_address }}</td>
+                <td>{{ delivery.get_status_display }}</td>
+                <td>{{ delivery.sent_at|default:"-" }}</td>
+                <td>{{ delivery.opened_at|default:"-" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4">No deliveries found</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</fieldset>
+{% endif %}
+
+<div class="submit-row">
+    <a href="{% url 'admin:newsletter_emailcampaign_change' campaign.id %}" class="button">Back to Campaign</a>
+    {% if campaign.status in 'draft,scheduled' %}
+    <a href="{% url 'admin:send_campaign' campaign.id %}" class="button" onclick="return confirm('Are you sure you want to send this campaign?')">Send Now</a>
+    {% endif %}
+</div>
+{% endblock %}
