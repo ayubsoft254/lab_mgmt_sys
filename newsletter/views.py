@@ -163,9 +163,9 @@ def send_bulk_email(request):
             
             # Create a campaign
             campaign = EmailCampaign.objects.create(
-                name=f"Ad hoc email: {subject}",
+                name="Ad hoc email: {}".format(subject),
                 subject=subject,
-                custom_html_content=f"<div>{message}</div>",
+                custom_html_content="<div>{}</div>".format(message),
                 custom_text_content=message,
                 recipient_type='custom',
                 sender_email=sender_email,
@@ -195,7 +195,8 @@ def send_bulk_email(request):
             from .tasks import process_email_campaign
             process_email_campaign.delay(campaign.id)
             
-            messages.success(request, f"Email is being sent to {users.count()} users from {sender_email}.")
+            messages.success(request, "Email is being sent to {} users from {}.".format(
+                users.count(), sender_email))
             return redirect('admin:newsletter_emailcampaign_changelist')
     else:
         sender_form = SenderEmailForm()

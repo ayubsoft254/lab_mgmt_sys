@@ -48,6 +48,28 @@ class NewsletterSubscriptionAdmin(admin.ModelAdmin):
     )
     actions = ['export_subscribers_csv', 'mark_as_inactive', 'mark_as_active']
     
+    def get_urls(self):
+        """Add custom URLs for admin actions"""
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                '<int:object_id>/send-test-email/',
+                self.admin_site.admin_view(self.send_test_email),
+                name='send_test_email',
+            ),
+            path(
+                '<int:object_id>/toggle-subscription/',
+                self.admin_site.admin_view(self.toggle_subscription),
+                name='toggle_subscription',
+            ),
+            path(
+                'stats/',
+                self.admin_site.admin_view(self.newsletter_stats_view),
+                name='newsletter_stats',
+            ),
+        ]
+        return custom_urls + urls
+    
     def subscription_date(self, obj):
         return obj.created_at.strftime('%Y-%m-%d %H:%M')
     subscription_date.short_description = 'Subscribed On'
