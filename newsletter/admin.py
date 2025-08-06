@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import NewsletterSubscription, EmailTemplate, EmailCampaign, EmailDelivery, CsvRecipient
-from .forms import CsvEmailCampaignForm, SenderEmailForm, EmailCampaignAdminForm
+from .forms import CsvEmailCampaignForm, EmailCampaignAdminForm
 from django.utils.html import format_html
 from django.urls import reverse, path
 from django import forms
@@ -326,6 +326,23 @@ class EmailCampaignAdmin(admin.ModelAdmin):
             ),
         ]
         return custom_urls + urls
+    
+    def changelist_view(self, request, extra_context=None):
+        """Add custom buttons to the changelist view"""
+        extra_context = extra_context or {}
+        extra_context['csv_campaign_url'] = reverse('admin:csv_campaign')
+        return super().changelist_view(request, extra_context=extra_context)
+    
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        """Add custom buttons to the change view"""
+        extra_context = extra_context or {}
+        if object_id:
+            extra_context.update({
+                'preview_url': reverse('admin:preview_campaign', args=[object_id]),
+                'send_url': reverse('admin:send_campaign', args=[object_id]),
+                'status_url': reverse('admin:campaign_status', args=[object_id]),
+            })
+        return super().change_view(request, object_id, form_url, extra_context)
     
     def csv_campaign_view(self, request):
         """View for creating CSV-based email campaigns"""
