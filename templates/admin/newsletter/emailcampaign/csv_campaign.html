@@ -18,15 +18,24 @@
     <div class="help">
         <p><strong>CSV Format Requirements:</strong></p>
         <ul>
-            <li>First column must be named 'email' and contain valid email addresses</li>
-            <li>Additional columns can be used as placeholders in your email content</li>
-            <li>Use column names like: first_name, last_name, company, etc.</li>
-            <li>In your email content, use placeholders like: {{ first_name }}, {{ company }}</li>
+            <li>CSV file must contain exactly these columns: <code>email, name, reg, course, hostel, room</code></li>
+            <li>All columns are required and cannot be empty</li>
+            <li>Use these column names as placeholders in your email content</li>
+            <li>In your email content, use placeholders like: {{ name }}, {{ reg }}, {{ course }}, {{ hostel }}, {{ room }}</li>
         </ul>
-        <p><strong>Example CSV:</strong></p>
-        <pre>email,first_name,last_name,company
-john@example.com,John,Doe,Acme Corp
-jane@example.com,Jane,Smith,Tech Inc</pre>
+        <p><strong>Required CSV Format:</strong></p>
+        <pre>email,name,reg,course,hostel,room
+john.doe@example.com,John Doe,CS001,Computer Science,Block A,101
+jane.smith@example.com,Jane Smith,CS002,Information Technology,Block B,205</pre>
+        <p><strong>Available Placeholders:</strong></p>
+        <ul>
+            <li><code>{{ email }}</code> - Student email address</li>
+            <li><code>{{ name }}</code> - Student full name</li>
+            <li><code>{{ reg }}</code> - Registration number</li>
+            <li><code>{{ course }}</code> - Course name</li>
+            <li><code>{{ hostel }}</code> - Hostel name</li>
+            <li><code>{{ room }}</code> - Room number</li>
+        </ul>
     </div>
 </div>
 
@@ -57,7 +66,7 @@ jane@example.com,Jane,Smith,Tech Inc</pre>
                     {% endfor %}
                 </ul>
             {% endif %}
-            <div class="help">You can use placeholders like {{ first_name }} in the subject</div>
+            <div class="help">You can use placeholders like {{ name }}, {{ course }}, {{ hostel }} in the subject</div>
         </div>
         
         <div class="form-row">
@@ -111,7 +120,11 @@ jane@example.com,Jane,Smith,Tech Inc</pre>
                     {% endfor %}
                 </ul>
             {% endif %}
-            <div class="help">Use placeholders from your CSV columns, e.g., {{ first_name }}, {{ company }}</div>
+            <div class="help">
+                <p>Use these placeholders from your CSV:</p>
+                <p><strong>{{ name }}</strong> - Student name | <strong>{{ reg }}</strong> - Registration | <strong>{{ course }}</strong> - Course | <strong>{{ hostel }}</strong> - Hostel | <strong>{{ room }}</strong> - Room</p>
+                <p>Example: "Dear {{ name }}, your room {{ room }} in {{ hostel }} has been assigned for {{ course }}."</p>
+            </div>
         </div>
         
         <div class="form-row">
@@ -124,6 +137,7 @@ jane@example.com,Jane,Smith,Tech Inc</pre>
                     {% endfor %}
                 </ul>
             {% endif %}
+            <div class="help">Plain text version using the same placeholders as above</div>
         </div>
     </fieldset>
     
