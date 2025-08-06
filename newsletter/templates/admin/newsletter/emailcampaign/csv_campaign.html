@@ -1,0 +1,174 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | {{ site_title|default:"Django site admin" }}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">Home</a>
+    &rsaquo; <a href="{% url 'admin:newsletter_emailcampaign_changelist' %}">Email campaigns</a>
+    &rsaquo; {{ title }}
+</div>
+{% endblock %}
+
+{% block content %}
+<h1>{{ title }}</h1>
+
+<div class="form-row">
+    <div class="help">
+        <p><strong>CSV Format Requirements:</strong></p>
+        <ul>
+            <li>First column must be named 'email' and contain valid email addresses</li>
+            <li>Additional columns can be used as placeholders in your email content</li>
+            <li>Use column names like: first_name, last_name, company, etc.</li>
+            <li>In your email content, use placeholders like: {{ first_name }}, {{ company }}</li>
+        </ul>
+        <p><strong>Example CSV:</strong></p>
+        <pre>email,first_name,last_name,company
+john@example.com,John,Doe,Acme Corp
+jane@example.com,Jane,Smith,Tech Inc</pre>
+    </div>
+</div>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    <fieldset class="module aligned">
+        <h2>Campaign Information</h2>
+        <div class="form-row">
+            {{ form.name.label_tag }}
+            {{ form.name }}
+            {% if form.name.errors %}
+                <ul class="errorlist">
+                    {% for error in form.name.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+        
+        <div class="form-row">
+            {{ form.subject.label_tag }}
+            {{ form.subject }}
+            {% if form.subject.errors %}
+                <ul class="errorlist">
+                    {% for error in form.subject.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <div class="help">You can use placeholders like {{ first_name }} in the subject</div>
+        </div>
+        
+        <div class="form-row">
+            {{ form.sender_email.label_tag }}
+            {{ form.sender_email }}
+            {% if form.sender_email.errors %}
+                <ul class="errorlist">
+                    {% for error in form.sender_email.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <div class="help">{{ form.sender_email.help_text }}</div>
+        </div>
+    </fieldset>
+    
+    <fieldset class="module aligned">
+        <h2>Content</h2>
+        <div class="form-row">
+            {{ form.template.label_tag }}
+            {{ form.template }}
+            {% if form.template.errors %}
+                <ul class="errorlist">
+                    {% for error in form.template.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+        
+        <div class="form-row">
+            {{ form.custom_html_content.label_tag }}
+            {{ form.custom_html_content }}
+            {% if form.custom_html_content.errors %}
+                <ul class="errorlist">
+                    {% for error in form.custom_html_content.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <div class="help">Use placeholders from your CSV columns, e.g., {{ first_name }}, {{ company }}</div>
+        </div>
+        
+        <div class="form-row">
+            {{ form.custom_text_content.label_tag }}
+            {{ form.custom_text_content }}
+            {% if form.custom_text_content.errors %}
+                <ul class="errorlist">
+                    {% for error in form.custom_text_content.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    </fieldset>
+    
+    <fieldset class="module aligned">
+        <h2>CSV Upload</h2>
+        <div class="form-row">
+            {{ form.csv_file.label_tag }}
+            {{ form.csv_file }}
+            {% if form.csv_file.errors %}
+                <ul class="errorlist">
+                    {% for error in form.csv_file.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <div class="help">{{ form.csv_file.help_text }}</div>
+        </div>
+    </fieldset>
+    
+    <fieldset class="module aligned">
+        <h2>Schedule (Optional)</h2>
+        <div class="form-row">
+            {{ form.scheduled_time.label_tag }}
+            {{ form.scheduled_time }}
+            {% if form.scheduled_time.errors %}
+                <ul class="errorlist">
+                    {% for error in form.scheduled_time.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <div class="help">Leave blank to send immediately after creation</div>
+        </div>
+    </fieldset>
+    
+    <div class="submit-row">
+        <input type="submit" value="Create CSV Campaign" class="default" />
+        <a href="{% url 'admin:newsletter_emailcampaign_changelist' %}" class="button cancel-link">Cancel</a>
+    </div>
+</form>
+
+<script>
+// Add some JavaScript to show/hide template vs custom content
+document.addEventListener('DOMContentLoaded', function() {
+    const templateField = document.querySelector('#id_template');
+    const htmlField = document.querySelector('#id_custom_html_content');
+    const textField = document.querySelector('#id_custom_text_content');
+    
+    function toggleCustomContent() {
+        const hasTemplate = templateField.value !== '';
+        htmlField.closest('.form-row').style.display = hasTemplate ? 'none' : 'block';
+        textField.closest('.form-row').style.display = hasTemplate ? 'none' : 'block';
+    }
+    
+    if (templateField) {
+        templateField.addEventListener('change', toggleCustomContent);
+        toggleCustomContent(); // Initial call
+    }
+});
+</script>
+{% endblock %}
