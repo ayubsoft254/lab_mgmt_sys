@@ -61,16 +61,29 @@ jane@example.com,Jane,Smith,Tech Inc</pre>
         </div>
         
         <div class="form-row">
-            {{ form.sender_email.label_tag }}
-            {{ form.sender_email }}
-            {% if form.sender_email.errors %}
+            {{ form.sender_email_choice.label_tag }}
+            {{ form.sender_email_choice }}
+            {% if form.sender_email_choice.errors %}
                 <ul class="errorlist">
-                    {% for error in form.sender_email.errors %}
+                    {% for error in form.sender_email_choice.errors %}
                         <li>{{ error }}</li>
                     {% endfor %}
                 </ul>
             {% endif %}
-            <div class="help">{{ form.sender_email.help_text }}</div>
+            <div class="help">{{ form.sender_email_choice.help_text }}</div>
+        </div>
+        
+        <div class="form-row" id="custom-email-row" style="display: none;">
+            {{ form.custom_sender_email.label_tag }}
+            {{ form.custom_sender_email }}
+            {% if form.custom_sender_email.errors %}
+                <ul class="errorlist">
+                    {% for error in form.custom_sender_email.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <div class="help">{{ form.custom_sender_email.help_text }}</div>
         </div>
     </fieldset>
     
@@ -153,16 +166,32 @@ jane@example.com,Jane,Smith,Tech Inc</pre>
 </form>
 
 <script>
-// Add some JavaScript to show/hide template vs custom content
 document.addEventListener('DOMContentLoaded', function() {
+    const senderChoice = document.querySelector('#id_sender_email_choice');
+    const customEmailRow = document.querySelector('#custom-email-row');
     const templateField = document.querySelector('#id_template');
     const htmlField = document.querySelector('#id_custom_html_content');
     const textField = document.querySelector('#id_custom_text_content');
     
+    // Show/hide custom email field based on selection
+    function toggleCustomEmailField() {
+        if (senderChoice.value === 'custom') {
+            customEmailRow.style.display = 'block';
+        } else {
+            customEmailRow.style.display = 'none';
+        }
+    }
+    
+    // Show/hide template vs custom content
     function toggleCustomContent() {
         const hasTemplate = templateField.value !== '';
         htmlField.closest('.form-row').style.display = hasTemplate ? 'none' : 'block';
         textField.closest('.form-row').style.display = hasTemplate ? 'none' : 'block';
+    }
+    
+    if (senderChoice) {
+        senderChoice.addEventListener('change', toggleCustomEmailField);
+        toggleCustomEmailField(); // Initial call
     }
     
     if (templateField) {
