@@ -93,12 +93,6 @@ class NewsletterSubscriptionAdmin(admin.ModelAdmin):
         )
     actions_column.short_description = 'Actions'
     
-    def get_readonly_fields(self, request, obj=None):
-        if obj:  # Editing existing object
-            return ('created_at', 'started_at', 'completed_at', 'total_recipients', 
-                    'sent_count', 'open_count', 'click_count', 'status')
-        return ('created_at',)  # Only created_at is readonly for new objects
-    
     def export_subscribers_csv(self, request, queryset):
         """Export selected subscribers to CSV file"""
         response = HttpResponse(content_type='text/csv')
@@ -120,42 +114,21 @@ class NewsletterSubscriptionAdmin(admin.ModelAdmin):
                 subscriber.created_at.strftime('%Y-%m-%d %H:%M')
             ])
             
-        self.message_user(request, f"{queryset.count()} subscribers exported successfully.", messages.SUCCESS)
+        self.message_user(request, "{} subscribers exported successfully.".format(queryset.count()), messages.SUCCESS)
         return response
     export_subscribers_csv.short_description = "Export selected subscribers to CSV"
     
     def mark_as_inactive(self, request, queryset):
         """Mark selected subscribers as inactive"""
         updated = queryset.update(is_active=False)
-        self.message_user(request, f"{updated} subscribers marked as inactive.", messages.SUCCESS)
+        self.message_user(request, "{} subscribers marked as inactive.".format(updated), messages.SUCCESS)
     mark_as_inactive.short_description = "Mark selected subscribers as inactive"
     
     def mark_as_active(self, request, queryset):
         """Mark selected subscribers as active"""
         updated = queryset.update(is_active=True)
-        self.message_user(request, f"{updated} subscribers marked as active.", messages.SUCCESS)
+        self.message_user(request, "{} subscribers marked as active.".format(updated), messages.SUCCESS)
     mark_as_active.short_description = "Mark selected subscribers as active"
-    
-    def get_urls(self):
-        urls = super().get_urls()
-        custom_urls = [
-            path(
-                '<path:object_id>/send-test/',
-                self.admin_site.admin_view(self.send_test_email),
-                name='send_test_email',
-            ),
-            path(
-                '<path:object_id>/toggle/',
-                self.admin_site.admin_view(self.toggle_subscription),
-                name='toggle_subscription',
-            ),
-            path(
-                'newsletter-stats/',
-                self.admin_site.admin_view(self.newsletter_stats_view),
-                name='newsletter_stats',
-            ),
-        ]
-        return custom_urls + urls
     
     def send_test_email(self, request, object_id):
         """Send a test email to the subscriber"""
@@ -165,9 +138,9 @@ class NewsletterSubscriptionAdmin(admin.ModelAdmin):
         if subscription:
             success = send_welcome_email(subscription.email, subscription.name)
             if success:
-                self.message_user(request, f"Test email sent to {subscription.email}.", messages.SUCCESS)
+                self.message_user(request, "Test email sent to {}.".format(subscription.email), messages.SUCCESS)
             else:
-                self.message_user(request, f"Failed to send test email to {subscription.email}.", messages.ERROR)
+                self.message_user(request, "Failed to send test email to {}.".format(subscription.email), messages.ERROR)
         return redirect('admin:newsletter_newslettersubscription_change', object_id)
     
     def toggle_subscription(self, request, object_id):
@@ -177,7 +150,8 @@ class NewsletterSubscriptionAdmin(admin.ModelAdmin):
             subscription.is_active = not subscription.is_active
             subscription.save()
             status = "activated" if subscription.is_active else "deactivated"
-            self.message_user(request, f"Subscription for {subscription.email} {status} successfully.", messages.SUCCESS)
+            self.message_user(request, "Subscription for {} {} successfully.".format(
+                subscription.email, status), messages.SUCCESS)
         return redirect('admin:newsletter_newslettersubscription_changelist')
     
     def newsletter_stats_view(self, request):
@@ -282,7 +256,7 @@ class EmailCampaignAdmin(admin.ModelAdmin):
             if obj.recipient_type == 'csv_upload' and obj.csv_file:
                 fieldsets.insert(2, ('CSV Upload', {
                     'fields': ('csv_file',),
-                    'description': f'CSV file uploaded: {obj.csv_file.name}'
+                    'description': 'CSV file uploaded: {}'.format(obj.csv_file.name)
                 }))
             
             return fieldsets
@@ -343,7 +317,7 @@ class EmailCampaignAdmin(admin.ModelAdmin):
                 # Process CSV file
                 self.process_csv_file(campaign, form.cleaned_data['csv_file'])
                 
-                messages.success(request, f"CSV campaign '{campaign.name}' created successfully!")
+                messages.success(request, "CSV campaign '{}' created successfully!".format(campaign.name))
                 return redirect('admin:newsletter_emailcampaign_change', campaign.id)
         else:
             form = CsvEmailCampaignForm()
@@ -359,13 +333,14 @@ class EmailCampaignAdmin(admin.ModelAdmin):
         campaign = get_object_or_404(EmailCampaign, id=campaign_id)
         
         if campaign.status not in ['draft', 'scheduled']:
-            messages.error(request, f"Campaign '{campaign.name}' cannot be sent. Current status: {campaign.get_status_display()}")
+            messages.error(request, "Campaign '{}' cannot be sent. Current status: {}".format(
+                campaign.name, campaign.get_status_display()))
             return redirect('admin:newsletter_emailcampaign_change', campaign_id)
         
         # Process the campaign
         self.process_campaign(campaign)
         
-        messages.success(request, f"Campaign '{campaign.name}' has been queued for sending!")
+        messages.success(request, "Campaign '{}' has been queued for sending!".format(campaign.name))
         return redirect('admin:newsletter_emailcampaign_change', campaign_id)
     
     def preview_campaign(self, request, campaign_id):
@@ -382,7 +357,14 @@ class EmailCampaignAdmin(admin.ModelAdmin):
                     **csv_recipient.data,
                 }
             else:
-                context = {'email': 'example@example.com', 'first_name': 'John', 'last_name': 'Doe'}
+                context = {
+                    'email': 'example@example.com', 
+                    'name': 'John Doe',
+                    'reg': 'CS001',
+                    'course': 'Computer Science',
+                    'hostel': 'Block A',
+                    'room': '101'
+                }
         else:
             # Use a sample user context
             context = {
@@ -397,7 +379,7 @@ class EmailCampaignAdmin(admin.ModelAdmin):
             html_content = Template(campaign.html_content).render(Context(context))
             text_content = Template(campaign.text_content).render(Context(context))
         except Exception as e:
-            messages.error(request, f"Error rendering template: {str(e)}")
+            messages.error(request, "Error rendering template: {}".format(str(e)))
             return redirect('admin:newsletter_emailcampaign_change', campaign_id)
         
         return render(request, 'admin/newsletter/emailcampaign/preview.html', {
@@ -406,7 +388,7 @@ class EmailCampaignAdmin(admin.ModelAdmin):
             'html_content': html_content,
             'text_content': text_content,
             'context': context,
-            'title': f'Preview: {campaign.name}',
+            'title': 'Preview: {}'.format(campaign.name),
             'opts': EmailCampaign._meta,
         })
     
@@ -416,7 +398,7 @@ class EmailCampaignAdmin(admin.ModelAdmin):
         
         context = {
             'campaign': campaign,
-            'title': f'Status: {campaign.name}',
+            'title': 'Status: {}'.format(campaign.name),
             'opts': EmailCampaign._meta,
         }
         
@@ -443,10 +425,11 @@ class EmailCampaignAdmin(admin.ModelAdmin):
                 self.process_campaign(campaign)
                 sent_count += 1
             else:
-                messages.warning(request, f"Campaign '{campaign.name}' could not be sent (status: {campaign.get_status_display()})")
+                messages.warning(request, "Campaign '{}' could not be sent (status: {})".format(
+                    campaign.name, campaign.get_status_display()))
         
         if sent_count > 0:
-            messages.success(request, f"{sent_count} campaign(s) queued for sending!")
+            messages.success(request, "{} campaign(s) queued for sending!".format(sent_count))
     send_campaign_now.short_description = "Send selected campaigns now"
     
     def process_csv_file(self, campaign, csv_file):
