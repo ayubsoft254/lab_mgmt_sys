@@ -66,7 +66,8 @@ class EmailCampaign(models.Model):
         ('students', 'Student Users Only'),
         ('lecturers', 'Lecturers Only'),
         ('admins', 'Administrators Only'),
-        ('subscribers', 'Newsletter Subscribers')
+        ('subscribers', 'Newsletter Subscribers'),
+        ('csv_upload', 'CSV Upload Recipients')
     )
     
     name = models.CharField(max_length=100)
@@ -75,6 +76,8 @@ class EmailCampaign(models.Model):
     custom_html_content = models.TextField(blank=True, help_text="Custom HTML content (if not using template)")
     custom_text_content = models.TextField(blank=True, help_text="Custom plain text content (if not using template)")
     recipient_type = models.CharField(max_length=20, choices=RECIPIENT_CHOICES, default='all_users')
+    sender_email = models.EmailField(blank=True, help_text="Sender email address (if different from default)")
+    csv_file = models.FileField(upload_to='email_campaigns/csv/', blank=True, null=True, help_text="CSV file with recipient data")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
     scheduled_time = models.DateTimeField(null=True, blank=True)
     started_at = models.DateTimeField(null=True, blank=True)
