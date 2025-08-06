@@ -35,22 +35,30 @@
 
 {% if campaign.recipient_type == 'csv_upload' %}
 <fieldset class="module">
-    <h2>CSV Recipients (First 10)</h2>
+    <h2>Student Recipients (First 10)</h2>
     <table>
         <thead>
             <tr>
                 <th>Email</th>
-                <th>Data</th>
+                <th>Name</th>
+                <th>Registration</th>
+                <th>Course</th>
+                <th>Hostel</th>
+                <th>Room</th>
             </tr>
         </thead>
         <tbody>
             {% for recipient in csv_recipients %}
             <tr>
                 <td>{{ recipient.email }}</td>
-                <td>{{ recipient.data }}</td>
+                <td>{{ recipient.data.name|default:"-" }}</td>
+                <td>{{ recipient.data.reg|default:"-" }}</td>
+                <td>{{ recipient.data.course|default:"-" }}</td>
+                <td>{{ recipient.data.hostel|default:"-" }}</td>
+                <td>{{ recipient.data.room|default:"-" }}</td>
             </tr>
             {% empty %}
-            <tr><td colspan="2">No recipients found</td></tr>
+            <tr><td colspan="6">No recipients found</td></tr>
             {% endfor %}
         </tbody>
     </table>
