@@ -11,11 +11,11 @@ def get_email_choices():
     
     # Add default email if available
     if hasattr(settings, 'EMAIL_HOST_USER') and settings.EMAIL_HOST_USER:
-        choices.append((settings.EMAIL_HOST_USER, f"Host Email ({settings.EMAIL_HOST_USER})"))
+        choices.append((settings.EMAIL_HOST_USER, "Host Email ({})".format(settings.EMAIL_HOST_USER)))
     
     # Add admissions email if available
     if hasattr(settings, 'EMAIL_HOST_USER_ADMISSIONS') and settings.EMAIL_HOST_USER_ADMISSIONS:
-        choices.append((settings.EMAIL_HOST_USER_ADMISSIONS, f"Admissions Email ({settings.EMAIL_HOST_USER_ADMISSIONS})"))
+        choices.append((settings.EMAIL_HOST_USER_ADMISSIONS, "Admissions Email ({})".format(settings.EMAIL_HOST_USER_ADMISSIONS)))
     
     # Add a custom option
     choices.append(('custom', 'Custom Email (enter below)'))
@@ -109,7 +109,8 @@ class CsvEmailCampaignForm(forms.ModelForm):
             
             missing_columns = [col for col in required_columns if col not in headers]
             if missing_columns:
-                raise ValidationError(f"CSV file is missing required columns: {', '.join(missing_columns)}. Required columns are: {', '.join(required_columns)}")
+                raise ValidationError("CSV file is missing required columns: {}. Required columns are: {}".format(
+                    ', '.join(missing_columns), ', '.join(required_columns)))
             
             # Validate at least one row exists
             rows = list(reader)
@@ -121,41 +122,41 @@ class CsvEmailCampaignForm(forms.ModelForm):
                 # Check email
                 email = row.get('email', '').strip()
                 if not email:
-                    raise ValidationError(f"Row {i}: Email address is required.")
+                    raise ValidationError("Row {}: Email address is required.".format(i))
                 
                 # Basic email validation
                 if '@' not in email or '.' not in email.split('@')[1]:
-                    raise ValidationError(f"Row {i}: Invalid email address '{email}'.")
+                    raise ValidationError("Row {}: Invalid email address '{}'.".format(i, email))
                 
                 # Check name
                 name = row.get('name', '').strip()
                 if not name:
-                    raise ValidationError(f"Row {i}: Name is required.")
+                    raise ValidationError("Row {}: Name is required.".format(i))
                 
                 # Check registration number
                 reg = row.get('reg', '').strip()
                 if not reg:
-                    raise ValidationError(f"Row {i}: Registration number is required.")
+                    raise ValidationError("Row {}: Registration number is required.".format(i))
                 
                 # Check course
                 course = row.get('course', '').strip()
                 if not course:
-                    raise ValidationError(f"Row {i}: Course is required.")
+                    raise ValidationError("Row {}: Course is required.".format(i))
                 
                 # Check hostel
                 hostel = row.get('hostel', '').strip()
                 if not hostel:
-                    raise ValidationError(f"Row {i}: Hostel is required.")
+                    raise ValidationError("Row {}: Hostel is required.".format(i))
                 
                 # Check room
                 room = row.get('room', '').strip()
                 if not room:
-                    raise ValidationError(f"Row {i}: Room number is required.")
+                    raise ValidationError("Row {}: Room number is required.".format(i))
             
         except UnicodeDecodeError:
             raise ValidationError("CSV file must be UTF-8 encoded.")
         except Exception as e:
-            raise ValidationError(f"Error reading CSV file: {str(e)}")
+            raise ValidationError("Error reading CSV file: {}".format(str(e)))
         
         return csv_file
 
