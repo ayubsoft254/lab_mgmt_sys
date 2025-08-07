@@ -520,7 +520,7 @@ class EmailCampaignAdmin(admin.ModelAdmin):
     
     def process_campaign(self, campaign):
         """Start processing a campaign in the background"""
-        from .tasks import process_email_campaign, process_csv_campaign_batch
+        from .tasks import process_email_campaign
         
         # Update campaign status
         campaign.status = 'sending'
@@ -531,8 +531,8 @@ class EmailCampaignAdmin(admin.ModelAdmin):
             campaign.total_recipients = campaign.csv_recipients.count()
             campaign.save()
             
-            # Queue CSV-specific task
-            process_csv_campaign_batch.delay(campaign.id)
+            # Queue the main task which will handle CSV recipients
+            process_email_campaign.delay(campaign.id)
         else:
             # Get recipients for other types
             recipients = campaign.get_recipients_queryset()
