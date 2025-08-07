@@ -36,9 +36,25 @@ def process_email_campaign(campaign_id):
         logger.info("Processing campaign '{}' with {} recipients".format(
             campaign.name, campaign.total_recipients))
         
-        # Determine sender email
-        sender_email = campaign.sender_email if campaign.sender_email else getattr(settings, 'DEFAULT_FROM_EMAIL', 'test@example.com')
+        # Determine sender email - use consistent logic
+        sender_email = campaign.sender_email
+        if not sender_email:
+            # Try EMAIL_HOST_USER first, then EMAIL_HOST_USER_ADMISSIONS, then fallback
+            sender_email = (
+                getattr(settings, 'EMAIL_HOST_USER', None) or 
+                getattr(settings, 'EMAIL_HOST_USER_ADMISSIONS', None) or 
+                getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@example.com')
+            )
+        
         logger.info("DEBUG: Using sender email: {}".format(sender_email))
+        
+        # Check if sender email is properly configured
+        if not sender_email or sender_email == 'noreply@example.com':
+            error_msg = "No valid sender email configured. Check EMAIL_HOST_USER in settings."
+            logger.error("DEBUG: {}".format(error_msg))
+            campaign.status = 'failed'
+            campaign.save()
+            return error_msg
         
         if campaign.recipient_type == 'csv_upload':
             logger.info("DEBUG: Processing CSV campaign")
@@ -337,8 +353,16 @@ def send_single_csv_email(campaign_id, csv_recipient_id):
         # Validate email before sending
         validate_email(csv_recipient.email)
         
-        # Determine sender email
-        sender_email = campaign.sender_email if campaign.sender_email else getattr(settings, 'EMAIL_HOST_USER', 'test@example.com')
+        # Determine sender email - use same logic as main task
+        sender_email = campaign.sender_email
+        if not sender_email:
+            sender_email = (
+                getattr(settings, 'EMAIL_HOST_USER', None) or 
+                getattr(settings, 'EMAIL_HOST_USER_ADMISSIONS', None) or 
+                getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@example.com')
+            )
+        
+        logger.info("DEBUG: Single email using sender: {}".format(sender_email))
         
         # Create context with CSV data
         context = {
