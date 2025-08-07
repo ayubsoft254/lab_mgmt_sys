@@ -6,14 +6,13 @@ from django.urls import reverse, path
 from django import forms
 from django.contrib import messages
 import csv
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from django.utils import timezone
-from django.core.mail import send_mail, EmailMultiAlternatives
 from django.template import Template, Context
-from django.contrib.admin.widgets import AdminDateWidget
-from django.db.models import Q, Count
+from django.db.models import Count
 from django.contrib.auth import get_user_model
+from django.db import transaction
 
 User = get_user_model()
 
@@ -178,7 +177,6 @@ class NewsletterSubscriptionAdmin(admin.ModelAdmin):
     
     def newsletter_stats_view(self, request):
         """Display newsletter statistics"""
-        
         context = {
             'title': 'Newsletter Statistics',
             'app_label': 'newsletter',
@@ -195,7 +193,6 @@ class NewsletterSubscriptionAdmin(admin.ModelAdmin):
             },
             'source_stats': NewsletterSubscription.objects.filter(is_active=True).values('source').annotate(count=Count('id')),
         }
-        
         return render(request, 'admin/newsletter/newslettersubscription/stats.html', context)
 
 @admin.register(EmailTemplate)
@@ -252,7 +249,7 @@ class EmailCampaignAdmin(admin.ModelAdmin):
             return "0%"
         progress = (obj.sent_count / obj.total_recipients) * 100
         color = "green" if progress == 100 else "orange" if progress > 0 else "red"
-        progress_text = "{:.1f}".format(progress)  # Format the percentage first
+        progress_text = "{:.1f}".format(progress)
         return format_html(
             '<span style="color: {};">{}% ({}/{})</span>',
             color, progress_text, obj.sent_count, obj.total_recipients
@@ -260,7 +257,7 @@ class EmailCampaignAdmin(admin.ModelAdmin):
     campaign_progress.short_description = 'Progress'
     
     def get_fieldsets(self, request, obj=None):
-        if obj:  # Editing existing object
+        if obj:
             fieldsets = [
                 ('Campaign Information', {
                     'fields': ('name', 'subject', 'recipient_type', 'sender_email', 'created_by', 'created_at')
@@ -284,7 +281,7 @@ class EmailCampaignAdmin(admin.ModelAdmin):
             
             return fieldsets
         
-        return (  # Creating new object
+        return (
             ('Campaign Information', {
                 'fields': ('name', 'subject', 'recipient_type', 'sender_email_choice', 'custom_sender_email')
             }),
@@ -345,20 +342,28 @@ class EmailCampaignAdmin(admin.ModelAdmin):
         return super().change_view(request, object_id, form_url, extra_context)
     
     def csv_campaign_view(self, request):
-        """View for creating CSV-based email campaigns"""
+        """View for creating CSV-based email campaigns with improved error handling"""
         if request.method == 'POST':
             form = CsvEmailCampaignForm(request.POST, request.FILES)
             if form.is_valid():
-                campaign = form.save(commit=False)
-                campaign.created_by = request.user
-                campaign.recipient_type = 'csv_upload'
-                campaign.save()
-                
-                # Process CSV file
-                self.process_csv_file(campaign, form.cleaned_data['csv_file'])
-                
-                messages.success(request, "CSV campaign '{}' created successfully!".format(campaign.name))
-                return redirect('admin:newsletter_emailcampaign_change', campaign.id)
+                try:
+                    with transaction.atomic():
+                        campaign = form.save(commit=False)
+                        campaign.created_by = request.user
+                        campaign.recipient_type = 'csv_upload'
+                        campaign.save()
+                        
+                        # Process CSV file
+                        success, message = self.process_csv_file(campaign, form.cleaned_data['csv_file'])
+                        
+                        if success:
+                            messages.success(request, f"CSV campaign '{campaign.name}' created successfully! {message}")
+                            return redirect('admin:newsletter_emailcampaign_change', campaign.id)
+                        else:
+                            campaign.delete()
+                            messages.error(request, f"Failed to process CSV file: {message}")
+                except Exception as e:
+                    messages.error(request, f"Error creating campaign: {str(e)}")
         else:
             form = CsvEmailCampaignForm()
         
@@ -369,75 +374,48 @@ class EmailCampaignAdmin(admin.ModelAdmin):
         })
     
     def send_campaign(self, request, campaign_id):
-        """Send a campaign immediately"""
+        """Send a campaign immediately with better error handling"""
         campaign = get_object_or_404(EmailCampaign, id=campaign_id)
         
         if campaign.status not in ['draft', 'scheduled']:
-            messages.error(request, "Campaign '{}' cannot be sent. Current status: {}".format(
-                campaign.name, campaign.get_status_display()))
+            messages.error(request, f"Campaign '{campaign.name}' cannot be sent. Current status: {campaign.get_status_display()}")
             return redirect('admin:newsletter_emailcampaign_change', campaign_id)
         
-        # Process the campaign
-        self.process_campaign(campaign)
+        try:
+            self.process_campaign(campaign)
+            messages.success(request, f"Campaign '{campaign.name}' has been queued for sending!")
+        except Exception as e:
+            messages.error(request, f"Failed to queue campaign: {str(e)}")
         
-        messages.success(request, "Campaign '{}' has been queued for sending!".format(campaign.name))
         return redirect('admin:newsletter_emailcampaign_change', campaign_id)
     
     def preview_campaign(self, request, campaign_id):
-        """Preview campaign content"""
+        """Preview campaign content with sample context"""
         campaign = get_object_or_404(EmailCampaign, id=campaign_id)
         
         # Create sample context for preview
         if campaign.recipient_type == 'csv_upload':
-            # Use first CSV recipient for preview
             csv_recipient = campaign.csv_recipients.first()
-            if csv_recipient:
-                context = {
-                    'email': csv_recipient.email,
-                    **csv_recipient.data,
-                }
-            else:
-                context = {
-                    'email': 'example@example.com', 
-                    'name': 'John Doe',
-                    'reg': 'CS001',
-                    'course': 'Computer Science',
-                    'hostel': 'Block A',
-                    'room': '101'
-                }
+            context = {
+                'email': csv_recipient.email if csv_recipient else 'example@example.com',
+                'name': csv_recipient.data.get('name', 'John Doe') if csv_recipient else 'John Doe',
+                **(csv_recipient.data if csv_recipient else {})
+            }
         else:
-            # Use a sample user context
             context = {
                 'first_name': 'John',
                 'last_name': 'Doe',
                 'email': 'john.doe@example.com',
             }
         
-        # Render content with context
         try:
-            # Use the subject from campaign (not template)
-            rendered_subject = campaign.subject
-            if rendered_subject:
-                subject = Template(rendered_subject).render(Context(context))
-            else:
-                subject = "No subject"
-            
-            # Get HTML content (from template or custom)
-            html_content_raw = campaign.html_content
-            if html_content_raw:
-                html_content = Template(html_content_raw).render(Context(context))
-            else:
-                html_content = "No HTML content"
-            
-            # Get text content (from template or custom)
-            text_content_raw = campaign.text_content
-            if text_content_raw:
-                text_content = Template(text_content_raw).render(Context(context))
-            else:
-                text_content = "No text content"
+            # Render content with context
+            subject = Template(campaign.subject).render(Context(context)) if campaign.subject else "No subject"
+            html_content = Template(campaign.html_content).render(Context(context)) if campaign.html_content else "No HTML content"
+            text_content = Template(campaign.text_content).render(Context(context)) if campaign.text_content else "No text content"
                 
         except Exception as e:
-            messages.error(request, "Error rendering template: {}".format(str(e)))
+            messages.error(request, f"Error rendering template: {str(e)}")
             return redirect('admin:newsletter_emailcampaign_change', campaign_id)
         
         return render(request, 'admin/newsletter/emailcampaign/preview.html', {
@@ -446,7 +424,7 @@ class EmailCampaignAdmin(admin.ModelAdmin):
             'html_content': html_content,
             'text_content': text_content,
             'context': context,
-            'title': 'Preview: {}'.format(campaign.name),
+            'title': f'Preview: {campaign.name}',
             'opts': EmailCampaign._meta,
         })
     
@@ -456,15 +434,15 @@ class EmailCampaignAdmin(admin.ModelAdmin):
         
         context = {
             'campaign': campaign,
-            'title': 'Status: {}'.format(campaign.name),
+            'title': f'Status: {campaign.name}',
             'opts': EmailCampaign._meta,
         }
         
         if campaign.recipient_type == 'csv_upload':
-            context['csv_recipients'] = campaign.csv_recipients.all()[:10]  # Show first 10
+            context['csv_recipients'] = campaign.csv_recipients.all()[:10]
             context['total_csv_recipients'] = campaign.csv_recipients.count()
         else:
-            context['deliveries'] = EmailDelivery.objects.filter(campaign=campaign)[:10]  # Show first 10
+            context['deliveries'] = EmailDelivery.objects.filter(campaign=campaign)[:10]
             context['delivery_stats'] = {
                 'pending': EmailDelivery.objects.filter(campaign=campaign, status='pending').count(),
                 'sent': EmailDelivery.objects.filter(campaign=campaign, status='sent').count(),
@@ -480,87 +458,125 @@ class EmailCampaignAdmin(admin.ModelAdmin):
         sent_count = 0
         for campaign in queryset:
             if campaign.status in ['draft', 'scheduled']:
-                self.process_campaign(campaign)
-                sent_count += 1
+                try:
+                    self.process_campaign(campaign)
+                    sent_count += 1
+                    messages.success(request, f"Campaign '{campaign.name}' queued for sending")
+                except Exception as e:
+                    messages.error(request, f"Failed to queue campaign '{campaign.name}': {str(e)}")
             else:
-                messages.warning(request, "Campaign '{}' could not be sent (status: {})".format(
-                    campaign.name, campaign.get_status_display()))
+                messages.warning(request, f"Campaign '{campaign.name}' could not be sent (status: {campaign.get_status_display()})")
         
         if sent_count > 0:
-            messages.success(request, "{} campaign(s) queued for sending!".format(sent_count))
+            messages.success(request, f"{sent_count} campaign(s) queued for sending!")
     send_campaign_now.short_description = "Send selected campaigns now"
     
     def process_csv_file(self, campaign, csv_file):
-        """Process uploaded CSV file and create CsvRecipient records"""
-        import csv
+        """Process uploaded CSV file and create CsvRecipient records with validation"""
         import io
+        from django.core.validators import validate_email
+        from django.core.exceptions import ValidationError
         
         csv_file.seek(0)
         content = csv_file.read().decode('utf-8')
-        reader = csv.DictReader(io.StringIO(content))
         
-        recipients = []
-        for row in reader:
-            email = row.get('email', '').strip()
-            if email:
-                # Remove email from row data to avoid duplication
-                row_data = {k: v for k, v in row.items() if k != 'email'}
+        try:
+            reader = csv.DictReader(io.StringIO(content))
+            if 'email' not in reader.fieldnames:
+                raise ValueError("CSV file must contain an 'email' column")
+                
+            recipients = []
+            seen_emails = set()
+            row_num = 0
+            valid_count = 0
+            
+            for row_num, row in enumerate(reader, 1):
+                email = row.get('email', '').strip().lower()
+                if not email:
+                    continue
+                    
+                try:
+                    validate_email(email)
+                except ValidationError:
+                    continue
+                
+                if email in seen_emails:
+                    continue
+                seen_emails.add(email)
+                
+                row_data = {k: v.strip() for k, v in row.items() if k != 'email' and v.strip()}
+                
                 recipients.append(CsvRecipient(
                     campaign=campaign,
                     email=email,
                     data=row_data
                 ))
-        
-        # Bulk create recipients
-        CsvRecipient.objects.bulk_create(recipients, ignore_conflicts=True)
-        
-        # Update campaign recipient count
-        campaign.total_recipients = campaign.csv_recipients.count()
-        campaign.save()
+                
+                valid_count += 1
+                
+                # Batch create every 10 records
+                if len(recipients) >= 10:
+                    CsvRecipient.objects.bulk_create(recipients)
+                    recipients = []
+            
+            # Create remaining recipients
+            if recipients:
+                CsvRecipient.objects.bulk_create(recipients)
+            
+            campaign.total_recipients = valid_count
+            campaign.save()
+            
+            return True, f"Processed {valid_count} valid recipients from {row_num} rows"
+            
+        except Exception as e:
+            return False, f"Error processing CSV at row {row_num}: {str(e)}"
     
     def process_campaign(self, campaign):
-        """Start processing a campaign in the background"""
-        from .tasks import process_email_campaign
+        """Start processing a campaign in the background with improved CSV handling"""
+        from .tasks import process_email_campaign, process_csv_campaign_batch
         
-        # Update campaign status
         campaign.status = 'sending'
         campaign.started_at = timezone.now()
         
-        if campaign.recipient_type == 'csv_upload':
-            # For CSV campaigns, recipients are already stored
-            campaign.total_recipients = campaign.csv_recipients.count()
-            campaign.save()
-            
-            # Queue the main task which will handle CSV recipients
-            process_email_campaign.delay(campaign.id)
-        else:
-            # Get recipients for other types
-            recipients = campaign.get_recipients_queryset()
-            campaign.total_recipients = recipients.count()
-            
-            # Create EmailDelivery records for each recipient
-            batch_size = 1000
-            recipient_ids = list(recipients.values_list('id', flat=True))
-            
-            for i in range(0, len(recipient_ids), batch_size):
-                batch = recipient_ids[i:i+batch_size]
-                batch_users = User.objects.filter(id__in=batch)
+        try:
+            if campaign.recipient_type == 'csv_upload':
+                if not campaign.csv_recipients.exists():
+                    raise ValueError("No valid CSV recipients found")
                 
-                deliveries = []
-                for user in batch_users:
-                    deliveries.append(EmailDelivery(
-                        campaign=campaign,
-                        recipient=user,
-                        email_address=user.email,
-                        status='pending'
-                    ))
+                campaign.total_recipients = campaign.csv_recipients.count()
+                campaign.save()
                 
-                EmailDelivery.objects.bulk_create(deliveries)
-            
+                # Use batch processing for large campaigns
+                if campaign.total_recipients > 10:
+                    process_csv_campaign_batch.delay(campaign.id)
+                else:
+                    process_email_campaign.delay(campaign.id)
+            else:
+                recipients = campaign.get_recipients_queryset()
+                campaign.total_recipients = recipients.count()
+                
+                # Create EmailDelivery records in batches
+                batch_size = 10
+                for i in range(0, campaign.total_recipients, batch_size):
+                    batch = recipients[i:i+batch_size]
+                    deliveries = [
+                        EmailDelivery(
+                            campaign=campaign,
+                            recipient=user,
+                            email_address=user.email,
+                            status='pending'
+                        )
+                        for user in batch
+                    ]
+                    EmailDelivery.objects.bulk_create(deliveries)
+                
+                campaign.save()
+                process_email_campaign.delay(campaign.id)
+                
+        except Exception as e:
+            campaign.status = 'failed'
             campaign.save()
-            
-            # Queue task to process regular campaign
-            process_email_campaign.delay(campaign.id)
+            raise e
 
 @admin.register(EmailDelivery)
 class EmailDeliveryAdmin(admin.ModelAdmin):
@@ -583,7 +599,7 @@ class CsvRecipientAdmin(admin.ModelAdmin):
     def data_preview(self, obj):
         """Show a preview of the data"""
         if obj.data:
-            preview = ', '.join(["{}: {}".format(k, v) for k, v in list(obj.data.items())[:3]])
+            preview = ', '.join([f"{k}: {v}" for k, v in list(obj.data.items())[:3]])
             if len(obj.data) > 3:
                 preview += "..."
             return preview
@@ -592,21 +608,6 @@ class CsvRecipientAdmin(admin.ModelAdmin):
     
     def has_add_permission(self, request):
         return False
-
-class UserAdmin(admin.ModelAdmin):
-    actions = ['send_email_to_selected_users']
-    
-    def send_email_to_selected_users(self, request, queryset):
-        # Count the selected users
-        user_count = queryset.count()
-        
-        # Store the selected user IDs in session for the next step
-        request.session['selected_user_ids'] = list(queryset.values_list('id', flat=True))
-        
-        # Redirect to a custom form for composing the email
-        return redirect('admin:send_bulk_email')
-    
-    send_email_to_selected_users.short_description = "Send email to selected users"
 
 # Create a reference to the stats view for importing in urls.py
 admin_stats_view = NewsletterSubscriptionAdmin.newsletter_stats_view
