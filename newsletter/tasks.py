@@ -338,7 +338,7 @@ def send_single_csv_email(campaign_id, csv_recipient_id):
         validate_email(csv_recipient.email)
         
         # Determine sender email
-        sender_email = campaign.sender_email if campaign.sender_email else getattr(settings, 'DEFAULT_FROM_EMAIL', 'test@example.com')
+        sender_email = campaign.sender_email if campaign.sender_email else getattr(settings, 'EMAIL_HOST_USER', 'test@example.com')
         
         # Create context with CSV data
         context = {
