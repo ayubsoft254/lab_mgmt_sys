@@ -2,6 +2,9 @@ from django.db import models
 import uuid
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from django.core.files.storage import default_storage
+import csv
+
 
 User = get_user_model()
 
@@ -122,9 +125,25 @@ class EmailCampaign(models.Model):
             return User.objects.filter(email__in=NewsletterSubscription.objects.filter(
                 is_active=True).values_list('email', flat=True))
         elif self.recipient_type == 'csv_upload':
-            # For CSV uploads, we'll handle this differently in the tasks
-            return User.objects.none()
-        return User.objects.none()
+            email_list = []
+            if not self.csv_file:
+                try:
+                    with default_storage.open(self.csv_file.name, 'r') as f:
+                        reader = csv.DictReader(f)
+                        for row in reader:
+                            email = row.get('email', '').strip().lower()
+                            if email:
+                                email_list.append(email)
+                except Exception as e:
+                    # Optionally log error: logger.error(f"CSV processing error: {e}")
+                    return User.objects.none()
+
+        return User.objects.filter(email__in=email_list, is_active=True)
+        return User.objects.filter(email__in=email_list, is_active=True)
+        
+            
+            
+        
     
     def get_csv_recipients(self):
         """Get CSV recipients for this campaign"""
