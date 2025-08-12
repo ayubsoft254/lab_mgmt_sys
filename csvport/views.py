@@ -10,7 +10,7 @@ class AllocationsCSVView(View):
         # Step 1: Fetch the JSON data from the API
         api_url = "https://portal2.ttu.ac.ke/api/allocations/"
         try:
-            response = requests.get(api_url, timeout=10)
+            response = requests.get(api_url, timeout=10, verify=False)
             response.raise_for_status()
             data = response.json()
         except requests.RequestException as e:
