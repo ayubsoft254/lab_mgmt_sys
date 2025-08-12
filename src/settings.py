@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     'contact',
     'newsletter',
     'resources',
+    'csvport',
 ]
 
 SITE_ID = 1
