@@ -12,7 +12,7 @@ class AllocationCSVView(View):
         if not reg_no:
             return HttpResponse("Missing registration number", status=400)
 
-        API_BASE = "https://portal2.ttu.ac.ke"
+        API_BASE = "https://portal2.ttu.ac.ke/api"
         token_url = f"{API_BASE}/api/token/"
         api_url = f"{API_BASE}/api/allocation/?reg_no={reg_no}"
 
