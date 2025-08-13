@@ -4,11 +4,11 @@ import requests
 import urllib3
 from django.http import HttpResponse
 from django.views import View
+import json
 
 
 class AllocationCSVView(View):
     def get(self, request, reg_no=None):
-        # Allow reg_no from URL or query param
         reg_no = reg_no or request.GET.get("reg_no")
         if not reg_no:
             return HttpResponse("Missing registration number", status=400)
@@ -30,6 +30,9 @@ class AllocationCSVView(View):
             token_response.raise_for_status()
             tokens = token_response.json()
 
+            # Debug: log token response
+            print("TOKEN RESPONSE:", json.dumps(tokens, indent=2))
+
             if "access" not in tokens:
                 return HttpResponse(f"Authentication failed: {tokens}", status=401)
 
@@ -39,7 +42,15 @@ class AllocationCSVView(View):
             headers = {
                 "Authorization": f"Bearer {access_token}"
             }
+            print("API URL:", api_url)
+            print("HEADERS:", headers)
+
             response = requests.get(api_url, headers=headers, verify=False, timeout=10)
+
+            # Debug: log raw API response
+            print("STATUS CODE:", response.status_code)
+            print("RAW RESPONSE TEXT:", response.text)
+
             response.raise_for_status()
             student_data = response.json()
 
@@ -49,7 +60,7 @@ class AllocationCSVView(View):
         if not student_data:
             return HttpResponse("No data found", status=404)
 
-        # If it's a dict, try to unwrap
+        # Normalize data
         if isinstance(student_data, dict):
             if "results" in student_data:
                 student_data = student_data["results"]
@@ -61,7 +72,7 @@ class AllocationCSVView(View):
         if not isinstance(student_data, list):
             return HttpResponse("Unexpected data format", status=500)
 
-        # Step 3: Convert JSON to CSV
+        # Step 3: Convert to CSV
         response_csv = HttpResponse(content_type="text/csv")
         safe_reg_no = reg_no.replace("/", "_").replace(" ", "_")
         response_csv["Content-Disposition"] = f'attachment; filename="allocation_{safe_reg_no}.csv"'
