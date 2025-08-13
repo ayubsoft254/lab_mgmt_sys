@@ -1,20 +1,21 @@
 import csv
-import requests
 import warnings
+import requests
+import urllib3
 from django.http import HttpResponse
 from django.views import View
-import urllib3
 
 
 class AllocationCSVView(View):
-    def get(self, request):
-        reg_no = request.GET.get("reg_no")
+    def get(self, request, reg_no=None):
+        # Get registration number from query parameters if not provided
+        reg_no = reg_no or request.GET.get("reg_no")
         if not reg_no:
-            return HttpResponse("Missing 'reg_no' query parameter", status=400)
+            return HttpResponse("Missing registration number", status=400)
 
         API_BASE = "https://portal2.ttu.ac.ke"
         token_url = f"{API_BASE}/api/token/"
-        data_url = f"{API_BASE}/api/allocation/?reg_no={reg_no}"
+        api_url = f"{API_BASE}/api/allocation/?reg_no={reg_no}"
 
         credentials = {
             "username": "hostel-checker",
@@ -24,7 +25,7 @@ class AllocationCSVView(View):
         warnings.simplefilter("ignore", urllib3.exceptions.InsecureRequestWarning)
 
         try:
-            # Step 1: Get access token
+            # Step 1: Authenticate and get token
             token_res = requests.post(token_url, json=credentials, verify=False, timeout=10)
             token_res.raise_for_status()
             tokens = token_res.json()
@@ -34,46 +35,40 @@ class AllocationCSVView(View):
 
             access_token = tokens["access"]
 
-            # Step 2: Fetch allocation data
+            # Step 2: Fetch allocation data using token
             headers = {"Authorization": f"Bearer {access_token}"}
-            data_res = requests.get(data_url, headers=headers, verify=False, timeout=10)
-            data_res.raise_for_status()
-            data = data_res.json()
+            response = requests.get(api_url, headers=headers, verify=False, timeout=10)
+            response.raise_for_status()
+            student_data = response.json()
 
         except requests.RequestException as e:
             return HttpResponse(f"Error fetching data: {e}", status=500)
 
-        # Step 3: Handle different data shapes
-        if not data:
-            return HttpResponse("No data returned", status=404)
+        if not student_data:
+            return HttpResponse("No data found for this registration number", status=404)
 
-        # If data is wrapped inside another key like {"results": [...]}
-        if isinstance(data, dict):
-            # Try common patterns
-            if "results" in data and isinstance(data["results"], list):
-                data = data["results"]
-            elif "data" in data and isinstance(data["data"], list):
-                data = data["data"]
+        # If wrapped in results/data
+        if isinstance(student_data, dict):
+            if "results" in student_data:
+                student_data = student_data["results"]
+            elif "data" in student_data:
+                student_data = student_data["data"]
             else:
-                # Convert dict to a list for CSV export
-                data = [data]
+                student_data = [student_data]
 
-        if not isinstance(data, list) or not data:
-            return HttpResponse("Data format not supported for CSV export", status=500)
+        if not isinstance(student_data, list):
+            return HttpResponse("Unexpected data format", status=500)
 
-        # Step 4: Create CSV response
+        # Step 3: Convert to CSV
         response_csv = HttpResponse(content_type="text/csv")
         safe_reg_no = reg_no.replace("/", "_").replace(" ", "_")
         response_csv["Content-Disposition"] = f'attachment; filename="allocation_{safe_reg_no}.csv"'
 
         writer = csv.writer(response_csv)
-
-        # Use consistent headers
-        headers_list = list(data[0].keys())
+        headers_list = list(student_data[0].keys())
         writer.writerow(headers_list)
 
-        for item in data:
-            row = [item.get(h, "") for h in headers_list]
-            writer.writerow(row)
+        for item in student_data:
+            writer.writerow([item.get(h, "") for h in headers_list])
 
         return response_csv
