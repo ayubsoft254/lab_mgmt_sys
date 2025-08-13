@@ -15,7 +15,7 @@ class AllocationCSVView(View):
 
         API_BASE = "https://portal2.ttu.ac.ke"
         token_url = f"{API_BASE}/api/token/"
-        api_url = f"{API_BASE}/api/allocation/?reg_no={reg_no}"
+        api_url = f"{API_BASE}/api/allocations/?reg_no={reg_no}"
 
         credentials = {
             "username": "hostel-checker",
