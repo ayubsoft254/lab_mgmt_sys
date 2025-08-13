@@ -8,11 +8,12 @@ from django.views import View
 
 class AllocationCSVView(View):
     def get(self, request, reg_no=None):
+        # Allow reg_no from URL or query param
         reg_no = reg_no or request.GET.get("reg_no")
         if not reg_no:
             return HttpResponse("Missing registration number", status=400)
 
-        API_BASE = "https://portal2.ttu.ac.ke/api"
+        API_BASE = "https://portal2.ttu.ac.ke"
         token_url = f"{API_BASE}/api/token/"
         api_url = f"{API_BASE}/api/allocation/?reg_no={reg_no}"
 
@@ -24,16 +25,20 @@ class AllocationCSVView(View):
         warnings.simplefilter("ignore", urllib3.exceptions.InsecureRequestWarning)
 
         try:
-            # Step 1: Get access token
-            token_res = requests.post(token_url, json=credentials, verify=False, timeout=10)
-            token_res.raise_for_status()
-            tokens = token_res.json()
-            access_token = tokens.get("access")
-            if not access_token:
+            # Step 1: Get token
+            token_response = requests.post(token_url, json=credentials, verify=False, timeout=10)
+            token_response.raise_for_status()
+            tokens = token_response.json()
+
+            if "access" not in tokens:
                 return HttpResponse(f"Authentication failed: {tokens}", status=401)
 
-            # Step 2: Call protected API endpoint exactly as in working script
-            headers = {"Authorization": f"Bearer {access_token}"}
+            access_token = tokens["access"]
+
+            # Step 2: Call API with Authorization header
+            headers = {
+                "Authorization": f"Bearer {access_token}"
+            }
             response = requests.get(api_url, headers=headers, verify=False, timeout=10)
             response.raise_for_status()
             student_data = response.json()
@@ -44,7 +49,7 @@ class AllocationCSVView(View):
         if not student_data:
             return HttpResponse("No data found", status=404)
 
-        # Normalize data to list
+        # If it's a dict, try to unwrap
         if isinstance(student_data, dict):
             if "results" in student_data:
                 student_data = student_data["results"]
@@ -64,6 +69,7 @@ class AllocationCSVView(View):
         writer = csv.writer(response_csv)
         headers_list = list(student_data[0].keys())
         writer.writerow(headers_list)
+
         for item in student_data:
             writer.writerow([item.get(h, "") for h in headers_list])
 
