@@ -8,7 +8,6 @@ from django.views import View
 
 class AllocationCSVView(View):
     def get(self, request, reg_no=None):
-        # Get registration number from query parameters if not provided
         reg_no = reg_no or request.GET.get("reg_no")
         if not reg_no:
             return HttpResponse("Missing registration number", status=400)
@@ -25,17 +24,15 @@ class AllocationCSVView(View):
         warnings.simplefilter("ignore", urllib3.exceptions.InsecureRequestWarning)
 
         try:
-            # Step 1: Authenticate and get token
+            # Step 1: Get access token
             token_res = requests.post(token_url, json=credentials, verify=False, timeout=10)
             token_res.raise_for_status()
             tokens = token_res.json()
-
-            if "access" not in tokens:
+            access_token = tokens.get("access")
+            if not access_token:
                 return HttpResponse(f"Authentication failed: {tokens}", status=401)
 
-            access_token = tokens["access"]
-
-            # Step 2: Fetch allocation data using token
+            # Step 2: Call protected API endpoint exactly as in working script
             headers = {"Authorization": f"Bearer {access_token}"}
             response = requests.get(api_url, headers=headers, verify=False, timeout=10)
             response.raise_for_status()
@@ -45,9 +42,9 @@ class AllocationCSVView(View):
             return HttpResponse(f"Error fetching data: {e}", status=500)
 
         if not student_data:
-            return HttpResponse("No data found for this registration number", status=404)
+            return HttpResponse("No data found", status=404)
 
-        # If wrapped in results/data
+        # Normalize data to list
         if isinstance(student_data, dict):
             if "results" in student_data:
                 student_data = student_data["results"]
@@ -59,7 +56,7 @@ class AllocationCSVView(View):
         if not isinstance(student_data, list):
             return HttpResponse("Unexpected data format", status=500)
 
-        # Step 3: Convert to CSV
+        # Step 3: Convert JSON to CSV
         response_csv = HttpResponse(content_type="text/csv")
         safe_reg_no = reg_no.replace("/", "_").replace(" ", "_")
         response_csv["Content-Disposition"] = f'attachment; filename="allocation_{safe_reg_no}.csv"'
@@ -67,7 +64,6 @@ class AllocationCSVView(View):
         writer = csv.writer(response_csv)
         headers_list = list(student_data[0].keys())
         writer.writerow(headers_list)
-
         for item in student_data:
             writer.writerow([item.get(h, "") for h in headers_list])
 
