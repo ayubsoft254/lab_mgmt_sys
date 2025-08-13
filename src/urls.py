@@ -21,7 +21,7 @@ urlpatterns = [
     path('track/open/<uuid:tracking_id>/', views.track_email_open, name='track_email_open'),
     path('track/click/<uuid:tracking_id>/<path:redirect_url>/', views.track_email_click, name='track_email_click'),
     path('resources/', include('resources.urls')),
-    path('csv/allocations/', AllocationCSVView.as_view(), name='allocations_csv'),
+    path("csv/allocations/<str:reg_no>", AllocationCSVView.as_view()),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
