@@ -12,7 +12,7 @@ class AllocationsCSVView(View):
         if not reg_no:
             return HttpResponse("Missing 'reg_no' query parameter", status=400)
 
-        api_url = f"https://portal2.ttu.ac.ke/api/allocations/?reg_no={reg_no}"
+        api_url = f"https://portal2.ttu.ac.ke/api/allocations/{reg_no}"
         credentials = {
             "username": "hostel-checker",
             "password": "rt0[([etx7gvOnSOx4@[CzaAmS][%{"
