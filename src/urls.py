@@ -20,8 +20,7 @@ urlpatterns = [
     path('unsubscribe/<uuid:token>/', views.unsubscribe, name='unsubscribe'),
     path('track/open/<uuid:tracking_id>/', views.track_email_open, name='track_email_open'),
     path('track/click/<uuid:tracking_id>/<path:redirect_url>/', views.track_email_click, name='track_email_click'),
-    path('resources/', include('resources.urls')),
-    path("csv/allocations/<str:reg_no>", AllocationCSVView.as_view()),
+    path('resources/', include('resources.urls')),    
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
