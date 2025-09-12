@@ -5,7 +5,6 @@ from django.conf.urls.static import static
 from analytics.views import AnalyticsView, AnalyticsApiView
 from contact.views import contact_submit
 from newsletter import views
-from csvport.views import AllocationCSVView
 from newsletter.admin import admin_stats_view
 
 urlpatterns = [
