@@ -85,7 +85,7 @@
                             {% endif %}
                         </div>
                         {% if slot.is_free %}
-                            <a href="#" class="btn btn-ttu w-full mt-2 py-2 rounded-lg font-semibold text-base shadow hover:bg-ttu-dark transition">Book Now</a>
+                            <a href="/labs/?date={{ slot.date|date:'Y-m-d' }}&start={{ slot.start_time|date:'H:i' }}&end={{ slot.end_time|date:'H:i' }}&duration=" class="btn btn-ttu w-full mt-2 py-2 rounded-lg font-semibold text-base shadow hover:bg-ttu-dark transition book-now-btn">Book Now</a>
                         {% else %}
                             <button class="btn btn-outline-ttu w-full mt-2 py-2 rounded-lg font-semibold text-base cursor-not-allowed opacity-60" disabled>Unavailable</button>
                         {% endif %}
@@ -100,6 +100,25 @@
         </div>
     {% endif %}
 </div>
+<script>
+// Update Book Now button to include selected duration
+document.addEventListener('DOMContentLoaded', function() {
+    const durationSelect = document.getElementById('duration');
+    document.querySelectorAll('.book-now-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            // Get selected duration
+            const duration = durationSelect ? durationSelect.value : '';
+            // Update href with duration
+            if (duration) {
+                const url = new URL(btn.href, window.location.origin);
+                url.searchParams.set('duration', duration);
+                btn.href = url.toString();
+            }
+            // Allow navigation
+        });
+    });
+});
+</script>
 <style>
 @media (max-width: 640px) {
     .glass-card { padding: 1.2rem !important; }
