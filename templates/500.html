@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Server Error - Lab Management System{% endblock %}
+
+{% block content %}
+<div class="min-h-[60vh] flex items-center justify-center">
+    <div class="text-center px-4">
+        <!-- Animated Error Icon -->
+        <div class="mb-8 animate-fade-in">
+            <div class="inline-block">
+                <i class="fas fa-exclamation-triangle text-red-500" style="font-size: 6rem; opacity: 0.8;"></i>
+            </div>
+        </div>
+        
+        <!-- Error Code -->
+        <h1 class="text-8xl font-bold text-red-500 mb-4 animate-fade-in delay-100">500</h1>
+        
+        <!-- Error Message -->
+        <h2 class="text-3xl font-semibold text-gray-800 mb-4 animate-fade-in delay-200">
+            Internal Server Error
+        </h2>
+        
+        <p class="text-gray-600 mb-8 max-w-md mx-auto animate-fade-in delay-300">
+            Sorry, something went wrong on our end. Our team has been notified and we're working to fix the issue.
+        </p>
+        
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in delay-300">
+            <a href="{% url 'home' %}" class="btn btn-ttu px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
+                <i class="fas fa-home mr-2"></i>
+                Go to Home
+            </a>
+            
+            <button onclick="location.reload()" class="btn btn-outline-ttu px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
+                <i class="fas fa-sync-alt mr-2"></i>
+                Try Again
+            </button>
+        </div>
+        
+        <!-- Support Information -->
+        <div class="mt-12 animate-fade-in delay-300">
+            <div class="bg-ttu-light rounded-lg p-6 max-w-md mx-auto">
+                <p class="text-gray-700 mb-3">
+                    <i class="fas fa-info-circle text-ttu-green mr-2"></i>
+                    If this problem persists, please contact support:
+                </p>
+                <div class="space-y-2 text-sm text-gray-600">
+                    <p>
+                        <i class="fas fa-envelope mr-2"></i>
+                        Email: <a href="mailto:support@ttu.ac.ke" class="text-ttu-green hover:text-ttu-dark">support@ttu.ac.ke</a>
+                    </p>
+                    <p class="text-xs text-gray-500 mt-4">
+                        Error Reference: #{{ request_id|default:"N/A" }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    
+    .animate-fade-in i {
+        animation: shake 2s ease-in-out infinite;
+    }
+</style>
+{% endblock %}

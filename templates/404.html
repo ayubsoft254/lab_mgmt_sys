@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Page Not Found - Lab Management System{% endblock %}
+
+{% block content %}
+<div class="min-h-[60vh] flex items-center justify-center">
+    <div class="text-center px-4">
+        <!-- Animated 404 Icon -->
+        <div class="mb-8 animate-fade-in">
+            <div class="inline-block">
+                <i class="fas fa-search text-ttu-green" style="font-size: 6rem; opacity: 0.8;"></i>
+            </div>
+        </div>
+        
+        <!-- Error Code -->
+        <h1 class="text-8xl font-bold text-ttu-green mb-4 animate-fade-in delay-100">404</h1>
+        
+        <!-- Error Message -->
+        <h2 class="text-3xl font-semibold text-gray-800 mb-4 animate-fade-in delay-200">
+            Page Not Found
+        </h2>
+        
+        <p class="text-gray-600 mb-8 max-w-md mx-auto animate-fade-in delay-300">
+            Oops! The page you're looking for doesn't exist. It might have been moved or deleted.
+        </p>
+        
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in delay-300">
+            <a href="{% url 'home' %}" class="btn btn-ttu px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
+                <i class="fas fa-home mr-2"></i>
+                Go to Home
+            </a>
+            
+            <button onclick="window.history.back()" class="btn btn-outline-ttu px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Go Back
+            </button>
+        </div>
+        
+        <!-- Helpful Links -->
+        <div class="mt-12 animate-fade-in delay-300">
+            <p class="text-gray-500 mb-4">You might be looking for:</p>
+            <div class="flex flex-wrap gap-3 justify-center">
+                <a href="{% url 'lab_list' %}" class="text-ttu-green hover:text-ttu-dark transition-colors">
+                    <i class="fas fa-flask mr-1"></i> View Labs
+                </a>
+                {% if user.is_authenticated %}
+                    <span class="text-gray-300">|</span>
+                    <a href="{% url 'free_timeslots' %}" class="text-ttu-green hover:text-ttu-dark transition-colors">
+                        <i class="fas fa-clock mr-1"></i> Free Timeslots
+                    </a>
+                    {% if user.is_lecturer %}
+                        <span class="text-gray-300">|</span>
+                        <a href="{% url 'lecturer_booking' %}" class="text-ttu-green hover:text-ttu-dark transition-colors">
+                            <i class="fas fa-calendar-plus mr-1"></i> Book Lab
+                        </a>
+                    {% endif %}
+                    {% if user.is_admin or user.is_super_admin %}
+                        <span class="text-gray-300">|</span>
+                        <a href="{% url 'admin_dashboard' %}" class="text-ttu-green hover:text-ttu-dark transition-colors">
+                            <i class="fas fa-tachometer-alt mr-1"></i> Dashboard
+                        </a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+    }
+    
+    .animate-fade-in i {
+        animation: float 3s ease-in-out infinite;
+    }
+</style>
+{% endblock %}

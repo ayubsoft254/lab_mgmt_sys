@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Access Denied - Lab Management System{% endblock %}
+
+{% block content %}
+<div class="min-h-[60vh] flex items-center justify-center">
+    <div class="text-center px-4">
+        <!-- Animated Forbidden Icon -->
+        <div class="mb-8 animate-fade-in">
+            <div class="inline-block">
+                <i class="fas fa-ban text-orange-500" style="font-size: 6rem; opacity: 0.8;"></i>
+            </div>
+        </div>
+        
+        <!-- Error Code -->
+        <h1 class="text-8xl font-bold text-orange-500 mb-4 animate-fade-in delay-100">403</h1>
+        
+        <!-- Error Message -->
+        <h2 class="text-3xl font-semibold text-gray-800 mb-4 animate-fade-in delay-200">
+            Access Denied
+        </h2>
+        
+        <p class="text-gray-600 mb-8 max-w-md mx-auto animate-fade-in delay-300">
+            You don't have permission to access this resource. If you believe this is an error, please contact an administrator.
+        </p>
+        
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in delay-300">
+            <a href="{% url 'home' %}" class="btn btn-ttu px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
+                <i class="fas fa-home mr-2"></i>
+                Go to Home
+            </a>
+            
+            <button onclick="window.history.back()" class="btn btn-outline-ttu px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Go Back
+            </button>
+        </div>
+        
+        <!-- Additional Information -->
+        <div class="mt-12 animate-fade-in delay-300">
+            <div class="bg-orange-50 rounded-lg p-6 max-w-md mx-auto border border-orange-200">
+                <h3 class="font-semibold text-gray-800 mb-3">
+                    <i class="fas fa-shield-alt text-orange-500 mr-2"></i>
+                    Why am I seeing this?
+                </h3>
+                <ul class="text-left text-sm text-gray-600 space-y-2">
+                    <li><i class="fas fa-check-circle text-ttu-green mr-2"></i> You may not be logged in</li>
+                    <li><i class="fas fa-check-circle text-ttu-green mr-2"></i> Your account may lack the required permissions</li>
+                    <li><i class="fas fa-check-circle text-ttu-green mr-2"></i> This resource may be restricted to specific user roles</li>
+                </ul>
+                
+                {% if not user.is_authenticated %}
+                    <div class="mt-4">
+                        <a href="{% url 'account_login' %}?next={{ request.path }}" class="text-ttu-green hover:text-ttu-dark font-semibold">
+                            <i class="fas fa-sign-in-alt mr-1"></i>
+                            Login to continue
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes pulse-scale {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    
+    .animate-fade-in i {
+        animation: pulse-scale 2s ease-in-out infinite;
+    }
+</style>
+{% endblock %}
