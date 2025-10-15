@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.forms import ValidationError
+from django.core.exceptions import ValidationError
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
@@ -454,18 +454,24 @@ def approve_booking_view(request, booking_id):
         return redirect('home')
     
     booking = get_object_or_404(ComputerBooking, id=booking_id)
-    booking.is_approved = True
-    booking.save()
     
-    # Updated notification with proper reference
-    Notification.objects.create(
-        user=booking.student,
-        message=f"Your booking for {booking.computer} has been approved.",
-        notification_type='booking_approved',
-        booking=booking  # Add direct reference
-    )
+    try:
+        booking.is_approved = True
+        booking.save()
+        
+        # Updated notification with proper reference
+        Notification.objects.create(
+            user=booking.student,
+            message=f"Your booking for {booking.computer} has been approved.",
+            notification_type='booking_approved',
+            booking=booking  # Add direct reference
+        )
+        
+        messages.success(request, "Booking approved successfully")
+    except ValidationError as e:
+        booking.is_approved = False
+        messages.error(request, f"Cannot approve booking: {', '.join(e.messages)}")
     
-    messages.success(request, "Booking approved successfully")
     return redirect('admin_dashboard')
 
 @login_required
@@ -475,18 +481,24 @@ def approve_session_view(request, session_id):
         return redirect('home')
     
     session = get_object_or_404(LabSession, id=session_id)
-    session.is_approved = True
-    session.save()
     
-    # Updated notification with proper reference
-    Notification.objects.create(
-        user=session.lecturer,
-        message=f"Your session for {session.lab.name} has been approved.",
-        notification_type='booking_approved',
-        lab_session=session  # Add direct reference
-    )
+    try:
+        session.is_approved = True
+        session.save()
+        
+        # Updated notification with proper reference
+        Notification.objects.create(
+            user=session.lecturer,
+            message=f"Your session for {session.lab.name} has been approved.",
+            notification_type='booking_approved',
+            lab_session=session  # Add direct reference
+        )
+        
+        messages.success(request, "Lab session approved successfully")
+    except ValidationError as e:
+        session.is_approved = False
+        messages.error(request, f"Cannot approve session: {', '.join(e.messages)}")
     
-    messages.success(request, "Lab session approved successfully")
     return redirect('admin_dashboard')
 
 @login_required

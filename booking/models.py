@@ -309,7 +309,10 @@ class ComputerBooking(models.Model):
             raise ValidationError('End time must be after start time')
         
         # Check if computer is available for the requested time slot
+        # Only check for conflicts if the booking is not cancelled
         if not self.is_cancelled:
+            # Only check conflicts with approved bookings when this booking is being approved
+            # OR when creating a new booking
             conflicting_bookings = ComputerBooking.objects.filter(
                 computer=self.computer,
                 is_approved=True,
@@ -325,6 +328,7 @@ class ComputerBooking(models.Model):
             conflicting_sessions = LabSession.objects.filter(
                 lab=self.computer.lab,
                 is_approved=True,
+                is_cancelled=False,
                 start_time__lt=self.end_time,
                 end_time__gt=self.start_time
             )
