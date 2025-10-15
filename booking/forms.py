@@ -123,23 +123,23 @@ class LabSessionForm(forms.ModelForm):
             if end_datetime <= start_datetime:
                 self.add_error('end_time', 'End time must be after start time')
             
-            # Check for conflicts with other lab sessions
+            # Check for conflicts with any session (approved or not, by any lecturer)
             if lab:
                 conflicting_sessions = LabSession.objects.filter(
                     lab=lab,
-                    is_approved=True,
                     is_cancelled=False,
                     start_time__lt=end_datetime,
                     end_time__gt=start_datetime
                 )
-                
                 if conflicting_sessions.exists():
                     session = conflicting_sessions.first()
+                    booked_by = session.lecturer.get_full_name() if hasattr(session.lecturer, 'get_full_name') else session.lecturer.username
+                    status = "approved" if session.is_approved else "pending approval"
                     self.add_error(
                         None,
                         f'The lab already has a session "{session.title}" scheduled from {session.start_time.strftime("%H:%M")} to {session.end_time.strftime("%H:%M")}. Please choose a different time.'
                     )
-                
+
                 # Check if there are more than 10 approved computer bookings during this time
                 booked_computers_count = ComputerBooking.objects.filter(
                     computer__lab=lab,
@@ -148,7 +148,6 @@ class LabSessionForm(forms.ModelForm):
                     start_time__lt=end_datetime,
                     end_time__gt=start_datetime
                 ).count()
-                
                 if booked_computers_count > 10:
                     self.add_error(
                         None,
