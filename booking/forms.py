@@ -52,23 +52,23 @@ class ComputerBookingForm(forms.ModelForm):
             if end_datetime <= start_datetime:
                 self.add_error('end_time', 'End time must be after start time')
             
-            # Check for conflicts with approved bookings
+            # Check for conflicts with any booking (approved or not, by any user)
             if computer:
                 conflicting_bookings = ComputerBooking.objects.filter(
                     computer=computer,
-                    is_approved=True,
                     is_cancelled=False,
                     start_time__lt=end_datetime,
                     end_time__gt=start_datetime
                 )
-                
                 if conflicting_bookings.exists():
                     conflict = conflicting_bookings.first()
+                    booked_by = conflict.student.get_full_name() if hasattr(conflict.student, 'get_full_name') else conflict.student.username
+                    status = "approved" if conflict.is_approved else "pending approval"
                     self.add_error(
-                        None, 
+                        None,
                         f'This computer is already booked from {conflict.start_time.strftime("%H:%M")} to {conflict.end_time.strftime("%H:%M")}. Please choose a different time or computer.'
                     )
-                
+
                 # Check for conflicts with lab sessions
                 if computer.lab:
                     conflicting_sessions = LabSession.objects.filter(
@@ -78,7 +78,6 @@ class ComputerBookingForm(forms.ModelForm):
                         start_time__lt=end_datetime,
                         end_time__gt=start_datetime
                     )
-                    
                     if conflicting_sessions.exists():
                         session = conflicting_sessions.first()
                         self.add_error(
