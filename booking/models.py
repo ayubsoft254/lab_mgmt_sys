@@ -152,28 +152,13 @@ class LabSession(models.Model):
         self.clean()
         super(LabSession, self).save(*args, **kwargs)
         
-        # If new lab session is created, notify relevant admins
+        # If new lab session is created, notify relevant admins (no duplicates)
         if is_new:
-            # Get admins specifically assigned to this lab
-            lab_admins = User.objects.filter(
-                is_admin=True, 
-                managed_labs=self.lab
-            )
-            
-            # Get super admins
+            # Get all unique admins (lab-specific and super admins)
+            lab_admins = User.objects.filter(is_admin=True, managed_labs=self.lab)
             super_admins = User.objects.filter(is_super_admin=True)
-            
-            # Create notifications for lab-specific admins
-            for admin in lab_admins:
-                Notification.objects.create(
-                    user=admin,
-                    message=f"New lab session: {self.title} in {self.lab.name} by {self.lecturer.username}",
-                    notification_type='session_booked',
-                    lab_session=self
-                )
-            
-            # Create notifications for super admins (if they're not already notified as lab admins)
-            for admin in super_admins.exclude(id__in=lab_admins.values_list('id', flat=True)):
+            all_admins = set(list(lab_admins) + list(super_admins))
+            for admin in all_admins:
                 Notification.objects.create(
                     user=admin,
                     message=f"New lab session: {self.title} in {self.lab.name} by {self.lecturer.username}",
@@ -354,28 +339,12 @@ class ComputerBooking(models.Model):
                 
         super(ComputerBooking, self).save(*args, **kwargs)
         
-        # Notify relevant admins about new booking
+        # Notify relevant admins about new booking (no duplicates)
         if is_new:
-            # Get admins specifically assigned to this lab
-            lab_admins = User.objects.filter(
-                is_admin=True, 
-                managed_labs=self.computer.lab
-            )
-            
-            # Get super admins
+            lab_admins = User.objects.filter(is_admin=True, managed_labs=self.computer.lab)
             super_admins = User.objects.filter(is_super_admin=True)
-            
-            # Create notifications for lab-specific admins
-            for admin in lab_admins:
-                Notification.objects.create(
-                    user=admin,
-                    message=f"New computer booking: {self.computer} by {self.student.username}",
-                    notification_type='new_booking',
-                    booking=self
-                )
-            
-            # Create notifications for super admins (if they're not already notified as lab admins)
-            for admin in super_admins.exclude(id__in=lab_admins.values_list('id', flat=True)):
+            all_admins = set(list(lab_admins) + list(super_admins))
+            for admin in all_admins:
                 Notification.objects.create(
                     user=admin,
                     message=f"New computer booking: {self.computer} by {self.student.username}",
