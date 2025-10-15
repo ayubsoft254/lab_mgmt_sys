@@ -716,3 +716,101 @@ class SessionAttendance(Attendance):
     
     def __str__(self):
         return f"Attendance for {self.student} in {self.session} - {self.get_status_display()}"
+
+
+class Announcement(models.Model):
+    """System-wide announcements for all users"""
+    PRIORITY_CHOICES = [
+        ('low', 'Low Priority'),
+        ('medium', 'Medium Priority'),
+        ('high', 'High Priority'),
+        ('urgent', 'Urgent'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('scheduled', 'Scheduled'),
+        ('active', 'Active'),
+        ('archived', 'Archived'),
+    ]
+    
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+    description = models.TextField(blank=True, help_text="Short summary for email subject")
+    
+    # Content options
+    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    
+    # Recipients
+    target_users = models.ManyToManyField(
+        User, 
+        blank=True, 
+        related_name='received_announcements',
+        help_text="Leave empty to send to all users"
+    )
+    target_students = models.BooleanField(default=True, help_text="Include all students")
+    target_lecturers = models.BooleanField(default=True, help_text="Include all lecturers")
+    target_admins = models.BooleanField(default=True, help_text="Include all admins")
+    
+    # Scheduling
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_announcements')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    scheduled_for = models.DateTimeField(null=True, blank=True, help_text="When to send the announcement")
+    published_at = models.DateTimeField(null=True, blank=True)
+    expires_at = models.DateTimeField(null=True, blank=True, help_text="When to remove from feed")
+    
+    # Notification options
+    send_email = models.BooleanField(default=True, help_text="Send email to recipients")
+    in_app_only = models.BooleanField(default=False, help_text="Only show in-app notification")
+    
+    # Tracking
+    notifications_sent = models.IntegerField(default=0)
+    emails_sent = models.IntegerField(default=0)
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Announcement'
+        verbose_name_plural = 'Announcements'
+    
+    def __str__(self):
+        return f"{self.title} ({self.get_status_display()})"
+    
+    def get_recipient_count(self):
+        """Calculate the number of users who will receive this announcement"""
+        if self.target_users.exists():
+            return self.target_users.count()
+        
+        count = 0
+        if self.target_students:
+            count += User.objects.filter(is_student=True).count()
+        if self.target_lecturers:
+            count += User.objects.filter(is_lecturer=True).count()
+        if self.target_admins:
+            count += User.objects.filter(is_admin=True).count()
+        
+        return count
+    
+    def get_recipients(self):
+        """Get the list of users who should receive this announcement"""
+        if self.target_users.exists():
+            return self.target_users.all()
+        
+        recipients = User.objects.none()
+        
+        if self.target_students:
+            recipients = recipients | User.objects.filter(is_student=True)
+        if self.target_lecturers:
+            recipients = recipients | User.objects.filter(is_lecturer=True)
+        if self.target_admins:
+            recipients = recipients | User.objects.filter(is_admin=True)
+        
+        return recipients.distinct()
+    
+    def mark_as_sent(self, email_count=0):
+        """Mark announcement as published/sent"""
+        self.status = 'active'
+        self.published_at = timezone.now()
+        self.emails_sent = email_count
+        self.save(update_fields=['status', 'published_at', 'emails_sent'])

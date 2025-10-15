@@ -4,7 +4,7 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.conf import settings
-from .models import ComputerBooking, LabSession, Notification, User
+from .models import ComputerBooking, LabSession, Notification, User, Announcement
 from datetime import timedelta
 
 @shared_task
@@ -219,3 +219,120 @@ def _send_admin_pending_sessions_email(admin, sessions):
         )
     except Exception as e:
         print(f"Error sending admin pending sessions email: {e}")
+
+
+@shared_task
+def broadcast_scheduled_announcements():
+    """Process scheduled announcements and send to recipients"""
+    try:
+        now = timezone.now()
+        
+        # Find announcements that are scheduled and ready to send
+        scheduled_announcements = Announcement.objects.filter(
+            status='scheduled',
+            scheduled_for__lte=now
+        )
+        
+        if not scheduled_announcements.exists():
+            return 'No scheduled announcements to broadcast'
+        
+        total_sent = 0
+        announcements_processed = 0
+        
+        for announcement in scheduled_announcements:
+            try:
+                # Get recipients for this announcement
+                recipients = announcement.get_recipients()
+                
+                if not recipients.exists():
+                    # No recipients, still mark as active
+                    announcement.status = 'active'
+                    announcement.published_at = now
+                    announcement.save(update_fields=['status', 'published_at'])
+                    announcements_processed += 1
+                    continue
+                
+                email_count = 0
+                notification_count = 0
+                
+                # Create notifications for each recipient
+                for recipient in recipients:
+                    # Create notification
+                    notification = Notification.objects.create(
+                        user=recipient,
+                        message=announcement.title,
+                        notification_type='announcement',
+                        content_type=None,
+                        object_id=None
+                    )
+                    notification_count += 1
+                    
+                    # Send email if enabled
+                    if announcement.send_email:
+                        try:
+                            _send_announcement_email(recipient, announcement)
+                            email_count += 1
+                        except Exception as e:
+                            print(f"Error sending announcement email to {recipient.email}: {e}")
+                
+                # Mark announcement as active and update tracking
+                announcement.status = 'active'
+                announcement.published_at = now
+                announcement.notifications_sent = notification_count
+                announcement.emails_sent = email_count
+                announcement.save(update_fields=[
+                    'status', 'published_at', 'notifications_sent', 'emails_sent'
+                ])
+                
+                announcements_processed += 1
+                total_sent += notification_count
+                
+            except Exception as e:
+                print(f"Error processing announcement {announcement.id}: {e}")
+                continue
+        
+        return (
+            f'Broadcast {announcements_processed} announcements, '
+            f'sent {total_sent} notifications'
+        )
+    
+    except Exception as e:
+        print(f"Error in broadcast_scheduled_announcements: {e}")
+        return f'Error: {str(e)}'
+
+
+def _send_announcement_email(user, announcement):
+    """Send announcement email to a user"""
+    try:
+        subject = announcement.title
+        
+        # Determine priority label color
+        priority_colors = {
+            'low': '#3498db',      # Blue
+            'medium': '#f39c12',   # Orange
+            'high': '#e74c3c',     # Red
+            'urgent': '#8e44ad',   # Purple
+        }
+        
+        context = {
+            'user': user,
+            'announcement': announcement,
+            'priority_color': priority_colors.get(announcement.priority, '#3498db'),
+            'priority_label': announcement.get_priority_display().title(),
+            'notification_url': f"{settings.BASE_URL}/notifications/",
+            'base_url': settings.BASE_URL,
+        }
+        
+        html_message = render_to_string('emails/announcement_notification.html', context)
+        plain_message = strip_tags(html_message)
+        
+        send_mail(
+            subject=subject,
+            message=plain_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            html_message=html_message,
+            fail_silently=False,
+        )
+    except Exception as e:
+        print(f"Error sending announcement email: {e}")
