@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            padding: 30px 20px;
+        }
+        .inquiry-details {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-left: 4px solid #e74c3c;
+            margin: 20px 0;
+            border-radius: 3px;
+        }
+        .inquiry-details p {
+            margin: 8px 0;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        .message-box {
+            background-color: #fff;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            margin: 15px 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .footer {
+            background-color: #f5f5f5;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #ddd;
+        }
+        .footer a {
+            color: #2c6e49;
+            text-decoration: none;
+        }
+        .action-button {
+            display: inline-block;
+            background-color: #e74c3c;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 3px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>📩 New Inquiry Received</h1>
+        </div>
+        
+        <div class="content">
+            <p>A new inquiry has been submitted through the TTU Computer Lab Management System.</p>
+            
+            <div class="inquiry-details">
+                <p><span class="detail-label">From:</span> {{ inquiry.name }} ({{ inquiry.email }})</p>
+                <p><span class="detail-label">Category:</span> {{ inquiry.get_category_display }}</p>
+                <p><span class="detail-label">Subject:</span> {{ inquiry.subject }}</p>
+                <p><span class="detail-label">Submitted:</span> {{ inquiry.created_at|date:"F j, Y \a\t H:i" }}</p>
+                <p><span class="detail-label">Reference ID:</span> INQ-{{ inquiry.id }}</p>
+            </div>
+            
+            <h3>Message:</h3>
+            <div class="message-box">{{ inquiry.message }}</div>
+            
+            <p>
+                <a href="{{ inquiry_detail_url }}" class="action-button">View in Admin Panel</a>
+            </p>
+            
+            <p>Please respond to this inquiry as soon as possible. The user will receive a notification when you provide your response.</p>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2024 Taita Taveta University. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #2c6e49 0%, #1e4c33 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            padding: 30px 20px;
+        }
+        .inquiry-details {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-left: 4px solid #2c6e49;
+            margin: 20px 0;
+            border-radius: 3px;
+        }
+        .inquiry-details p {
+            margin: 5px 0;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #2c6e49;
+        }
+        .reference-id {
+            background-color: #e8f4f1;
+            padding: 10px;
+            border-radius: 3px;
+            margin: 15px 0;
+            font-size: 12px;
+            color: #555;
+        }
+        .footer {
+            background-color: #f5f5f5;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #ddd;
+        }
+        .footer a {
+            color: #2c6e49;
+            text-decoration: none;
+        }
+        .button {
+            display: inline-block;
+            background-color: #2c6e49;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 3px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>✓ Your Inquiry Has Been Received</h1>
+        </div>
+        
+        <div class="content">
+            <p>Hello {{ inquiry.name }},</p>
+            
+            <p>Thank you for submitting your inquiry to TTU Computer Lab Management System. We have received your message and will review it shortly.</p>
+            
+            <div class="inquiry-details">
+                <p><span class="detail-label">Subject:</span> {{ inquiry.subject }}</p>
+                <p><span class="detail-label">Category:</span> {{ inquiry.get_category_display }}</p>
+                <p><span class="detail-label">Submitted:</span> {{ inquiry.created_at|date:"F j, Y \a\t H:i" }}</p>
+            </div>
+            
+            <div class="reference-id">
+                <strong>Reference ID:</strong> INQ-{{ inquiry.id }}<br>
+                Keep this reference number for your records.
+            </div>
+            
+            <p>Our support team will review your inquiry and get back to you as soon as possible. You can expect a response within <strong>24-48 business hours</strong>.</p>
+            
+            <p>In the meantime, you may find helpful information in our:</p>
+            <ul>
+                <li><a href="{{ base_url }}/support/" style="color: #2c6e49;">Support & FAQ Page</a></li>
+                <li><a href="{{ base_url }}/documentation/" style="color: #2c6e49;">Documentation</a></li>
+            </ul>
+            
+            <p>If you have any additional information to add to your inquiry, please reply to this email with your reference ID.</p>
+            
+            <p>Best regards,<br>
+            <strong>TTU Computer Lab Management System</strong><br>
+            Support Team</p>
+        </div>
+        
+        <div class="footer">
+            <p>This is an automated email. Please do not reply directly to this message.</p>
+            <p>For further assistance, contact us at <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>
+            <p>&copy; 2024 Taita Taveta University. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

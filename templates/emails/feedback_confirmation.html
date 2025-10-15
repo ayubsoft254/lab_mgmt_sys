@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #2c6e49 0%, #1e4c33 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            padding: 30px 20px;
+        }
+        .feedback-details {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-left: 4px solid #2c6e49;
+            margin: 20px 0;
+            border-radius: 3px;
+        }
+        .feedback-details p {
+            margin: 5px 0;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #2c6e49;
+        }
+        .rating-display {
+            font-size: 18px;
+            color: #f39c12;
+            margin: 5px 0;
+        }
+        .category-badge {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+        .footer {
+            background-color: #f5f5f5;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #ddd;
+        }
+        .footer a {
+            color: #2c6e49;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>✓ Feedback Received</h1>
+        </div>
+        
+        <div class="content">
+            {% if feedback.user %}
+                <p>Hello {{ feedback.user.first_name|default:feedback.user.username }},</p>
+            {% else %}
+                <p>Hello,</p>
+            {% endif %}
+            
+            <p>Thank you for taking the time to share your feedback with us. We really appreciate your input as it helps us improve the TTU Computer Lab Management System.</p>
+            
+            <div class="feedback-details">
+                <p><span class="detail-label">Title:</span> {{ feedback.title }}</p>
+                <p>
+                    <span class="detail-label">Category:</span>
+                    <span class="category-badge">{{ feedback.get_category_display }}</span>
+                </p>
+                <p>
+                    <span class="detail-label">Your Rating:</span>
+                    <span class="rating-display">{{ feedback.get_rating_display }}</span>
+                </p>
+                <p><span class="detail-label">Submitted:</span> {{ feedback.created_at|date:"F j, Y \a\t H:i" }}</p>
+            </div>
+            
+            <p>Your feedback has been recorded and will be reviewed by our team. If your feedback requires further follow-up, we may reach out to you.</p>
+            
+            <p>
+                <strong>What happens next?</strong><br>
+                We continuously monitor feedback to identify areas for improvement. Your insights are valuable in helping us enhance the user experience and address any issues you may have encountered.
+            </p>
+            
+            <p>Thank you again for your contribution!</p>
+            
+            <p>Best regards,<br>
+            <strong>TTU Computer Lab Management System</strong><br>
+            Development Team</p>
+        </div>
+        
+        <div class="footer">
+            <p>This is an automated email. Please do not reply directly to this message.</p>
+            <p>For further assistance, contact us at <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>
+            <p>&copy; 2024 Taita Taveta University. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
