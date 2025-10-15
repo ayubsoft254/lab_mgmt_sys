@@ -552,11 +552,10 @@ def free_timeslots_view(request, lab_id=None, computer_id=None):
     while current_date <= end_date:
         # Generate hourly slots from 8:00 AM to 8:00 PM
         for hour in range(8, 20):
-            # Fixed: Use the correct way to create a time object
             slot_start_time = time(hour=hour, minute=0)
             slot_start = timezone.make_aware(datetime.combine(current_date, slot_start_time))
             slot_end = slot_start + timedelta(hours=1)
-            
+
             # Check if slot is free
             if computer:
                 is_free = not booked_slots.filter(
@@ -574,14 +573,17 @@ def free_timeslots_view(request, lab_id=None, computer_id=None):
                         end_time__gt=slot_start
                     ).exists()
                 )
-            
+
+            # Add is_weekend property
+            is_weekend = current_date.weekday() >= 5  # 5=Saturday, 6=Sunday
+
             time_slots.append({
                 'date': current_date,
                 'start_time': slot_start,
                 'end_time': slot_end,
-                'is_free': is_free
+                'is_free': is_free,
+                'is_weekend': is_weekend
             })
-        
         current_date += timedelta(days=1)
     
     return render(request, 'free_timeslots.html', {

@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container mx-auto px-2 py-6 animate-fade-in">
-    <h1 class="text-3xl md:text-4xl font-bold text-ttu-dark mb-6 text-center">
+    <h1 class="text-3xl md:text-4xl font-bold text-ttu-dark mb-4 text-center">
         {% if computer %}
             <span class="block mb-1">Free Time Slots</span>
             <span class="text-lg font-normal text-gray-500">{{ computer.lab.name }} &mdash; Computer #{{ computer.computer_number }}</span>
@@ -12,6 +12,34 @@
         {% endif %}
     </h1>
 
+    <!-- Lab Hours Summary -->
+    <div class="glass-card rounded-lg shadow mb-6 p-4 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
+        <div>
+            <span class="font-semibold text-ttu-green text-lg"><i class="fas fa-clock mr-1"></i> Lab Hours:</span>
+            <span class="ml-2 text-gray-700">Monday - Friday, 8:00 AM to 5:00 PM</span>
+        </div>
+        <div>
+            <span class="font-semibold text-orange-600"><i class="fas fa-utensils mr-1"></i> Lunch Break:</span>
+            <span class="ml-2 text-gray-700">1:00 PM to 2:00 PM</span>
+        </div>
+        <div>
+            <span class="font-semibold text-gray-500"><i class="fas fa-calendar-day mr-1"></i> Closed:</span>
+            <span class="ml-2 text-gray-700">Weekends & Public Holidays</span>
+        </div>
+    </div>
+
+    <!-- Duration Selector -->
+    <div class="mb-6 flex flex-col md:flex-row items-center justify-center gap-4">
+        <label for="duration" class="font-semibold text-ttu-dark text-base">Select Duration:</label>
+        <select id="duration" name="duration" class="form-select px-4 py-2 rounded-lg border-ttu-green focus:ring-ttu-green focus:border-ttu-green">
+            <option value="30">30 minutes</option>
+            <option value="60">1 hour</option>
+            <option value="90">1 hour 30 minutes</option>
+            <option value="120">2 hours</option>
+            <option value="180">3 hours</option>
+        </select>
+    </div>
+
     {% if error %}
         <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded shadow">
             <i class="fas fa-exclamation-circle mr-2"></i> {{ error }}
@@ -19,32 +47,50 @@
     {% else %}
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {% for slot in time_slots %}
-                <div class="glass-card rounded-xl shadow-md p-5 flex flex-col items-center justify-center text-center transition hover:scale-[1.03] hover:shadow-lg duration-200">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="text-ttu-green font-bold text-lg">
-                            {{ slot.date|date:"D, M d" }}
+                {% comment %} Mark unavailable slots visually {% endcomment %}
+                {% if slot.start_time|date:'H:i' < '08:00' or slot.end_time|date:'H:i' > '17:00' or slot.start_time|date:'H:i' >= '13:00' and slot.end_time|date:'H:i' <= '14:00' or slot.is_weekend %}
+                    <div class="glass-card rounded-xl shadow-md p-5 flex flex-col items-center justify-center text-center opacity-50 cursor-not-allowed border-2 border-gray-200">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-gray-400 font-bold text-lg">
+                                {{ slot.date|date:"D, M d" }}
+                            </span>
+                            <span class="bg-gray-100 text-gray-400 px-2 py-1 rounded text-xs font-semibold">
+                                {{ slot.start_time|date:"h:i A" }} - {{ slot.end_time|date:"h:i A" }}
+                            </span>
+                        </div>
+                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gray-200 text-gray-500 font-semibold text-sm">
+                            <i class="fas fa-ban"></i> Unavailable
                         </span>
-                        <span class="bg-ttu-light text-ttu-dark px-2 py-1 rounded text-xs font-semibold">
-                            {{ slot.start_time|date:"h:i A" }} - {{ slot.end_time|date:"h:i A" }}
-                        </span>
+                        <div class="mt-2 text-xs text-gray-400">Outside lab hours or lunch break</div>
                     </div>
-                    <div class="mb-2">
+                {% else %}
+                    <div class="glass-card rounded-xl shadow-md p-5 flex flex-col items-center justify-center text-center transition hover:scale-[1.03] hover:shadow-lg duration-200">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-ttu-green font-bold text-lg">
+                                {{ slot.date|date:"D, M d" }}
+                            </span>
+                            <span class="bg-ttu-light text-ttu-dark px-2 py-1 rounded text-xs font-semibold">
+                                {{ slot.start_time|date:"h:i A" }} - {{ slot.end_time|date:"h:i A" }}
+                            </span>
+                        </div>
+                        <div class="mb-2">
+                            {% if slot.is_free %}
+                                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-100 text-green-700 font-semibold text-sm">
+                                    <i class="fas fa-check-circle"></i> Available
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-100 text-red-700 font-semibold text-sm">
+                                    <i class="fas fa-times-circle"></i> Booked
+                                </span>
+                            {% endif %}
+                        </div>
                         {% if slot.is_free %}
-                            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-100 text-green-700 font-semibold text-sm">
-                                <i class="fas fa-check-circle"></i> Available
-                            </span>
+                            <a href="#" class="btn btn-ttu w-full mt-2 py-2 rounded-lg font-semibold text-base shadow hover:bg-ttu-dark transition">Book Now</a>
                         {% else %}
-                            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-100 text-red-700 font-semibold text-sm">
-                                <i class="fas fa-times-circle"></i> Booked
-                            </span>
+                            <button class="btn btn-outline-ttu w-full mt-2 py-2 rounded-lg font-semibold text-base cursor-not-allowed opacity-60" disabled>Unavailable</button>
                         {% endif %}
                     </div>
-                    {% if slot.is_free %}
-                        <a href="#" class="btn btn-ttu w-full mt-2 py-2 rounded-lg font-semibold text-base shadow hover:bg-ttu-dark transition">Book Now</a>
-                    {% else %}
-                        <button class="btn btn-outline-ttu w-full mt-2 py-2 rounded-lg font-semibold text-base cursor-not-allowed opacity-60" disabled>Unavailable</button>
-                    {% endif %}
-                </div>
+                {% endif %}
             {% empty %}
                 <div class="col-span-full text-center text-gray-500 py-8">
                     <i class="fas fa-calendar-times text-ttu-green text-4xl mb-2"></i><br>
