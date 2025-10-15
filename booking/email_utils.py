@@ -16,10 +16,16 @@ logger = logging.getLogger(__name__)
 def send_booking_approval_email(booking):
     """
     Send email to student when their booking is approved.
+    Prevents duplicate emails by checking the approval_email_sent flag.
     
     Args:
         booking: ComputerBooking instance
     """
+    # Prevent duplicate emails
+    if booking.approval_email_sent:
+        logger.info(f"Approval email already sent for booking {booking.id}, skipping")
+        return True
+    
     try:
         subject = f"Your Computer Booking Has Been Approved - {booking.computer}"
         
@@ -49,6 +55,10 @@ def send_booking_approval_email(booking):
         email.attach_alternative(html_message, "text/html")
         email.send(fail_silently=False)
         
+        # Mark email as sent
+        booking.approval_email_sent = True
+        booking.save(update_fields=['approval_email_sent'])
+        
         logger.info(f"Booking approval email sent to {booking.student.email} for booking {booking.id}")
         return True
         
@@ -60,11 +70,17 @@ def send_booking_approval_email(booking):
 def send_booking_rejection_email(booking, rejection_reason=""):
     """
     Send email to student when their booking is rejected.
+    Prevents duplicate emails by checking the rejection_email_sent flag.
     
     Args:
         booking: ComputerBooking instance
         rejection_reason: Optional reason for rejection
     """
+    # Prevent duplicate emails
+    if booking.rejection_email_sent:
+        logger.info(f"Rejection email already sent for booking {booking.id}, skipping")
+        return True
+    
     try:
         subject = f"Your Computer Booking Has Been Rejected - {booking.computer}"
         
@@ -90,6 +106,10 @@ def send_booking_rejection_email(booking, rejection_reason=""):
         email.attach_alternative(html_message, "text/html")
         email.send(fail_silently=False)
         
+        # Mark email as sent
+        booking.rejection_email_sent = True
+        booking.save(update_fields=['rejection_email_sent'])
+        
         logger.info(f"Booking rejection email sent to {booking.student.email} for booking {booking.id}")
         return True
         
@@ -101,10 +121,16 @@ def send_booking_rejection_email(booking, rejection_reason=""):
 def send_session_approval_email(session):
     """
     Send email to lecturer when their lab session is approved.
+    Prevents duplicate emails by checking the approval_email_sent flag.
     
     Args:
         session: LabSession instance
     """
+    # Prevent duplicate emails
+    if session.approval_email_sent:
+        logger.info(f"Approval email already sent for session {session.id}, skipping")
+        return True
+    
     try:
         subject = f"Your Lab Session Has Been Approved - {session.title}"
         
@@ -130,6 +156,10 @@ def send_session_approval_email(session):
         email.attach_alternative(html_message, "text/html")
         email.send(fail_silently=False)
         
+        # Mark email as sent
+        session.approval_email_sent = True
+        session.save(update_fields=['approval_email_sent'])
+        
         logger.info(f"Session approval email sent to {session.lecturer.email} for session {session.id}")
         return True
         
@@ -141,11 +171,17 @@ def send_session_approval_email(session):
 def send_session_rejection_email(session, rejection_reason=""):
     """
     Send email to lecturer when their lab session is rejected.
+    Prevents duplicate emails by checking the rejection_email_sent flag.
     
     Args:
         session: LabSession instance
         rejection_reason: Optional reason for rejection
     """
+    # Prevent duplicate emails
+    if session.rejection_email_sent:
+        logger.info(f"Rejection email already sent for session {session.id}, skipping")
+        return True
+    
     try:
         subject = f"Your Lab Session Has Been Rejected - {session.title}"
         
@@ -171,6 +207,10 @@ def send_session_rejection_email(session, rejection_reason=""):
         email.attach_alternative(html_message, "text/html")
         email.send(fail_silently=False)
         
+        # Mark email as sent
+        session.rejection_email_sent = True
+        session.save(update_fields=['rejection_email_sent'])
+        
         logger.info(f"Session rejection email sent to {session.lecturer.email} for session {session.id}")
         return True
         
@@ -182,12 +222,18 @@ def send_session_rejection_email(session, rejection_reason=""):
 def send_booking_cancellation_email(booking, cancelled_by=None, reason=""):
     """
     Send email to student when their booking is cancelled.
+    Prevents duplicate emails by checking the cancellation_email_sent flag.
     
     Args:
         booking: ComputerBooking instance
         cancelled_by: String indicating who cancelled (admin or user)
         reason: Optional cancellation reason
     """
+    # Prevent duplicate emails
+    if booking.cancellation_email_sent:
+        logger.info(f"Cancellation email already sent for booking {booking.id}, skipping")
+        return True
+    
     try:
         subject = f"Your Computer Booking Has Been Cancelled - {booking.computer}"
         
@@ -214,6 +260,10 @@ def send_booking_cancellation_email(booking, cancelled_by=None, reason=""):
         email.attach_alternative(html_message, "text/html")
         email.send(fail_silently=False)
         
+        # Mark email as sent
+        booking.cancellation_email_sent = True
+        booking.save(update_fields=['cancellation_email_sent'])
+        
         logger.info(f"Booking cancellation email sent to {booking.student.email} for booking {booking.id}")
         return True
         
@@ -225,12 +275,18 @@ def send_booking_cancellation_email(booking, cancelled_by=None, reason=""):
 def send_session_cancellation_email(session, cancelled_by=None, reason=""):
     """
     Send email to lecturer when their session is cancelled.
+    Prevents duplicate emails by checking the cancellation_email_sent flag.
     
     Args:
         session: LabSession instance
         cancelled_by: String indicating who cancelled
         reason: Optional cancellation reason
     """
+    # Prevent duplicate emails
+    if session.cancellation_email_sent:
+        logger.info(f"Cancellation email already sent for session {session.id}, skipping")
+        return True
+    
     try:
         subject = f"Your Lab Session Has Been Cancelled - {session.title}"
         
@@ -256,6 +312,10 @@ def send_session_cancellation_email(session, cancelled_by=None, reason=""):
         )
         email.attach_alternative(html_message, "text/html")
         email.send(fail_silently=False)
+        
+        # Mark email as sent
+        session.cancellation_email_sent = True
+        session.save(update_fields=['cancellation_email_sent'])
         
         logger.info(f"Session cancellation email sent to {session.lecturer.email} for session {session.id}")
         return True

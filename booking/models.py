@@ -120,6 +120,11 @@ class LabSession(models.Model):
     is_cancelled = models.BooleanField(default=False)
     cancellation_reason = models.TextField(blank=True)
     
+    # Email tracking fields to prevent duplicate emails
+    approval_email_sent = models.BooleanField(default=False)
+    rejection_email_sent = models.BooleanField(default=False)
+    cancellation_email_sent = models.BooleanField(default=False)
+    
     def clean(self):
         # Check if end time is after start time
         if self.end_time <= self.start_time:
@@ -287,6 +292,11 @@ class ComputerBooking(models.Model):
     extension_requested_at = models.DateTimeField(null=True, blank=True)
     extension_approved = models.BooleanField(default=False)
     extension_approved_at = models.DateTimeField(null=True, blank=True)
+    
+    # Email tracking fields to prevent duplicate emails
+    approval_email_sent = models.BooleanField(default=False)
+    rejection_email_sent = models.BooleanField(default=False)
+    cancellation_email_sent = models.BooleanField(default=False)
     
     def clean(self):
         # Check if end time is after start time
