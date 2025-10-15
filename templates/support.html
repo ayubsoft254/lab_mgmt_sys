@@ -140,42 +140,22 @@
         <div class="grid md:grid-cols-2 gap-12">
             <div class="bg-white rounded-xl shadow-lg overflow-hidden">
                 <div class="p-8">
-                    <h3 class="text-2xl font-bold text-gray-900 mb-6">Send us a message</h3>
-                    <form id="contact-form" method="post" action="{% url 'contact_submit' %}">
-                        {% csrf_token %}
-                        <div class="mb-6">
-                            <label for="name" class="block text-gray-700 font-medium mb-2">Your Name</label>
-                            <input type="text" id="name" name="name" class="form-field w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ttu-green focus:border-transparent" placeholder="John Doe" required>
-                        </div>
-                        <div class="mb-6">
-                            <label for="email" class="block text-gray-700 font-medium mb-2">Email Address</label>
-                            <input type="email" id="email" name="email" class="form-field w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ttu-green focus:border-transparent" placeholder="you@example.com" required>
-                        </div>
-                        <div class="mb-6">
-                            <label for="subject" class="block text-gray-700 font-medium mb-2">Subject</label>
-                            <select id="subject" name="subject" class="form-field w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ttu-green focus:border-transparent" required>
-                                <option value="">Select a subject...</option>
-                                <option value="general">General Inquiry</option>
-                                <option value="technical">Technical Support</option>
-                                <option value="booking">Booking Assistance</option>
-                                <option value="feedback">Feedback</option>
-                            </select>
-                        </div>
-                        <div class="mb-6">
-                            <label for="message" class="block text-gray-700 font-medium mb-2">Message</label>
-                            <textarea id="message" name="message" rows="4" class="form-field w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ttu-green focus:border-transparent" placeholder="Your message here..." required></textarea>
-                        </div>
-                        <button type="submit" class="w-full bg-ttu-green text-white py-3 px-6 rounded-lg font-semibold hover:bg-ttu-dark transition-colors duration-300 flex items-center justify-center">
-                            <span>Send Message</span>
-                            <i class="fas fa-paper-plane ml-2"></i>
-                            <span class="loading-spinner hidden ml-2">
-                                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                            </span>
-                        </button>
-                    </form>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-6">Get in Touch</h3>
+                    <p class="text-gray-600 mb-6">Have questions or need support? Choose from the options below:</p>
+                    
+                    <div class="space-y-3">
+                        <a href="{% url 'contact:submit_inquiry' %}" class="w-full block bg-ttu-green text-white py-3 px-6 rounded-lg font-semibold hover:bg-ttu-dark transition-colors duration-300 text-center">
+                            <i class="fas fa-question-circle mr-2"></i> Submit an Inquiry
+                        </a>
+                        <p class="text-center text-sm text-gray-600">Ask questions about bookings, technical issues, or account problems</p>
+                        
+                        <div class="border-t border-gray-200 py-3"></div>
+                        
+                        <a href="{% url 'contact:submit_feedback' %}" class="w-full block bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300 text-center">
+                            <i class="fas fa-star mr-2"></i> Share Feedback
+                        </a>
+                        <p class="text-center text-sm text-gray-600">Tell us what you think and help us improve</p>
+                    </div>
                 </div>
             </div>
             
