@@ -1,0 +1,25 @@
+Lab Session Approved
+
+Hello {{ lecturer_name }},
+
+Excellent news! Your lab session has been APPROVED and is now scheduled.
+
+--- SESSION DETAILS ---
+
+Title: {{ session_title }}
+Lab: {{ lab }}
+Date & Time: {{ start_time }} - {{ end_time }}
+Attending Students: {{ student_count }} student(s)
+
+--- NEXT STEPS ---
+
+1. Prepare your materials and content for the session
+2. Arrive early to set up and check equipment
+3. Students will receive notifications about the approved session
+
+View your session: {{ session_url }}
+
+---
+
+Lab Management System
+All rights reserved

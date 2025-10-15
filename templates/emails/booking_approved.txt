@@ -1,0 +1,26 @@
+Booking Approved
+
+Hello {{ student_name }},
+
+Great news! Your computer booking has been APPROVED. You're all set to use the computer lab.
+
+--- BOOKING DETAILS ---
+
+Computer: {{ computer }}
+Lab: {{ lab }}
+Date & Time: {{ start_time }} - {{ end_time }}
+Booking Code: {{ booking_code }}
+Purpose: {{ purpose }}
+
+--- IMPORTANT ---
+
+Please arrive a few minutes early and bring a valid ID for check-in.
+
+If you need to cancel or modify your booking, please contact the lab administration.
+
+View your booking: {{ booking_url }}
+
+---
+
+Lab Management System
+All rights reserved

@@ -1,0 +1,26 @@
+Booking Request Rejected
+
+Hello {{ student_name }},
+
+Unfortunately, your computer booking request has been REJECTED.
+
+--- BOOKING DETAILS ---
+
+Computer: {{ computer }}
+Lab: {{ lab }}
+Date & Time: {{ start_time }} - {{ end_time }}
+
+--- REASON FOR REJECTION ---
+
+{{ rejection_reason }}
+
+---
+
+Please try booking another time slot or contact our support team for assistance.
+
+Contact Support: {{ support_url }}
+
+---
+
+Lab Management System
+All rights reserved

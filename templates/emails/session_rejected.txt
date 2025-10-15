@@ -1,0 +1,26 @@
+Lab Session Request Rejected
+
+Hello {{ lecturer_name }},
+
+Unfortunately, your lab session request has been REJECTED.
+
+--- SESSION DETAILS ---
+
+Title: {{ session_title }}
+Lab: {{ lab }}
+Date & Time: {{ start_time }} - {{ end_time }}
+
+--- REASON FOR REJECTION ---
+
+{{ rejection_reason }}
+
+---
+
+Please try booking another time slot or contact our support team for more information.
+
+Contact Support: {{ support_url }}
+
+---
+
+Lab Management System
+All rights reserved

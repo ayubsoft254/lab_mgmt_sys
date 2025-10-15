@@ -19,6 +19,11 @@ from .forms import (
     ComputerBookingForm, LabSessionForm, RecurringSessionForm, 
     StudentRatingForm, UserProfileForm, AttendanceForm, BulkAttendanceForm
 )
+from .email_utils import (
+    send_booking_approval_email, send_booking_rejection_email,
+    send_session_approval_email, send_session_rejection_email,
+    send_booking_cancellation_email, send_session_cancellation_email
+)
  
 class LandingPageView(TemplateView):
     template_name = 'landing.html'
@@ -454,7 +459,10 @@ def approve_booking_view(request, booking_id):
             booking=booking  # Add direct reference
         )
         
-        messages.success(request, "Booking approved successfully")
+        # Send approval email to student
+        send_booking_approval_email(booking)
+        
+        messages.success(request, "Booking approved successfully and confirmation email sent")
     except ValidationError as e:
         booking.is_approved = False
         messages.error(request, f"Cannot approve booking: {', '.join(e.messages)}")
@@ -481,7 +489,10 @@ def approve_session_view(request, session_id):
             lab_session=session  # Add direct reference
         )
         
-        messages.success(request, "Lab session approved successfully")
+        # Send approval email to lecturer
+        send_session_approval_email(session)
+        
+        messages.success(request, "Lab session approved successfully and confirmation email sent")
     except ValidationError as e:
         session.is_approved = False
         messages.error(request, f"Cannot approve session: {', '.join(e.messages)}")
@@ -762,9 +773,12 @@ def bulk_approve_bookings_view(request):
                 notification_type='booking_approved',
                 booking=booking
             )
+            
+            # Send approval email
+            send_booking_approval_email(booking)
             count += 1
         
-        messages.success(request, f"{count} bookings approved successfully")
+        messages.success(request, f"{count} bookings approved successfully and confirmation emails sent")
     
     return redirect('admin_dashboard')
 
@@ -790,9 +804,12 @@ def bulk_approve_sessions_view(request):
                 notification_type='booking_approved',
                 lab_session=session
             )
+            
+            # Send approval email
+            send_session_approval_email(session)
             count += 1
         
-        messages.success(request, f"{count} lab sessions approved successfully")
+        messages.success(request, f"{count} lab sessions approved successfully and confirmation emails sent")
     
     return redirect('admin_dashboard')
 
@@ -939,11 +956,14 @@ def reject_booking_view(request, booking_id):
         booking=booking
     )
     
+    # Send rejection email to student
+    send_booking_rejection_email(booking)
+    
     # Cancel the booking
     booking.is_cancelled = True
     booking.save()
     
-    messages.success(request, "Booking rejected successfully")
+    messages.success(request, "Booking rejected successfully and notification email sent")
     return redirect('admin_dashboard')
 
 @login_required
@@ -962,10 +982,13 @@ def reject_session_view(request, session_id):
         lab_session=session
     )
     
+    # Send rejection email to lecturer
+    send_session_rejection_email(session)
+    
     # Delete the session
     session.delete()
     
-    messages.success(request, "Lab session rejected successfully")
+    messages.success(request, "Lab session rejected successfully and notification email sent")
     return redirect('admin_dashboard')
 
 @login_required
@@ -980,7 +1003,7 @@ def cancel_booking_view(request, booking_id):
         booking.is_cancelled = True
         booking.save()
         
-        # Create notification
+        # Create notification and send email
         if request.user.is_admin:
             Notification.objects.create(
                 user=booking.student,
@@ -988,6 +1011,8 @@ def cancel_booking_view(request, booking_id):
                 notification_type='booking_cancelled',
                 booking=booking
             )
+            # Send cancellation email to student
+            send_booking_cancellation_email(booking, cancelled_by="Administrator")
         else:
             # Notify admins when a student cancels
             admin_users = User.objects.filter(is_admin=True)
@@ -998,8 +1023,10 @@ def cancel_booking_view(request, booking_id):
                     notification_type='booking_cancelled',
                     booking=booking
                 )
+            # Send cancellation email to student
+            send_booking_cancellation_email(booking, cancelled_by="Student")
         
-        messages.success(request, "Booking cancelled successfully")
+        messages.success(request, "Booking cancelled successfully and confirmation email sent")
         return redirect('home')
     
     return render(request, 'cancel_booking.html', {'booking': booking})
@@ -1013,7 +1040,7 @@ def cancel_session_view(request, session_id):
     session = get_object_or_404(LabSession, id=session_id)
     
     if request.method == 'POST':
-        # Create notification before deleting
+        # Create notification and send email to lecturer
         Notification.objects.create(
             user=session.lecturer,
             message=f"Your session for {session.lab.name} has been cancelled by an administrator.",
@@ -1021,10 +1048,22 @@ def cancel_session_view(request, session_id):
             lab_session=session
         )
         
+        # Send cancellation email to lecturer
+        send_session_cancellation_email(session, cancelled_by="Administrator")
+        
+        # Also notify attending students
+        for student in session.attending_students.all():
+            Notification.objects.create(
+                user=student,
+                message=f"The lab session '{session.title}' scheduled for {session.lab.name} has been cancelled.",
+                notification_type='session_cancelled',
+                lab_session=session
+            )
+        
         # Delete the session
         session.delete()
         
-        messages.success(request, "Lab session cancelled successfully")
+        messages.success(request, "Lab session cancelled successfully and notifications sent")
         return redirect('admin_dashboard')
     
     return render(request, 'cancel_session.html', {'session': session})

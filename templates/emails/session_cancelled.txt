@@ -1,0 +1,29 @@
+Lab Session Cancelled
+
+Hello {{ lecturer_name }},
+
+Your lab session has been CANCELLED.
+
+--- CANCELLED SESSION DETAILS ---
+
+Title: {{ session_title }}
+Lab: {{ lab }}
+Date & Time: {{ start_time }} - {{ end_time }}
+Cancelled By: {{ cancelled_by }}
+
+--- CANCELLATION REASON ---
+
+{{ cancellation_reason }}
+
+---
+
+Registered students have been notified of this cancellation.
+
+If you would like to reschedule or have any questions, please contact support.
+
+Contact Support: {{ support_url }}
+
+---
+
+Lab Management System
+All rights reserved

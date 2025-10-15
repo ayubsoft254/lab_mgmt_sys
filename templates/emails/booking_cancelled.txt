@@ -1,0 +1,27 @@
+Booking Cancelled
+
+Hello {{ student_name }},
+
+Your computer booking has been CANCELLED.
+
+--- CANCELLED BOOKING DETAILS ---
+
+Computer: {{ computer }}
+Lab: {{ lab }}
+Date & Time: {{ start_time }} - {{ end_time }}
+Cancelled By: {{ cancelled_by }}
+
+--- CANCELLATION REASON ---
+
+{{ cancellation_reason }}
+
+---
+
+If you have any questions or would like to rebook, please don't hesitate to contact us.
+
+Contact Support: {{ support_url }}
+
+---
+
+Lab Management System
+All rights reserved
