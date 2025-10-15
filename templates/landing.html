@@ -381,6 +381,68 @@
     </section>    
 
     {% endblock body %}
+    
+    <!-- Contact Section -->
+    <section id="contact" class="py-16 bg-ttu-lighter">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <span class="inline-block px-3 py-1 text-sm font-semibold text-ttu-green bg-green-100 rounded-full mb-4">CONTACT US</span>
+                <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Get In <span class="text-ttu-green">Touch</span></h2>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+                <!-- Email -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow p-8 text-center">
+                    <div class="w-14 h-14 bg-ttu-light rounded-full flex items-center justify-center mx-auto mb-4 text-ttu-green text-2xl">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Email</h3>
+                    <p class="text-gray-600 mb-4">For inquiries and general support</p>
+                    <a href="mailto:ictlabs@ttu.ac.ke" class="text-ttu-green font-semibold hover:underline">
+                        ictlabs@ttu.ac.ke
+                    </a>
+                </div>
+
+                <!-- WhatsApp/Phone -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow p-8 text-center">
+                    <div class="w-14 h-14 bg-ttu-light rounded-full flex items-center justify-center mx-auto mb-4 text-ttu-green text-2xl">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">WhatsApp / Phone</h3>
+                    <p class="text-gray-600 mb-4">For quick support and inquiries</p>
+                    <a href="https://wa.me/254113364472" target="_blank" rel="noopener noreferrer" class="text-ttu-green font-semibold hover:underline">
+                        +254 113 364 472
+                    </a>
+                </div>
+
+                <!-- Location -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow p-8 text-center">
+                    <div class="w-14 h-14 bg-ttu-light rounded-full flex items-center justify-center mx-auto mb-4 text-ttu-green text-2xl">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Location</h3>
+                    <p class="text-gray-600 mb-4">Visit us at the IC Department</p>
+                    <p class="text-ttu-green font-semibold">
+                        Taita Taveta University
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-12 text-center">
+                <p class="text-gray-600 mb-6">Need more help? Visit our support page or submit a form.</p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="{% url 'support' %}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-ttu-green hover:bg-ttu-dark transition-colors duration-300">
+                        Support & FAQ <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                    <a href="{% url 'contact:submit_inquiry' %}" class="inline-flex items-center px-6 py-3 border-2 border-ttu-green text-base font-medium rounded-md text-ttu-green hover:bg-ttu-light transition-colors duration-300">
+                        Send Inquiry <i class="fas fa-envelope ml-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% endblock body %}
     <!-- Footer -->
     <footer class="bg-ttu-dark text-white pt-16 pb-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
