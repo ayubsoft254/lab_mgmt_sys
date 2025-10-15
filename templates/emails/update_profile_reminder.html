@@ -1,0 +1,26 @@
+{% load static %}
+<table style="width:100%;max-width:600px;margin:auto;background:#f8fcf9;border-radius:16px;font-family:Arial,sans-serif;border:1px solid #e0e0e0;box-shadow:0 4px 24px rgba(44,110,73,0.08);">
+    <tr>
+        <td style="padding:40px 32px;text-align:center;">
+            <img src="https://reg.ttu.ac.ke/static/ttulogo.jpg" alt="TTU Logo" style="height:56px;margin-bottom:20px;border-radius:12px;box-shadow:0 2px 8px rgba(44,110,73,0.10);">
+            <h2 style="color:#2c6e49;margin-bottom:10px;font-size:2.1em;font-weight:700;letter-spacing:-1px;">Action Required: Update Your Profile</h2>
+            <p style="color:#333;font-size:1.15em;margin-bottom:28px;line-height:1.6;">
+                Hi <span style="color:#1e4c33;font-weight:600;">{{ user.get_full_name|default:user.username }}</span>,<br>
+                <br>
+                We noticed your profile is missing some important information. Keeping your profile up to date ensures you have full access to all features and notifications in the Lab Management System.
+            </p>
+            <div style="background:#f2f9f5;border-radius:10px;padding:18px 0 10px 0;margin-bottom:28px;box-shadow:0 2px 8px rgba(44,110,73,0.05);max-width:340px;margin-left:auto;margin-right:auto;">
+                <div style="color:#2c6e49;font-weight:bold;font-size:1.08em;margin-bottom:8px;">Missing Information:</div>
+                <ul style="list-style:none;padding:0;margin:0;color:#1e4c33;font-size:1em;">
+                    {% if not user.first_name %}<li style="margin-bottom:6px;"><i style="color:#ef4444;margin-right:6px;" class="fas fa-user"></i> First Name</li>{% endif %}
+                    {% if not user.last_name %}<li style="margin-bottom:6px;"><i style="color:#ef4444;margin-right:6px;" class="fas fa-user"></i> Last Name</li>{% endif %}
+                    {% if not user.school %}<li style="margin-bottom:6px;"><i style="color:#ef4444;margin-right:6px;" class="fas fa-university"></i> School</li>{% endif %}
+                    {% if user.is_student and not user.course %}<li style="margin-bottom:6px;"><i style="color:#ef4444;margin-right:6px;" class="fas fa-graduation-cap"></i> Course</li>{% endif %}
+                </ul>
+            </div>
+            <a href="https://projects.ttu.ac.ke/profile/" style="display:inline-block;padding:14px 38px;background:#2c6e49;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:1.08em;box-shadow:0 2px 8px rgba(44,110,73,0.10);transition:background 0.2s;">Update Profile Now</a>
+            <p style="color:#888;font-size:0.98em;margin-top:36px;line-height:1.5;">If you have any questions or need help, please contact our support team at <a href="mailto:ictlabs@ttu.ac.ke" style="color:#2c6e49;font-weight:500;text-decoration:underline;">ictlabs@ttu.ac.ke</a>.</p>
+            <div style="margin-top:32px;color:#b2b2b2;font-size:0.92em;">Thank you for helping us keep your account secure and up to date.<br>&mdash; TTU ICT Labs Team</div>
+        </td>
+    </tr>
+</table>
