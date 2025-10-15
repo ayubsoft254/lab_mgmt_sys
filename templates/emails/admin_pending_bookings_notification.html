@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .email-container {
+            max-width: 800px;
+            margin: 0 auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            padding: 30px 20px;
+        }
+        .alert-box {
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 20px;
+            color: #856404;
+        }
+        .booking-item {
+            background-color: #f8f9fa;
+            border-left: 4px solid #e74c3c;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 3px;
+        }
+        .booking-header {
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 8px;
+        }
+        .booking-details {
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .detail-row {
+            display: flex;
+            margin: 5px 0;
+        }
+        .detail-label {
+            font-weight: bold;
+            width: 120px;
+            color: #555;
+        }
+        .detail-value {
+            flex: 1;
+            color: #333;
+        }
+        .action-buttons {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
+        .action-link {
+            display: inline-block;
+            background-color: #e74c3c;
+            color: white;
+            padding: 8px 15px;
+            text-decoration: none;
+            border-radius: 3px;
+            margin-right: 10px;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+        .action-link:hover {
+            background-color: #c0392b;
+        }
+        .summary-box {
+            background-color: #e8f4f1;
+            border: 1px solid #2c6e49;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .summary-title {
+            font-weight: bold;
+            color: #2c6e49;
+            margin-bottom: 10px;
+        }
+        .pending-count {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-top: 10px;
+        }
+        .footer {
+            background-color: #f5f5f5;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #ddd;
+        }
+        .footer a {
+            color: #2c6e49;
+            text-decoration: none;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .status-pending {
+            background-color: #ffc107;
+            color: #333;
+        }
+        .purpose-box {
+            background-color: #f5f5f5;
+            padding: 8px;
+            border-radius: 3px;
+            margin-top: 5px;
+            font-size: 12px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>⚠ Pending Computer Bookings</h1>
+            <p style="margin: 10px 0 0 0; opacity: 0.9;">Action Required: {{ pending_count }} booking(s) awaiting approval</p>
+        </div>
+        
+        <div class="content">
+            <p>Hello {{ admin.get_full_name|default:admin.username }},</p>
+            
+            <p>You have <strong>{{ pending_count }} pending computer booking(s)</strong> that require your review and approval.</p>
+            
+            <div class="summary-box">
+                <div class="summary-title">📊 Summary</div>
+                <p>Total pending bookings: <span class="pending-count">{{ pending_count }}</span></p>
+                <p style="margin-top: 10px; color: #555;">These bookings were submitted by students and are waiting for your approval. Please review them as soon as possible to help students access the lab resources they need.</p>
+            </div>
+            
+            <div class="alert-box">
+                <strong>💡 Tip:</strong> Review and approve bookings promptly to provide a better experience for students.
+            </div>
+            
+            <h3 style="color: #e74c3c; margin-top: 25px; margin-bottom: 15px;">Pending Bookings:</h3>
+            
+            {% for booking in bookings %}
+            <div class="booking-item">
+                <div class="booking-header">
+                    {{ booking.computer }} 
+                    <span class="status-badge status-pending">PENDING</span>
+                </div>
+                <div class="booking-details">
+                    <div class="detail-row">
+                        <div class="detail-label">Student:</div>
+                        <div class="detail-value">{{ booking.student.get_full_name|default:booking.student.username }}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Date:</div>
+                        <div class="detail-value">{{ booking.start_time|date:"F j, Y" }}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Time:</div>
+                        <div class="detail-value">{{ booking.start_time|date:"H:i" }} - {{ booking.end_time|date:"H:i" }}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Duration:</div>
+                        <div class="detail-value">{{ booking.end_time|add:booking.start_time|timeuntil:booking.start_time }}</div>
+                    </div>
+                    {% if booking.purpose %}
+                    <div class="detail-row">
+                        <div class="detail-label">Purpose:</div>
+                        <div class="detail-value">
+                            <div class="purpose-box">{{ booking.purpose }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="detail-row">
+                        <div class="detail-label">Submitted:</div>
+                        <div class="detail-value">{{ booking.created_at|date:"M d, Y H:i" }}</div>
+                    </div>
+                    <div class="action-buttons">
+                        <a href="{{ admin_dashboard_url }}" class="action-link">Review in Dashboard</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            
+            <div style="background-color: #e8f4f1; border: 1px solid #2c6e49; border-radius: 4px; padding: 15px; margin-top: 25px;">
+                <p style="margin-top: 0;">
+                    <strong>Next Steps:</strong><br>
+                    1. Visit your <a href="{{ admin_dashboard_url }}" style="color: #2c6e49; font-weight: bold;">admin dashboard</a><br>
+                    2. Review the pending bookings<br>
+                    3. Approve or reject each booking<br>
+                    4. Students will be notified automatically
+                </p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>This is an automated notification from TTU Computer Lab Management System.</p>
+            <p><a href="{{ base_url }}/Dashboard/">Go to Admin Dashboard</a></p>
+            <p>&copy; 2024 Taita Taveta University. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

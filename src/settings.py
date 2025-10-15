@@ -222,6 +222,14 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'booking.tasks.check_ending_bookings',
         'schedule': crontab(minute='*/1'),  # Run every minute
     },
+    'notify-admins-pending-bookings': {
+        'task': 'booking.tasks.notify_admins_pending_bookings',
+        'schedule': crontab(minute='0', hour='*/2'),  # Run every 2 hours at the top of the hour
+    },
+    'notify-admins-pending-sessions': {
+        'task': 'booking.tasks.notify_admins_pending_sessions',
+        'schedule': crontab(minute='0', hour='*/2'),  # Run every 2 hours at the top of the hour
+    },
 }
 
 # Add these settings for the host validation middleware

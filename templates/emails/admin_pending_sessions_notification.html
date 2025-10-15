@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .email-container {
+            max-width: 800px;
+            margin: 0 auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            padding: 30px 20px;
+        }
+        .alert-box {
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 20px;
+            color: #856404;
+        }
+        .session-item {
+            background-color: #f8f9fa;
+            border-left: 4px solid #9b59b6;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 3px;
+        }
+        .session-header {
+            font-weight: bold;
+            color: #9b59b6;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+        .session-details {
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .detail-row {
+            display: flex;
+            margin: 5px 0;
+        }
+        .detail-label {
+            font-weight: bold;
+            width: 120px;
+            color: #555;
+        }
+        .detail-value {
+            flex: 1;
+            color: #333;
+        }
+        .action-buttons {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
+        .action-link {
+            display: inline-block;
+            background-color: #9b59b6;
+            color: white;
+            padding: 8px 15px;
+            text-decoration: none;
+            border-radius: 3px;
+            margin-right: 10px;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+        .action-link:hover {
+            background-color: #8e44ad;
+        }
+        .summary-box {
+            background-color: #f3e5f5;
+            border: 1px solid #9b59b6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .summary-title {
+            font-weight: bold;
+            color: #9b59b6;
+            margin-bottom: 10px;
+        }
+        .pending-count {
+            font-size: 24px;
+            font-weight: bold;
+            color: #9b59b6;
+            margin-top: 10px;
+        }
+        .footer {
+            background-color: #f5f5f5;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #ddd;
+        }
+        .footer a {
+            color: #2c6e49;
+            text-decoration: none;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .status-pending {
+            background-color: #ffc107;
+            color: #333;
+        }
+        .description-box {
+            background-color: #f5f5f5;
+            padding: 8px;
+            border-radius: 3px;
+            margin-top: 5px;
+            font-size: 12px;
+            font-style: italic;
+        }
+        .lecturer-info {
+            background-color: #e8f5e9;
+            padding: 5px 8px;
+            border-radius: 3px;
+            color: #2e7d32;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>⚠ Pending Lab Sessions</h1>
+            <p style="margin: 10px 0 0 0; opacity: 0.9;">Action Required: {{ pending_count }} session(s) awaiting approval</p>
+        </div>
+        
+        <div class="content">
+            <p>Hello {{ admin.get_full_name|default:admin.username }},</p>
+            
+            <p>You have <strong>{{ pending_count }} pending lab session(s)</strong> that require your review and approval.</p>
+            
+            <div class="summary-box">
+                <div class="summary-title">📊 Summary</div>
+                <p>Total pending sessions: <span class="pending-count">{{ pending_count }}</span></p>
+                <p style="margin-top: 10px; color: #555;">These sessions were submitted by lecturers and are waiting for your approval. Please review them as soon as possible to ensure laboratory resources are allocated appropriately.</p>
+            </div>
+            
+            <div class="alert-box">
+                <strong>💡 Tip:</strong> Review and approve sessions promptly to support academic activities and help lecturers plan their classes.
+            </div>
+            
+            <h3 style="color: #9b59b6; margin-top: 25px; margin-bottom: 15px;">Pending Sessions:</h3>
+            
+            {% for session in sessions %}
+            <div class="session-item">
+                <div class="session-header">
+                    {{ session.title }}
+                    <span class="status-badge status-pending">PENDING</span>
+                </div>
+                <div class="session-details">
+                    <div class="detail-row">
+                        <div class="detail-label">Lecturer:</div>
+                        <div class="detail-value">
+                            <span class="lecturer-info">👨‍🏫 {{ session.lecturer.get_full_name|default:session.lecturer.username }}</span>
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Lab:</div>
+                        <div class="detail-value">{{ session.lab.name }}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Date:</div>
+                        <div class="detail-value">{{ session.start_time|date:"F j, Y" }}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Time:</div>
+                        <div class="detail-value">{{ session.start_time|date:"H:i" }} - {{ session.end_time|date:"H:i" }}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Duration:</div>
+                        <div class="detail-value">
+                            {% if session.end_time|add:session.start_time %}
+                                {{ session.end_time|timeuntil:session.start_time }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if session.description %}
+                    <div class="detail-row">
+                        <div class="detail-label">Description:</div>
+                        <div class="detail-value">
+                            <div class="description-box">{{ session.description }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="detail-row">
+                        <div class="detail-label">Submitted:</div>
+                        <div class="detail-value">{{ session.created_at|date:"M d, Y H:i" }}</div>
+                    </div>
+                    <div class="action-buttons">
+                        <a href="{{ admin_dashboard_url }}" class="action-link">Review in Dashboard</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            
+            <div style="background-color: #f3e5f5; border: 1px solid #9b59b6; border-radius: 4px; padding: 15px; margin-top: 25px;">
+                <p style="margin-top: 0;">
+                    <strong>Next Steps:</strong><br>
+                    1. Visit your <a href="{{ admin_dashboard_url }}" style="color: #9b59b6; font-weight: bold;">admin dashboard</a><br>
+                    2. Review the pending sessions<br>
+                    3. Approve or reject each session<br>
+                    4. Lecturers will be notified automatically
+                </p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>This is an automated notification from TTU Computer Lab Management System.</p>
+            <p><a href="{{ base_url }}/Dashboard/">Go to Admin Dashboard</a></p>
+            <p>&copy; 2024 Taita Taveta University. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
