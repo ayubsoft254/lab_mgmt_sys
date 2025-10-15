@@ -1,48 +1,63 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mx-auto p-6 animate-fade-in">
-    <h1 class="text-3xl font-bold text-ttu-dark mb-6">
+<div class="container mx-auto px-2 py-6 animate-fade-in">
+    <h1 class="text-3xl md:text-4xl font-bold text-ttu-dark mb-6 text-center">
         {% if computer %}
-            Free Time Slots for {{ computer.lab.name }} - Computer #{{ computer.computer_number }}
+            <span class="block mb-1">Free Time Slots</span>
+            <span class="text-lg font-normal text-gray-500">{{ computer.lab.name }} &mdash; Computer #{{ computer.computer_number }}</span>
         {% else %}
-            Free Time Slots for {{ lab.name }}
+            <span class="block mb-1">Free Time Slots</span>
+            <span class="text-lg font-normal text-gray-500">{{ lab.name }}</span>
         {% endif %}
     </h1>
 
     {% if error %}
-        <div class="bg-ttu-light border-l-4 border-ttu-red text-ttu-dark p-4 mb-4 rounded">
-            {{ error }}
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded shadow">
+            <i class="fas fa-exclamation-circle mr-2"></i> {{ error }}
         </div>
     {% else %}
-        <div class="glass-card overflow-x-auto">
-            <table class="min-w-full table-auto">
-                <thead class="bg-ttu-light text-ttu-dark">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Date</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Time Slot</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Availability</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200 text-ttu-dark">
-                    {% for slot in time_slots %}
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">{{ slot.date|date:"D, M d" }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                {{ slot.start_time|date:"h:i A" }} - {{ slot.end_time|date:"h:i A" }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                {% if slot.is_free %}
-                                    <span class="text-green-600 font-semibold">Available</span>
-                                {% else %}
-                                    <span class="text-red-600 font-semibold">Booked</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {% for slot in time_slots %}
+                <div class="glass-card rounded-xl shadow-md p-5 flex flex-col items-center justify-center text-center transition hover:scale-[1.03] hover:shadow-lg duration-200">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-ttu-green font-bold text-lg">
+                            {{ slot.date|date:"D, M d" }}
+                        </span>
+                        <span class="bg-ttu-light text-ttu-dark px-2 py-1 rounded text-xs font-semibold">
+                            {{ slot.start_time|date:"h:i A" }} - {{ slot.end_time|date:"h:i A" }}
+                        </span>
+                    </div>
+                    <div class="mb-2">
+                        {% if slot.is_free %}
+                            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-100 text-green-700 font-semibold text-sm">
+                                <i class="fas fa-check-circle"></i> Available
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-100 text-red-700 font-semibold text-sm">
+                                <i class="fas fa-times-circle"></i> Booked
+                            </span>
+                        {% endif %}
+                    </div>
+                    {% if slot.is_free %}
+                        <a href="#" class="btn btn-ttu w-full mt-2 py-2 rounded-lg font-semibold text-base shadow hover:bg-ttu-dark transition">Book Now</a>
+                    {% else %}
+                        <button class="btn btn-outline-ttu w-full mt-2 py-2 rounded-lg font-semibold text-base cursor-not-allowed opacity-60" disabled>Unavailable</button>
+                    {% endif %}
+                </div>
+            {% empty %}
+                <div class="col-span-full text-center text-gray-500 py-8">
+                    <i class="fas fa-calendar-times text-ttu-green text-4xl mb-2"></i><br>
+                    No free time slots found for this lab/computer.
+                </div>
+            {% endfor %}
         </div>
     {% endif %}
 </div>
+<style>
+@media (max-width: 640px) {
+    .glass-card { padding: 1.2rem !important; }
+    .btn { font-size: 1em !important; }
+}
+</style>
 {% endblock %}
