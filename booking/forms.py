@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 import re
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-from .models import Computer, LabSession, RecurringSession, ComputerBooking, StudentRating, User, ComputerBookingAttendance
+from .models import Computer, LabSession, RecurringSession, ComputerBooking, StudentRating, User, ComputerBookingAttendance, Lab
 
 # Constants for domain validation
 STUDENT_EMAIL_DOMAIN = 'students.ttu.ac.ke'
@@ -33,6 +33,7 @@ class ComputerBookingForm(forms.ModelForm):
         date = cleaned_data.get('date')
         start_time = cleaned_data.get('start_time')
         end_time = cleaned_data.get('end_time')
+        computer = cleaned_data.get('computer')
         
         if date and start_time and end_time:
             # Combine date and time fields
@@ -50,6 +51,40 @@ class ComputerBookingForm(forms.ModelForm):
             # Ensure end time is after start time
             if end_datetime <= start_datetime:
                 self.add_error('end_time', 'End time must be after start time')
+            
+            # Check for conflicts with approved bookings
+            if computer:
+                conflicting_bookings = ComputerBooking.objects.filter(
+                    computer=computer,
+                    is_approved=True,
+                    is_cancelled=False,
+                    start_time__lt=end_datetime,
+                    end_time__gt=start_datetime
+                )
+                
+                if conflicting_bookings.exists():
+                    conflict = conflicting_bookings.first()
+                    self.add_error(
+                        None, 
+                        f'This computer is already booked from {conflict.start_time.strftime("%H:%M")} to {conflict.end_time.strftime("%H:%M")}. Please choose a different time or computer.'
+                    )
+                
+                # Check for conflicts with lab sessions
+                if computer.lab:
+                    conflicting_sessions = LabSession.objects.filter(
+                        lab=computer.lab,
+                        is_approved=True,
+                        is_cancelled=False,
+                        start_time__lt=end_datetime,
+                        end_time__gt=start_datetime
+                    )
+                    
+                    if conflicting_sessions.exists():
+                        session = conflicting_sessions.first()
+                        self.add_error(
+                            None,
+                            f'The lab is reserved for a session "{session.title}" from {session.start_time.strftime("%H:%M")} to {session.end_time.strftime("%H:%M")}. Please choose a different time.'
+                        )
             
             cleaned_data['start_time'] = start_datetime
             cleaned_data['end_time'] = end_datetime
@@ -70,6 +105,7 @@ class LabSessionForm(forms.ModelForm):
         date = cleaned_data.get('date')
         start_time = cleaned_data.get('start_time')
         end_time = cleaned_data.get('end_time')
+        lab = cleaned_data.get('lab')
         
         if date and start_time and end_time:
             # Combine date and time fields
@@ -87,6 +123,38 @@ class LabSessionForm(forms.ModelForm):
             # Ensure end time is after start time
             if end_datetime <= start_datetime:
                 self.add_error('end_time', 'End time must be after start time')
+            
+            # Check for conflicts with other lab sessions
+            if lab:
+                conflicting_sessions = LabSession.objects.filter(
+                    lab=lab,
+                    is_approved=True,
+                    is_cancelled=False,
+                    start_time__lt=end_datetime,
+                    end_time__gt=start_datetime
+                )
+                
+                if conflicting_sessions.exists():
+                    session = conflicting_sessions.first()
+                    self.add_error(
+                        None,
+                        f'The lab already has a session "{session.title}" scheduled from {session.start_time.strftime("%H:%M")} to {session.end_time.strftime("%H:%M")}. Please choose a different time.'
+                    )
+                
+                # Check if there are more than 10 approved computer bookings during this time
+                booked_computers_count = ComputerBooking.objects.filter(
+                    computer__lab=lab,
+                    is_approved=True,
+                    is_cancelled=False,
+                    start_time__lt=end_datetime,
+                    end_time__gt=start_datetime
+                ).count()
+                
+                if booked_computers_count > 10:
+                    self.add_error(
+                        None,
+                        f'Cannot book lab session. There are {booked_computers_count} approved computer bookings during this time (maximum allowed is 10). Please choose a different time.'
+                    )
             
             cleaned_data['start_time'] = start_datetime
             cleaned_data['end_time'] = end_datetime

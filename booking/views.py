@@ -155,19 +155,6 @@ def student_booking_view(request, lab_id, computer_id=None):
         if form.is_valid():
             booking = form.save(commit=False)
             booking.student = request.user
-            
-            # Check if there's a lab session during this time
-            conflicting_sessions = LabSession.objects.filter(
-                lab=lab,
-                is_approved=True,
-                start_time__lt=booking.end_time,
-                end_time__gt=booking.start_time
-            )
-            
-            if conflicting_sessions.exists():
-                messages.error(request, "Lab is reserved for a session during this time slot")
-                return render(request, 'student_booking.html', {'form': form, 'lab': lab})
-            
             booking.save()
             
             # Updated notification with proper reference to booking
