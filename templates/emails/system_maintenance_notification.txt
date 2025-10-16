@@ -1,0 +1,34 @@
+SYSTEM MAINTENANCE COMPLETE - {{ system_name }} IS NOW FULLY OPERATIONAL
+
+Dear User,
+
+We are pleased to inform you that system maintenance has been completed successfully. The {{ system_name }} is now fully active and ready for use.
+
+STATUS: ✓ FULLY OPERATIONAL
+All systems are functioning normally. You can now resume your regular bookings and lab session operations.
+
+WHAT'S NEXT?
+- Log in to your account to manage your bookings
+- Schedule your lab sessions as needed
+- Check available timeslots for your preferred labs
+
+NEED ASSISTANCE?
+
+If you encounter any issues or have questions about the system, please don't hesitate to contact us:
+
+📧 EMAIL:
+{{ support_email }}
+
+📞 PHONE / WHATSAPP:
+{{ support_phone }}
+
+Our support team is available to assist you with any questions or concerns you may have.
+
+Thank you for using the {{ system_name }}!
+
+Best regards,
+ICT Labs Support Team
+
+---
+This is an automated notification. Please do not reply to this email.
+© {% now "Y" %} Taita Taveta University. All rights reserved.

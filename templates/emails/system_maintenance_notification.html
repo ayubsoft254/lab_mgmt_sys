@@ -1,0 +1,164 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Maintenance Complete</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .header {
+            background-color: #2c6e49;
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+        .logo {
+            max-width: 60px;
+            height: auto;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .content {
+            background-color: white;
+            padding: 30px 20px;
+            border-radius: 0 0 5px 5px;
+        }
+        .content p {
+            margin: 15px 0;
+        }
+        .highlight {
+            background-color: #f0f8f5;
+            padding: 20px;
+            border-left: 4px solid #2c6e49;
+            margin: 20px 0;
+            border-radius: 3px;
+        }
+        .contact-section {
+            background-color: #f9f9f9;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 3px;
+            text-align: center;
+        }
+        .contact-method {
+            margin: 10px 0;
+            padding: 10px;
+        }
+        .contact-method strong {
+            color: #2c6e49;
+        }
+        .success-badge {
+            display: inline-block;
+            background-color: #28a745;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .footer {
+            background-color: #f9f9f9;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #ddd;
+            border-radius: 0 0 5px 5px;
+        }
+        .footer-logo {
+            max-width: 40px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+        a {
+            color: #2c6e49;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <img src="https://reg.ttu.ac.ke/static/ttulogo.jpg" alt="TTU Logo" class="logo">
+                <div>
+                    <h1>✓ System Maintenance Complete</h1>
+                    <p>{{ system_name }} is now fully operational</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <p>Dear User,</p>
+            
+            <p>We are pleased to inform you that system maintenance has been completed successfully. The <strong>{{ system_name }}</strong> is now fully active and ready for use.</p>
+            
+            <div class="highlight">
+                <p style="margin-top: 0;"><strong>Status: <span class="success-badge">✓ FULLY OPERATIONAL</span></strong></p>
+                <p>All systems are functioning normally. You can now resume your regular bookings and lab session operations.</p>
+            </div>
+            
+            <h3 style="color: #2c6e49;">What's Next?</h3>
+            <ul>
+                <li>Log in to your account to manage your bookings</li>
+                <li>Schedule your lab sessions as needed</li>
+                <li>Check available timeslots for your preferred labs</li>
+            </ul>
+            
+            <h3 style="color: #2c6e49;">Need Assistance?</h3>
+            <p>If you encounter any issues or have questions about the system, please don't hesitate to contact us:</p>
+            
+            <div class="contact-section">
+                <div class="contact-method">
+                    <strong>📧 Email:</strong><br>
+                    <a href="mailto:{{ support_email }}">{{ support_email }}</a>
+                </div>
+                
+                <div class="contact-method">
+                    <strong>📞 Phone / WhatsApp:</strong><br>
+                    <a href="tel:{{ support_phone }}">{{ support_phone }}</a><br>
+                    <a href="https://wa.me/{{ support_phone|slice:'1:' }}">Message us on WhatsApp</a>
+                </div>
+            </div>
+            
+            <p>Our support team is available to assist you with any questions or concerns you may have.</p>
+            
+            <p>Thank you for using the {{ system_name }}!</p>
+            
+            <p>Best regards,<br>
+            <strong>ICT Labs Support Team</strong></p>
+        </div>
+        
+        <div class="footer">
+            <img src="https://reg.ttu.ac.ke/static/ttulogo.jpg" alt="TTU Logo" class="footer-logo">
+            <p>&copy; {% now "Y" %} Taita Taveta University. All rights reserved.</p>
+            <p>This is an automated notification. Please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>

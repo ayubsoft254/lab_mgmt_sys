@@ -323,3 +323,57 @@ def send_session_cancellation_email(session, cancelled_by=None, reason=""):
     except Exception as e:
         logger.error(f"Failed to send session cancellation email: {str(e)}")
         return False
+
+
+def send_system_maintenance_notification():
+    """
+    Send system maintenance completion notification to all active users.
+    Notifies students and lecturers that the system is now fully operational.
+    """
+    try:
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        
+        # Get all active users (students and lecturers)
+        active_users = User.objects.filter(
+            is_active=True,
+            email__isnull=False
+        ).exclude(email='')
+        
+        if not active_users.exists():
+            logger.warning("No active users found to send maintenance notification")
+            return False
+        
+        subject = "System Maintenance Complete - Lab Management System Now Fully Active"
+        
+        context = {
+            'support_email': 'ictlabs@ttu.ac.ke',
+            'support_phone': '+254113364472',
+            'system_name': 'Lab Management System',
+        }
+        
+        html_message = render_to_string('emails/system_maintenance_notification.html', context)
+        text_message = render_to_string('emails/system_maintenance_notification.txt', context)
+        
+        # Send email to all active users
+        for user in active_users:
+            try:
+                email = EmailMultiAlternatives(
+                    subject=subject,
+                    body=text_message,
+                    from_email=settings.EMAIL_HOST_USER,
+                    to=[user.email]
+                )
+                email.attach_alternative(html_message, "text/html")
+                email.send(fail_silently=False)
+                logger.info(f"System maintenance notification sent to {user.email}")
+            except Exception as e:
+                logger.error(f"Failed to send maintenance notification to {user.email}: {str(e)}")
+                continue
+        
+        logger.info(f"System maintenance notification sent to {active_users.count()} users")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Failed to send system maintenance notification: {str(e)}")
+        return False
