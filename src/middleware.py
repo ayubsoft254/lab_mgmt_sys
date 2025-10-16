@@ -1,6 +1,8 @@
-from django.http import HttpResponseBadRequest
+from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.conf import settings
 from django.utils.deprecation import MiddlewareMixin
+from django.urls import reverse
+from django.utils import timezone
 import logging
 
 logger = logging.getLogger(__name__)
@@ -229,3 +231,54 @@ class EnhancedHostValidationMiddleware(MiddlewareMixin):
         else:
             ip = request.META.get('REMOTE_ADDR')
         return ip
+
+
+class SessionExpiryMiddleware(MiddlewareMixin):
+    """
+    Middleware to handle session expiry and redirect users to login page
+    when their session has expired.
+    """
+    
+    def process_request(self, request):
+        """
+        Check if the session has expired and redirect to login if necessary.
+        """
+        # Skip session check for login/logout pages and static files
+        excluded_paths = [
+            reverse('account_login'),
+            reverse('account_logout'),
+            reverse('account_signup'),
+            '/static/',
+            '/admin/login/',
+        ]
+        
+        # Check if current path should be excluded
+        if any(request.path.startswith(path) for path in excluded_paths):
+            return None
+        
+        # Check if user is authenticated
+        if request.user.is_authenticated:
+            # Check session expiry timestamp
+            if 'session_start_time' in request.session:
+                session_start_time = request.session['session_start_time']
+                session_age = (timezone.now() - session_start_time).total_seconds()
+                session_timeout = getattr(settings, 'SESSION_COOKIE_AGE', 3600)
+                
+                # If session has expired, log out the user
+                if session_age > session_timeout:
+                    # Clear the session
+                    request.session.flush()
+                    
+                    # Log the session expiry
+                    logger.info(
+                        f"Session expired for user: {request.user.username} "
+                        f"(Session age: {session_age}s, Timeout: {session_timeout}s)"
+                    )
+                    
+                    # Redirect to login page with a message
+                    return HttpResponseRedirect(reverse('account_login'))
+            else:
+                # Set session start time on first request
+                request.session['session_start_time'] = timezone.now()
+        
+        return None

@@ -91,6 +91,7 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'src.middleware.SessionExpiryMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -124,6 +125,16 @@ AUTHENTICATION_BACKENDS = [
 LOGIN_URL = 'account_login'  # Use allauth's login URL
 LOGIN_REDIRECT_URL = 'home'  # Where to redirect after successful login
 LOGOUT_REDIRECT_URL = 'account_login'  # Where to redirect after logout
+
+# Session settings
+SESSION_COOKIE_AGE = 7200  # Session expires after 2 hours (in seconds)
+SESSION_SAVE_EVERY_REQUEST = True  # Update session expiry on every request
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Session expires when browser closes
+SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access to session cookie
+SESSION_COOKIE_SECURE = True  # Only send cookie over HTTPS
+SESSION_COOKIE_SAMESITE = 'Lax'  # CSRF protection
+CSRF_COOKIE_SECURE = True  # Only send CSRF cookie over HTTPS
+CSRF_COOKIE_SAMESITE = 'Lax'  # CSRF protection
 
 # Allauth settings
 ACCOUNT_LOGIN_METHODS = {'email', 'username'}  # New way to define allowed login methods
