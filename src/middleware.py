@@ -261,13 +261,18 @@ class SessionExpiryMiddleware(MiddlewareMixin):
             # Check session expiry timestamp
             if 'session_start_time' in request.session:
                 try:
-                    # Convert stored timestamp (float) back to datetime
-                    from datetime import datetime as dt
-                    session_start_time = dt.fromtimestamp(request.session['session_start_time'])
-                    session_age = (timezone.now() - session_start_time.replace(tzinfo=timezone.utc)).total_seconds()
-                except (ValueError, TypeError):
-                    # If conversion fails, treat as expired
-                    session_age = float('inf')
+                    session_start_time = request.session['session_start_time']
+                    # Handle both datetime objects and ISO format strings
+                    if isinstance(session_start_time, str):
+                        from datetime import datetime as dt
+                        session_start_time = dt.fromisoformat(session_start_time)
+                    session_age = (timezone.now() - session_start_time).total_seconds()
+                except (ValueError, TypeError, AttributeError) as e:
+                    logger.warning(f"Error parsing session start time: {e}")
+                    # If conversion fails, treat as new session
+                    import time
+                    request.session['session_start_time'] = timezone.now()
+                    return None
                 
                 session_timeout = getattr(settings, 'SESSION_COOKIE_AGE', 3600)
                 
@@ -285,9 +290,8 @@ class SessionExpiryMiddleware(MiddlewareMixin):
                     # Redirect to login page with a message
                     return HttpResponseRedirect(reverse('account_login'))
             else:
-                # Set session start time as timestamp (float) instead of datetime object
-                # This ensures JSON serialization compatibility
-                import time
-                request.session['session_start_time'] = time.time()
+                # Set session start time on first request
+                # Our custom serializer can handle datetime objects
+                request.session['session_start_time'] = timezone.now()
         
         return None

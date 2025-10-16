@@ -133,6 +133,7 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Session expires when browser closes
 SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access to session cookie
 SESSION_COOKIE_SECURE = True  # Only send cookie over HTTPS
 SESSION_COOKIE_SAMESITE = 'Lax'  # CSRF protection
+SESSION_SERIALIZER = 'src.serializers.DateTimeAwareJSONSerializer'  # Custom serializer for datetime support
 CSRF_COOKIE_SECURE = True  # Only send CSRF cookie over HTTPS
 CSRF_COOKIE_SAMESITE = 'Lax'  # CSRF protection
 
