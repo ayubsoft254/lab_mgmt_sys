@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import ValidationError
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse
+from django.http import JsonResponse as DjangoJsonResponse
 from django.views.decorators.http import require_GET, require_POST
 from django.views.generic import TemplateView
 from django.contrib import messages
@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from datetime import datetime, timedelta
+from src.json_encoders import JsonResponse
 
 from .models import (
     User, Lab, Computer, ComputerBooking, LabSession, 
@@ -1344,7 +1345,7 @@ def unread_notifications_json(request):
 
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse
+from src.json_encoders import JsonResponse
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.utils import timezone
