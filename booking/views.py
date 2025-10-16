@@ -398,15 +398,15 @@ def admin_dashboard_view(request):
     # Add these to the context in admin_check_in_dashboard view
     context.update({
         'debug_info': {
-            'today': today,
-            'timezone_now': timezone.now(),
+            'today': today.isoformat() if today else None,
+            'timezone_now': timezone.now().isoformat(),
             'today_bookings_count': today_bookings.count(),
             'today_sessions_count': today_sessions.count(),
             'today_bookings_times': [
-                (b.id, b.start_time, b.end_time) for b in today_bookings[:5]
+                (b.id, b.start_time.isoformat(), b.end_time.isoformat()) for b in today_bookings[:5]
             ],
             'today_sessions_times': [
-                (s.id, s.start_time, s.end_time) for s in today_sessions[:5]
+                (s.id, s.start_time.isoformat(), s.end_time.isoformat()) for s in today_sessions[:5]
             ]
         }
     })
@@ -1447,24 +1447,24 @@ def admin_check_in_dashboard(request):
             'all_bookings_count': all_bookings_count,
             'all_sessions_count': all_sessions_count,
             'debug_info': {
-                'today': selected_date,
-                'now': now,
+                'today': selected_date.isoformat() if selected_date else None,
+                'now': now.isoformat(),
                 'today_bookings_count': today_bookings.count(),
                 'today_sessions_count': today_sessions.count(),
                 'sample_bookings': [
                     {
                         'id': b.id,
                         'student': b.student.username,
-                        'start': b.start_time,
-                        'end': b.end_time,
+                        'start': b.start_time.isoformat(),
+                        'end': b.end_time.isoformat(),
                     } for b in today_bookings[:3]
                 ],
                 'sample_sessions': [
                     {
                         'id': s.id,
                         'title': s.title,
-                        'start': s.start_time,
-                        'end': s.end_time,
+                        'start': s.start_time.isoformat(),
+                        'end': s.end_time.isoformat(),
                     } for s in today_sessions[:3]
                 ]
             }
