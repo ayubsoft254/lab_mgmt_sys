@@ -97,6 +97,7 @@ class SupportPageView(TemplateView):
 def home_view(request):
     upcoming_bookings = None
     upcoming_sessions = None
+    recurring_sessions = None
     notifications = Notification.objects.filter(user=request.user, is_read=False)
     
     if request.user.is_student:
@@ -111,6 +112,12 @@ def home_view(request):
             lecturer=request.user,
             end_time__gte=timezone.now()
         ).order_by('start_time')
+        
+        recurring_sessions = RecurringSession.objects.filter(
+            lecturer=request.user,
+            is_approved=True,
+            end_date__gte=timezone.now().date()
+        ).order_by('start_date')
     
     labs = Lab.objects.all()
     
@@ -118,6 +125,7 @@ def home_view(request):
         'labs': labs,
         'upcoming_bookings': upcoming_bookings,
         'upcoming_sessions': upcoming_sessions,
+        'recurring_sessions': recurring_sessions,
         'notifications': notifications
     })
 
