@@ -553,16 +553,10 @@ def free_timeslots_view(request, lab_id=None, computer_id=None):
             start_time__date__range=[start_date, end_date]
         )
     else:
-        # Lab-wide sessions and bookings
+        # Lab-wide sessions
         booked_lab_sessions = LabSession.objects.filter(
             lab=lab,
             is_approved=True,
-            start_time__date__range=[start_date, end_date]
-        )
-        booked_computer_bookings = ComputerBooking.objects.filter(
-            computer__lab=lab,
-            is_approved=True,
-            is_cancelled=False,
             start_time__date__range=[start_date, end_date]
         )
     
@@ -578,21 +572,33 @@ def free_timeslots_view(request, lab_id=None, computer_id=None):
 
             # Check if slot is free
             if computer:
+                # For a specific computer, check if the slot is available
                 is_free = not booked_slots.filter(
                     start_time__lt=slot_end,
                     end_time__gt=slot_start
                 ).exists()
             else:
-                is_free = not (
-                    booked_lab_sessions.filter(
-                        start_time__lt=slot_end,
-                        end_time__gt=slot_start
-                    ).exists() or
-                    booked_computer_bookings.filter(
-                        start_time__lt=slot_end,
-                        end_time__gt=slot_start
-                    ).exists()
-                )
+                # For lab-wide view, check only lab sessions
+                # Check how many computers are available during this slot
+                all_computers = Computer.objects.filter(lab=lab)
+                booked_computers = ComputerBooking.objects.filter(
+                    computer__lab=lab,
+                    is_approved=True,
+                    is_cancelled=False,
+                    start_time__lt=slot_end,
+                    end_time__gt=slot_start
+                ).values_list('computer_id', flat=True).distinct()
+                
+                available_computers = all_computers.count() - len(set(booked_computers))
+                
+                # Check if lab session blocks this time
+                lab_session_blocks = booked_lab_sessions.filter(
+                    start_time__lt=slot_end,
+                    end_time__gt=slot_start
+                ).exists()
+                
+                # Slot is free if there are available computers AND no lab session blocks it
+                is_free = available_computers > 0 and not lab_session_blocks
 
             # Add is_weekend property
             is_weekend = current_date.weekday() >= 5  # 5=Saturday, 6=Sunday
