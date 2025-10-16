@@ -375,9 +375,29 @@
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="bg-ttu-light py-4 mt-auto">
-        <div class="container mx-auto px-4 text-center text-gray-600 text-sm">
-            &copy; {% now "Y" %} Lab Management System
+    <footer class="bg-ttu-light py-6 mt-auto">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+                <div class="text-center md:text-left">
+                    <p class="text-gray-600 text-sm">
+                        &copy; {% now "Y" %} Lab Management System
+                    </p>
+                </div>
+                <div class="flex flex-col md:flex-row items-center gap-4">
+                    <div class="flex items-center gap-2">
+                        <span class="text-gray-600 text-sm">For inquiries:</span>
+                        <a href="https://wa.me/254113364472" target="_blank" rel="noopener noreferrer" class="text-green-600 hover:text-green-700 font-semibold flex items-center gap-1 transition-colors">
+                            <i class="fab fa-whatsapp"></i> WhatsApp
+                        </a>
+                    </div>
+                    <span class="hidden md:inline text-gray-400">|</span>
+                    <div class="flex items-center gap-2">
+                        <a href="mailto:ictlabs@ttu.ac.ke" class="text-blue-600 hover:text-blue-700 font-semibold flex items-center gap-1 transition-colors">
+                            <i class="fas fa-envelope"></i> ictlabs@ttu.ac.ke
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </footer>
 
