@@ -374,24 +374,36 @@
                 <h3>Computer Status</h3>
             </div>
             <div class="space-y-3">
-                {% with available=computers|dictsort:"status" %}
-                    <div class="flex items-center justify-between p-2 bg-green-50 rounded-lg">
-                        <span class="text-sm text-gray-700 font-semibold">Available</span>
-                        <span class="inline-block w-8 h-8 bg-green-500 text-white rounded-lg flex items-center justify-center text-sm font-bold">
-                            {{ available|length|default:"0" }}
-                        </span>
-                    </div>
-                {% endwith %}
-                <div class="flex items-center justify-between p-2 bg-amber-50 rounded-lg">
-                    <span class="text-sm text-gray-700 font-semibold">Reserved</span>
-                    <span class="inline-block w-8 h-8 bg-amber-500 text-white rounded-lg flex items-center justify-center text-sm font-bold">
-                        {{ computers|length|default:"0" }}
+                <!-- Available Computers -->
+                <div class="flex items-center justify-between p-2 bg-green-50 rounded-lg">
+                    <span class="text-sm text-gray-700 font-semibold">
+                        <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                        Available
+                    </span>
+                    <span class="inline-block w-8 h-8 bg-green-500 text-white rounded-lg flex items-center justify-center text-sm font-bold">
+                        {{ available_computers }}
                     </span>
                 </div>
+                
+                <!-- Reserved Computers -->
+                <div class="flex items-center justify-between p-2 bg-amber-50 rounded-lg">
+                    <span class="text-sm text-gray-700 font-semibold">
+                        <i class="fas fa-lock text-amber-600 mr-2"></i>
+                        Reserved
+                    </span>
+                    <span class="inline-block w-8 h-8 bg-amber-500 text-white rounded-lg flex items-center justify-center text-sm font-bold">
+                        {{ reserved_computers }}
+                    </span>
+                </div>
+                
+                <!-- Maintenance Computers -->
                 <div class="flex items-center justify-between p-2 bg-red-50 rounded-lg">
-                    <span class="text-sm text-gray-700 font-semibold">Maintenance</span>
+                    <span class="text-sm text-gray-700 font-semibold">
+                        <i class="fas fa-tools text-red-600 mr-2"></i>
+                        Maintenance
+                    </span>
                     <span class="inline-block w-8 h-8 bg-red-500 text-white rounded-lg flex items-center justify-center text-sm font-bold">
-                        0
+                        {{ maintenance_computers }}
                     </span>
                 </div>
             </div>
@@ -415,15 +427,15 @@
             </div>
             <div class="stat-item">
                 <span class="text-green-500 font-bold text-lg">●</span>
-                <span class="stat-label">Available Now</span>
+                <span class="stat-label">{{ available_computers }} Available</span>
             </div>
             <div class="stat-item">
                 <span class="text-amber-500 font-bold text-lg">●</span>
-                <span class="stat-label">Reserved</span>
+                <span class="stat-label">{{ reserved_computers }} Reserved</span>
             </div>
             <div class="stat-item">
                 <span class="text-red-500 font-bold text-lg">●</span>
-                <span class="stat-label">Maintenance</span>
+                <span class="stat-label">{{ maintenance_computers }} Maintenance</span>
             </div>
         </div>
 

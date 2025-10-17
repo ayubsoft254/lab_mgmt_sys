@@ -151,10 +151,18 @@ def lab_detail_view(request, lab_id):
         is_approved=True
     ).order_by('start_time')
     
+    # Get computer counts by status
+    available_computers = computers.filter(status='available').count()
+    reserved_computers = computers.filter(status='reserved').count()
+    maintenance_computers = computers.filter(status='maintenance').count()
+    
     return render(request, 'lab_detail.html', {
         'lab': lab,
         'computers': computers,
-        'upcoming_sessions': upcoming_sessions
+        'upcoming_sessions': upcoming_sessions,
+        'available_computers': available_computers,
+        'reserved_computers': reserved_computers,
+        'maintenance_computers': maintenance_computers,
     })
 
 @login_required
