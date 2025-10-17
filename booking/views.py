@@ -1164,8 +1164,18 @@ def rate_student_view(request, student_id, session_id=None, booking_id=None):
 @require_GET
 def session_details_api(request, session_id):
     """API endpoint to get session details for the modal"""
+    # Only admins and super admins can view session details
+    if not request.user.is_admin and not request.user.is_super_admin:
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+    
     try:
         session = LabSession.objects.get(id=session_id)
+        
+        # For non-super admins, check if they manage the lab
+        if not request.user.is_super_admin:
+            if not request.user.managed_labs.filter(id=session.lab.id).exists():
+                return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
         attending_students = []
         
         # Get all student bookings for this session
@@ -1199,8 +1209,17 @@ def session_details_api(request, session_id):
 @require_GET
 def booking_details_api(request, booking_id):
     """API endpoint to get booking details for the modal"""
+    # Only admins and super admins can view booking details
+    if not request.user.is_admin and not request.user.is_super_admin:
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+    
     try:
         booking = ComputerBooking.objects.get(id=booking_id)
+        
+        # For non-super admins, check if they manage the lab
+        if not request.user.is_super_admin:
+            if not request.user.managed_labs.filter(id=booking.computer.lab.id).exists():
+                return JsonResponse({'error': 'Unauthorized'}, status=403)
         
         status = 'Pending'
         status_class = 'bg-yellow-100 text-yellow-800'
@@ -1219,7 +1238,7 @@ def booking_details_api(request, booking_id):
             'date': booking.start_time.strftime('%B %d, %Y'),
             'start_time': booking.start_time.strftime('%H:%M'),
             'end_time': booking.end_time.strftime('%H:%M'),
-            'booking_code': booking.booking_code,
+            'booking_code': str(booking.booking_code),
             'status': status,
             'status_class': status_class,
             'created_at': booking.created_at.strftime('%B %d, %Y %H:%M'),

@@ -1117,8 +1117,22 @@
                 
                 // Fetch session details
                 fetch(`/api/sessions/${sessionId}/details/`)
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) {
+                            if (response.status === 403) {
+                                throw new Error('You do not have permission to view this session details.');
+                            } else if (response.status === 404) {
+                                throw new Error('Session not found.');
+                            } else {
+                                throw new Error(`Error: ${response.status}`);
+                            }
+                        }
+                        return response.json();
+                    })
                     .then(data => {
+                        if (data.error) {
+                            throw new Error(data.error);
+                        }
                         // Populate modal with session details
                         sessionContent.innerHTML = `
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -1167,7 +1181,7 @@
                         `;
                     })
                     .catch(error => {
-                        sessionContent.innerHTML = `<p class="text-red-500">Error loading session details. Please try again.</p>`;
+                        sessionContent.innerHTML = `<div class="p-4 bg-red-50 border border-red-200 rounded-md"><p class="text-red-700 text-sm">${error.message || 'Error loading session details. Please try again.'}</p></div>`;
                         console.error('Error:', error);
                     });
             });
@@ -1205,8 +1219,22 @@
                 
                 // Fetch booking details
                 fetch(`/api/bookings/${bookingId}/details/`)
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) {
+                            if (response.status === 403) {
+                                throw new Error('You do not have permission to view this booking details.');
+                            } else if (response.status === 404) {
+                                throw new Error('Booking not found.');
+                            } else {
+                                throw new Error(`Error: ${response.status}`);
+                            }
+                        }
+                        return response.json();
+                    })
                     .then(data => {
+                        if (data.error) {
+                            throw new Error(data.error);
+                        }
                         // Populate modal with booking details
                         bookingContent.innerHTML = `
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1260,7 +1288,7 @@
                         `;
                     })
                     .catch(error => {
-                        bookingContent.innerHTML = `<p class="text-red-500">Error loading booking details. Please try again.</p>`;
+                        bookingContent.innerHTML = `<div class="p-4 bg-red-50 border border-red-200 rounded-md"><p class="text-red-700 text-sm">${error.message || 'Error loading booking details. Please try again.'}</p></div>`;
                         console.error('Error:', error);
                     });
             });
