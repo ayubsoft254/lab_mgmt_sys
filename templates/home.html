@@ -1,231 +1,319 @@
 {% extends 'base.html' %}
 
-{% block title %}Lab Management System - Home{% endblock %}
+{% block title %}Home - Lab Management System{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h1>Welcome to the Lab Management System</h1>
-            
-            {% if user.is_authenticated %}
-                <p>Hello, {{ user.username }}!</p>
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <!-- Hero Section -->
+    <div class="bg-ttu-green text-white py-8 md:py-12 px-4">
+        <div class="container mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-bold mb-2">Welcome Back!</h1>
+                    {% if user.is_authenticated %}
+                        <p class="text-green-100 text-lg">Hello, <span class="font-semibold">{{ user.username }}</span></p>
+                    {% else %}
+                        <p class="text-green-100">Welcome to the Lab Management System</p>
+                    {% endif %}
+                </div>
                 
-                {% if notifications %}
-                    <div class="alert alert-info">
-                        <p>You have {{ notifications|length }} unread notification{{ notifications|length|pluralize }}</p>
-                        <a href="{% url 'notification_list' %}" class="btn btn-sm btn-info">View Notifications</a>
+                {% if user.is_authenticated and notifications %}
+                    <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg px-4 py-3 w-full md:w-auto">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="fas fa-bell text-yellow-300"></i>
+                            <span class="font-semibold">{{ notifications|length }} Notification{{ notifications|length|pluralize }}</span>
+                        </div>
+                        <a href="{% url 'notification_list' %}" class="inline-block bg-white text-ttu-green px-4 py-2 rounded-md font-medium hover:bg-gray-100 transition text-sm">
+                            View All
+                        </a>
                     </div>
                 {% endif %}
-            {% endif %}
+            </div>
         </div>
     </div>
 
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <h2>Available Labs</h2>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        {% for lab in labs %}
-                            <div class="col-md-4 mb-3">
-                                <div class="card h-100">
-                                    <div class="card-body">
-                                        <h5 class="card-title">{{ lab.name }}</h5>
-                                        <h6 class="card-subtitle mb-2 text-muted">{{ lab.location }}</h6>
-                                        <p class="card-text">{{ lab.description|truncatewords:20 }}</p>
-                                        <p><strong>Capacity:</strong> {{ lab.capacity }} computers</p>
-                                        <a href="{% url 'lab_detail' lab.id %}" class="btn btn-primary">View Details</a>
-                                    </div>
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8 md:py-12">
+        <!-- Available Labs Section -->
+        <section class="mb-12">
+            <div class="flex items-center gap-3 mb-6">
+                <i class="fas fa-flask text-ttu-green text-2xl"></i>
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Available Labs</h2>
+            </div>
+            
+            {% if labs %}
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for lab in labs %}
+                        <div class="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden hover:translate-y-[-4px]">
+                            <!-- Lab Header -->
+                            <div class="h-24 bg-gradient-to-r from-ttu-green to-ttu-dark-green relative overflow-hidden">
+                                <div class="absolute inset-0 opacity-10">
+                                    <i class="fas fa-flask text-white text-6xl absolute -top-2 -right-4"></i>
                                 </div>
                             </div>
-                        {% empty %}
-                            <div class="col-12">
-                                <p>No labs available at the moment.</p>
+                            
+                            <!-- Lab Content -->
+                            <div class="p-5">
+                                <h3 class="text-xl font-bold text-gray-800 mb-1">{{ lab.name }}</h3>
+                                <p class="text-ttu-green text-sm font-medium mb-3 flex items-center gap-2">
+                                    <i class="fas fa-map-marker-alt"></i>{{ lab.location }}
+                                </p>
+                                
+                                <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ lab.description|truncatewords:15 }}</p>
+                                
+                                <!-- Lab Stats -->
+                                <div class="bg-gray-50 rounded-lg p-3 mb-4 flex items-center justify-between">
+                                    <div class="text-center flex-1">
+                                        <div class="text-2xl font-bold text-ttu-green">{{ lab.capacity }}</div>
+                                        <div class="text-xs text-gray-600">Computers</div>
+                                    </div>
+                                    <div class="h-12 w-px bg-gray-300"></div>
+                                    <div class="text-center flex-1">
+                                        <div class="text-2xl font-bold text-blue-600">{{ lab.available_computers|default:0 }}</div>
+                                        <div class="text-xs text-gray-600">Available</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Action Button -->
+                                <a href="{% url 'lab_detail' lab.id %}" class="block w-full bg-ttu-green text-white py-2 rounded-lg font-medium text-center hover:bg-ttu-dark-green transition">
+                                    View Lab Details →
+                                </a>
                             </div>
-                        {% endfor %}
-                    </div>
+                        </div>
+                    {% endfor %}
                 </div>
-            </div>
-        </div>
-    </div>
-
-    {% if user.is_student and upcoming_bookings %}
-        <div class="row mb-4">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h2>Your Upcoming Bookings</h2>
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Lab</th>
-                                    <th>Computer</th>
-                                    <th>Date</th>
-                                    <th>Time</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for booking in upcoming_bookings %}
-                                    <tr>
-                                        <td>{{ booking.computer.lab.name }}</td>
-                                        <td>Computer #{{ booking.computer.computer_number }}</td>
-                                        <td>{{ booking.start_time|date:"M d, Y" }}</td>
-                                        <td>{{ booking.start_time|date:"H:i" }} - {{ booking.end_time|date:"H:i" }}</td>
-                                        <td>
-                                            {% if booking.is_approved %}
-                                                <span class="badge bg-success">Approved</span>
-                                            {% else %}
-                                                <span class="badge bg-warning text-dark">Pending</span>
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+            {% else %}
+                <div class="bg-white rounded-lg p-8 text-center">
+                    <i class="fas fa-inbox text-4xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-500 text-lg">No labs available at the moment.</p>
                 </div>
-            </div>
-        </div>
-    {% endif %}
+            {% endif %}
+        </section>
 
-    {% if user.is_lecturer and upcoming_sessions %}
-        <div class="row mb-4">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h2>Your Upcoming Lab Sessions</h2>
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Lab</th>
-                                    <th>Title</th>
-                                    <th>Date</th>
-                                    <th>Time</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for session in upcoming_sessions %}
-                                    <tr>
-                                        <td>{{ session.lab.name }}</td>
-                                        <td>{{ session.title }}</td>
-                                        <td>{{ session.start_time|date:"M d, Y" }}</td>
-                                        <td>{{ session.start_time|date:"H:i" }} - {{ session.end_time|date:"H:i" }}</td>
-                                        <td>
-                                            {% if session.is_approved %}
-                                                <span class="badge bg-success">Approved</span>
-                                            {% else %}
-                                                <span class="badge bg-warning text-dark">Pending</span>
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endif %}
-
-    <div class="row">
-        <div class="col-md-6 mb-3">
+        <!-- User-Specific Sections -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Student Section -->
             {% if user.is_student %}
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Book a Computer</h5>
-                        <p class="card-text">Browse available labs and book a computer for your studies.</p>
-                        <a href="{% url 'lab_list' %}" class="btn btn-primary">View Labs</a>
+                <div class="lg:col-span-3">
+                    {% if upcoming_bookings %}
+                        <section class="mb-8">
+                            <div class="flex items-center gap-3 mb-6">
+                                <i class="fas fa-calendar-check text-blue-600 text-2xl"></i>
+                                <h2 class="text-2xl font-bold text-gray-800">Your Upcoming Bookings</h2>
+                            </div>
+                            
+                            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                                <div class="overflow-x-auto">
+                                    <table class="w-full">
+                                        <thead>
+                                            <tr class="bg-gray-50 border-b border-gray-200">
+                                                <th class="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-700">Lab</th>
+                                                <th class="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-700 hidden sm:table-cell">Computer</th>
+                                                <th class="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-700">Date & Time</th>
+                                                <th class="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-700">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-gray-200">
+                                            {% for booking in upcoming_bookings|slice:":5" %}
+                                                <tr class="hover:bg-gray-50 transition">
+                                                    <td class="px-4 md:px-6 py-4 text-sm font-medium text-gray-800">{{ booking.computer.lab.name }}</td>
+                                                    <td class="px-4 md:px-6 py-4 text-sm text-gray-600 hidden sm:table-cell">#{{ booking.computer.computer_number }}</td>
+                                                    <td class="px-4 md:px-6 py-4 text-sm text-gray-600">
+                                                        <span class="block">{{ booking.start_time|date:"M d" }}</span>
+                                                        <span class="text-xs text-gray-500">{{ booking.start_time|date:"H:i" }}</span>
+                                                    </td>
+                                                    <td class="px-4 md:px-6 py-4 text-sm">
+                                                        {% if booking.is_approved %}
+                                                            <span class="inline-flex items-center gap-1 bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
+                                                                <i class="fas fa-check-circle"></i>Approved
+                                                            </span>
+                                                        {% else %}
+                                                            <span class="inline-flex items-center gap-1 bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-medium">
+                                                                <i class="fas fa-clock"></i>Pending
+                                                            </span>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            {% if upcoming_bookings|length > 5 %}
+                                <div class="mt-4 text-center">
+                                    <a href="{% url 'booking_history' %}" class="text-ttu-green hover:text-ttu-dark-green font-medium">
+                                        View all bookings →
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </section>
+                    {% endif %}
+
+                    <!-- Quick Action Card -->
+                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl p-6 md:p-8 shadow-lg">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h3 class="text-2xl font-bold mb-2">Ready to Book?</h3>
+                                <p class="text-blue-100 mb-4">Browse our labs and find the perfect computer for your studies.</p>
+                                <a href="{% url 'lab_list' %}" class="inline-block bg-white text-blue-600 px-6 py-2 rounded-lg font-medium hover:bg-gray-100 transition">
+                                    Explore Labs
+                                </a>
+                            </div>
+                            <i class="fas fa-laptop text-6xl opacity-10"></i>
+                        </div>
                     </div>
                 </div>
             {% endif %}
-        </div>
-        <div class="col-md-6 mb-3">
+
+            <!-- Lecturer Section -->
             {% if user.is_lecturer %}
-                <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                        <h3 class="text-lg font-semibold text-gray-800">Your Upcoming Sessions</h3>
-                    </div>
-                    <div class="p-6">
-                        {% if upcoming_sessions %}
-                            <div class="space-y-4">
-                                {% for session in upcoming_sessions %}
-                                    <div class="bg-gray-50 p-4 rounded-lg">
-                                        <h4 class="font-medium text-gray-900">{{ session.title }}</h4>
-                                        <p class="text-sm text-gray-700 mt-1">{{ session.lab.name }}</p>
-                                        <p class="text-sm text-gray-700">{{ session.start_time|date:"M d, Y H:i" }} - {{ session.end_time|time:"H:i" }}</p>
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {% if session.is_approved %}bg-green-100 text-green-800{% else %}bg-yellow-100 text-yellow-800{% endif %} mt-2">
-                                            {% if session.is_approved %}Approved{% else %}Pending Approval{% endif %}
-                                        </span>
+                <!-- Upcoming Sessions -->
+                {% if upcoming_sessions %}
+                    <section class="lg:col-span-2">
+                        <div class="flex items-center gap-3 mb-6">
+                            <i class="fas fa-calendar-alt text-purple-600 text-2xl"></i>
+                            <h2 class="text-2xl font-bold text-gray-800">Upcoming Sessions</h2>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            {% for session in upcoming_sessions|slice:":4" %}
+                                <div class="bg-white rounded-lg shadow-md p-5 hover:shadow-lg transition border-l-4 border-purple-500">
+                                    <div class="flex justify-between items-start gap-4 flex-wrap">
+                                        <div class="flex-1 min-w-0">
+                                            <h3 class="text-lg font-bold text-gray-800 truncate">{{ session.title }}</h3>
+                                            <p class="text-sm text-gray-600 mt-1">
+                                                <i class="fas fa-flask text-ttu-green mr-2"></i>{{ session.lab.name }}
+                                            </p>
+                                            <p class="text-sm text-gray-600 mt-1">
+                                                <i class="fas fa-clock text-orange-500 mr-2"></i>{{ session.start_time|date:"M d, Y H:i" }}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            {% if session.is_approved %}
+                                                <span class="inline-flex items-center gap-1 bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap">
+                                                    <i class="fas fa-check-circle"></i>Approved
+                                                </span>
+                                            {% else %}
+                                                <span class="inline-flex items-center gap-1 bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap">
+                                                    <i class="fas fa-hourglass-half"></i>Pending
+                                                </span>
+                                            {% endif %}
+                                        </div>
                                     </div>
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            <p class="text-gray-500">No upcoming sessions.</p>
-                        {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </section>
+                {% endif %}
+
+                <!-- Recurring Sessions -->
+                <section class="lg:col-span-1">
+                    <div class="flex items-center gap-3 mb-6">
+                        <i class="fas fa-sync text-indigo-600 text-2xl"></i>
+                        <h2 class="text-xl font-bold text-gray-800">Recurring</h2>
                     </div>
-                </div>
-                
-                <!-- Add Recurring Sessions Section -->
-                <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                        <h3 class="text-lg font-semibold text-gray-800">Your Recurring Sessions</h3>
-                    </div>
-                    <div class="p-6">
-                        {% if recurring_sessions %}
-                            <div class="space-y-4">
-                                {% for session in recurring_sessions %}
-                                    <div class="bg-gray-50 p-4 rounded-lg">
-                                        <h4 class="font-medium text-gray-900">{{ session.title }}</h4>
-                                        <p class="text-sm text-gray-700 mt-1">{{ session.lab.name }}</p>
-                                        <p class="text-sm text-gray-700">
-                                            {{ session.get_recurrence_type_display }}: 
-                                            {{ session.start_date|date:"M d" }} - {{ session.end_date|date:"M d" }}, 
-                                            {{ session.start_time|time:"H:i" }} - {{ session.end_time|time:"H:i" }}
-                                        </p>
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {% if session.is_approved %}bg-green-100 text-green-800{% else %}bg-yellow-100 text-yellow-800{% endif %} mt-2">
-                                            {% if session.is_approved %}Approved{% else %}Pending Approval{% endif %}
-                                        </span>
+                    
+                    {% if recurring_sessions %}
+                        <div class="space-y-3 max-h-96 overflow-y-auto">
+                            {% for session in recurring_sessions|slice:":6" %}
+                                <div class="bg-white rounded-lg shadow-sm p-4 border-l-4 border-indigo-500">
+                                    <h4 class="font-semibold text-gray-800 text-sm truncate">{{ session.title }}</h4>
+                                    <p class="text-xs text-gray-600 mt-1">{{ session.lab.name }}</p>
+                                    <p class="text-xs text-gray-500 mt-1">{{ session.get_recurrence_type_display }}</p>
+                                    <div class="mt-2">
+                                        {% if session.is_approved %}
+                                            <span class="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Approved</span>
+                                        {% else %}
+                                            <span class="inline-block bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">Pending</span>
+                                        {% endif %}
                                     </div>
-                                {% endfor %}
-                            </div>
-                            <div class="mt-4">
-                                <a href="{% url 'recurring_sessions_list' %}" class="text-blue-600 hover:text-blue-800 text-sm">
-                                    View all recurring sessions →
-                                </a>
-                            </div>
-                        {% else %}
-                            <p class="text-gray-500">No recurring sessions.</p>
-                            <div class="mt-4">
-                                <a href="{% url 'recurring_booking' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-                                    Create Recurring Session
-                                </a>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <a href="{% url 'recurring_sessions_list' %}" class="block mt-4 text-center text-ttu-green hover:text-ttu-dark-green font-medium text-sm">
+                            View All →
+                        </a>
+                    {% else %}
+                        <div class="bg-white rounded-lg p-6 text-center">
+                            <i class="fas fa-plus-circle text-4xl text-gray-300 mb-3"></i>
+                            <p class="text-gray-600 text-sm mb-4">No recurring sessions yet</p>
+                            <a href="{% url 'recurring_booking' %}" class="inline-block bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition">
+                                Create One
+                            </a>
+                        </div>
+                    {% endif %}
+                </section>
             {% endif %}
-        </div>
-        
-        <div class="col-md-6 mb-3">
-            {% if user.is_admin %}
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Admin Dashboard</h5>
-                        <p class="card-text">Manage lab bookings and requests.</p>
-                        <a href="{% url 'admin_dashboard' %}" class="btn btn-primary">Admin Dashboard</a>
+
+            <!-- Admin Section -->
+            {% if user.is_admin or user.is_super_admin %}
+                <section class="lg:col-span-3">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Admin Stats Card -->
+                        <a href="{% url 'admin_dashboard' %}" class="group">
+                            <div class="bg-gradient-to-br from-red-500 to-red-600 text-white rounded-xl p-6 shadow-lg hover:shadow-xl transition h-full">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="text-red-100 text-sm mb-1">Admin Dashboard</p>
+                                        <h3 class="text-2xl font-bold">Manage System</h3>
+                                        <p class="text-red-100 text-sm mt-3">View approvals and manage bookings</p>
+                                    </div>
+                                    <i class="fas fa-tachometer-alt text-4xl opacity-20"></i>
+                                </div>
+                            </div>
+                        </a>
+
+                        <!-- Check-in Card -->
+                        <a href="{% url 'admin_check_in_dashboard' %}" class="group">
+                            <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl p-6 shadow-lg hover:shadow-xl transition h-full">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="text-green-100 text-sm mb-1">Check-in System</p>
+                                        <h3 class="text-2xl font-bold">Attendance</h3>
+                                        <p class="text-green-100 text-sm mt-3">Record student check-ins</p>
+                                    </div>
+                                    <i class="fas fa-clipboard-check text-4xl opacity-20"></i>
+                                </div>
+                            </div>
+                        </a>
+
+                        <!-- Reports Card -->
+                        <a href="{% url 'reports:dashboard' %}" class="group">
+                            <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl p-6 shadow-lg hover:shadow-xl transition h-full">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="text-blue-100 text-sm mb-1">Analytics</p>
+                                        <h3 class="text-2xl font-bold">Reports</h3>
+                                        <p class="text-blue-100 text-sm mt-3">System usage & statistics</p>
+                                    </div>
+                                    <i class="fas fa-chart-line text-4xl opacity-20"></i>
+                                </div>
+                            </div>
+                        </a>
                     </div>
-                </div>
+                </section>
             {% endif %}
         </div>
     </div>
 </div>
+
+<style>
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    @media (max-width: 768px) {
+        .text-2xl {
+            font-size: 1.5rem;
+        }
+        
+        .text-3xl {
+            font-size: 1.875rem;
+        }
+    }
+</style>
 {% endblock %}
