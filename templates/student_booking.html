@@ -1,123 +1,642 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Book a Computer - {{ lab.name }}{% endblock %}
 
+{% block extra_head %}
+<style>
+    :root {
+        --ttu-green: #2c6e49;
+        --ttu-dark-green: #1e4c33;
+    }
+
+    /* ===== Main Container ===== */
+    .booking-container {
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 1.5rem;
+    }
+
+    /* ===== Hero Section ===== */
+    .booking-hero {
+        background: linear-gradient(135deg, var(--ttu-green) 0%, var(--ttu-dark-green) 100%);
+        color: white;
+        padding: 2rem 1.5rem;
+        border-radius: 0.75rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(44, 110, 73, 0.2);
+        animation: slideInDown 0.6s ease-out;
+    }
+
+    .booking-hero h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .booking-hero p {
+        font-size: 1rem;
+        opacity: 0.95;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* ===== Content Layout ===== */
+    .booking-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+
+    @media (max-width: 1024px) {
+        .booking-content {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* ===== Form Card ===== */
+    .booking-form-card {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e5e7eb;
+        animation: slideInUp 0.6s ease-out 0.1s backwards;
+    }
+
+    .booking-form-card h2 {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #1f2937;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .booking-form-card h2 i {
+        color: var(--ttu-green);
+        font-size: 1.75rem;
+    }
+
+    /* ===== Form Groups ===== */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .form-group label i {
+        color: var(--ttu-green);
+        margin-right: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.5rem;
+        font-size: 0.95rem;
+        font-family: inherit;
+        transition: all 0.3s ease;
+        background-color: #f9fafb;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: var(--ttu-green);
+        background-color: white;
+        box-shadow: 0 0 0 3px rgba(44, 110, 73, 0.1);
+    }
+
+    /* ===== Time Input Row ===== */
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .form-row .form-group {
+        margin-bottom: 0;
+    }
+
+    /* ===== Selected Computer Info ===== */
+    .computer-info-banner {
+        background: linear-gradient(135deg, rgba(44, 110, 73, 0.1) 0%, rgba(44, 110, 73, 0.05) 100%);
+        border-left: 4px solid var(--ttu-green);
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .computer-info-banner i {
+        font-size: 1.5rem;
+        color: var(--ttu-green);
+    }
+
+    .computer-info-banner-text h3 {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--ttu-green);
+        margin: 0;
+    }
+
+    .computer-info-banner-text p {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin: 0.25rem 0 0 0;
+    }
+
+    /* ===== Errors ===== */
+    .form-errors {
+        background: #fee2e2;
+        border: 1px solid #fecaca;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        animation: slideInUp 0.3s ease-out;
+    }
+
+    .form-errors h3 {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #991b1b;
+        margin: 0 0 0.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-errors h3 i {
+        font-size: 1.2rem;
+    }
+
+    .form-errors ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .form-errors li {
+        color: #7f1d1d;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .form-errors li:before {
+        content: '•';
+        color: #991b1b;
+        font-weight: bold;
+        margin-top: 0.2rem;
+    }
+
+    .form-errors li:last-child {
+        margin-bottom: 0;
+    }
+
+    /* ===== Field Errors ===== */
+    .field-error {
+        color: #dc2626;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .field-error i {
+        font-size: 0.75rem;
+    }
+
+    .form-group input.error,
+    .form-group select.error {
+        border-color: #dc2626;
+        background-color: #fef2f2;
+    }
+
+    /* ===== Form Actions ===== */
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    @media (max-width: 640px) {
+        .form-actions {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .form-actions button,
+        .form-actions a {
+            width: 100%;
+        }
+    }
+
+    .btn-submit {
+        flex: 1;
+        padding: 0.9rem 1.5rem;
+        background: linear-gradient(135deg, var(--ttu-green) 0%, var(--ttu-dark-green) 100%);
+        color: white;
+        border: none;
+        border-radius: 0.5rem;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .btn-submit:hover {
+        box-shadow: 0 6px 16px rgba(44, 110, 73, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .btn-submit:active {
+        transform: translateY(0);
+    }
+
+    .btn-cancel {
+        flex: 1;
+        padding: 0.9rem 1.5rem;
+        background: white;
+        color: var(--ttu-green);
+        border: 2px solid var(--ttu-green);
+        border-radius: 0.5rem;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .btn-cancel:hover {
+        background: var(--ttu-green);
+        color: white;
+    }
+
+    /* ===== Info Card ===== */
+    .booking-info-card {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e5e7eb;
+        animation: slideInUp 0.6s ease-out 0.2s backwards;
+    }
+
+    .booking-info-card h3 {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #1f2937;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .booking-info-card h3 i {
+        color: var(--ttu-green);
+        font-size: 1.75rem;
+    }
+
+    .info-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        space-y: 1rem;
+    }
+
+    .info-list li {
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        background: #f9fafb;
+        border-left: 4px solid var(--ttu-green);
+        border-radius: 0.375rem;
+        display: flex;
+        gap: 0.75rem;
+        font-size: 0.9rem;
+        color: #6b7280;
+        transition: all 0.3s ease;
+    }
+
+    .info-list li:hover {
+        background: #f3f4f6;
+        border-left-color: var(--ttu-dark-green);
+    }
+
+    .info-list li i {
+        flex-shrink: 0;
+        color: var(--ttu-green);
+        margin-top: 0.2rem;
+        font-size: 1rem;
+    }
+
+    .info-list li strong {
+        display: block;
+        color: #1f2937;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+
+    /* ===== Animations ===== */
+    @keyframes slideInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ===== Mobile Optimization ===== */
+    @media (max-width: 640px) {
+        .booking-container {
+            padding: 1rem;
+        }
+
+        .booking-hero {
+            padding: 1.5rem 1rem;
+        }
+
+        .booking-hero h1 {
+            font-size: 1.5rem;
+        }
+
+        .booking-form-card,
+        .booking-info-card {
+            padding: 1.5rem;
+        }
+
+        .booking-form-card h2,
+        .booking-info-card h3 {
+            font-size: 1.25rem;
+        }
+
+        .info-list li {
+            padding: 0.75rem;
+            font-size: 0.85rem;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h1>Book a Computer in {{ lab.name }}</h1>
-            <p class="lead">{{ lab.location }}</p>
-        </div>
+<div class="booking-container">
+    <!-- Hero Section -->
+    <div class="booking-hero">
+        <h1>
+            <i class="fas fa-laptop"></i>
+            Book a Computer
+        </h1>
+        <p>
+            <i class="fas fa-map-marker-alt"></i>
+            {{ lab.name }} • {{ lab.location }}
+        </p>
     </div>
 
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h2>Booking Form</h2>
+    <!-- Content Grid -->
+    <div class="booking-content">
+        <!-- Booking Form -->
+        <div class="booking-form-card">
+            <h2>
+                <i class="fas fa-calendar-check"></i>
+                Booking Details
+            </h2>
+
+            {% if computer %}
+                <div class="computer-info-banner">
+                    <i class="fas fa-check-circle"></i>
+                    <div class="computer-info-banner-text">
+                        <h3>Computer Selected</h3>
+                        <p>Computer #{{ computer.computer_number }}</p>
+                    </div>
                 </div>
-                <div class="card-body">
-                    {% if computer %}
-                        <p>You are booking Computer #{{ computer.computer_number }}</p>
+            {% endif %}
+
+            <!-- Display Errors -->
+            {% if form.non_field_errors %}
+                <div class="form-errors">
+                    <h3>
+                        <i class="fas fa-exclamation-circle"></i>
+                        Booking Error
+                    </h3>
+                    <ul>
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <!-- Booking Form -->
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <!-- Computer Selection -->
+                <div class="form-group">
+                    <label for="{{ form.computer.id_for_label }}">
+                        <i class="fas fa-desktop"></i>
+                        Select Computer
+                    </label>
+                    {{ form.computer }}
+                    {% if form.computer.errors %}
+                        <div class="field-error">
+                            <i class="fas fa-times-circle"></i>
+                            {% for error in form.computer.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
                     {% endif %}
-                    
-                    <form method="post">
-                        {% csrf_token %}
-                        
-                        {% if form.non_field_errors %}
-                            <div class="alert alert-danger">
-                                {% for error in form.non_field_errors %}
+                </div>
+
+                <!-- Date Selection -->
+                <div class="form-group">
+                    <label for="{{ form.date.id_for_label }}">
+                        <i class="fas fa-calendar"></i>
+                        Select Date
+                    </label>
+                    {{ form.date }}
+                    {% if form.date.errors %}
+                        <div class="field-error">
+                            <i class="fas fa-times-circle"></i>
+                            {% for error in form.date.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Time Selection -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.start_time.id_for_label }}">
+                            <i class="fas fa-clock"></i>
+                            Start Time
+                        </label>
+                        {{ form.start_time }}
+                        {% if form.start_time.errors %}
+                            <div class="field-error">
+                                <i class="fas fa-times-circle"></i>
+                                {% for error in form.start_time.errors %}
                                     {{ error }}
                                 {% endfor %}
                             </div>
                         {% endif %}
-                        
-                        <div class="mb-3">
-                            <label for="{{ form.computer.id_for_label }}" class="form-label">Computer</label>
-                            {{ form.computer }}
-                            {% if form.computer.errors %}
-                                <div class="text-danger">
-                                    {% for error in form.computer.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="{{ form.date.id_for_label }}" class="form-label">Date</label>
-                            {{ form.date }}
-                            {% if form.date.errors %}
-                                <div class="text-danger">
-                                    {% for error in form.date.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.start_time.id_for_label }}" class="form-label">Start Time</label>
-                                {{ form.start_time }}
-                                {% if form.start_time.errors %}
-                                    <div class="text-danger">
-                                        {% for error in form.start_time.errors %}
-                                            {{ error }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.end_time.id_for_label }}">
+                            <i class="fas fa-hourglass-end"></i>
+                            End Time
+                        </label>
+                        {{ form.end_time }}
+                        {% if form.end_time.errors %}
+                            <div class="field-error">
+                                <i class="fas fa-times-circle"></i>
+                                {% for error in form.end_time.errors %}
+                                    {{ error }}
+                                {% endfor %}
                             </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.end_time.id_for_label }}" class="form-label">End Time</label>
-                                {{ form.end_time }}
-                                {% if form.end_time.errors %}
-                                    <div class="text-danger">
-                                        {% for error in form.end_time.errors %}
-                                            {{ error }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        
-                        <div class="mt-4">
-                            <button type="submit" class="btn btn-primary">Submit Booking</button>
-                            <a href="{% url 'lab_detail' lab.id %}" class="btn btn-secondary">Cancel</a>
-                        </div>
-                    </form>
+                        {% endif %}
+                    </div>
                 </div>
-            </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-check"></i>
+                        <span class="d-none d-sm-inline">Confirm Booking</span>
+                        <span class="d-sm-none">Confirm</span>
+                    </button>
+                    <a href="{% url 'lab_detail' lab.id %}" class="btn-cancel">
+                        <i class="fas fa-arrow-left"></i>
+                        <span class="d-none d-sm-inline">Go Back</span>
+                        <span class="d-sm-none">Back</span>
+                    </a>
+                </div>
+            </form>
         </div>
-        
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h2>Booking Information</h2>
-                </div>
-                <div class="card-body">
-                    <p>Please note the following:</p>
-                    <ul>
-                        <li>Bookings are subject to approval by an administrator.</li>
-                        <li>Your booking may be cancelled if a lecturer needs the lab for a session.</li>
-                        <li>You will receive a notification about the status of your booking.</li>
-                        <li>Bookings cannot overlap with scheduled lab sessions.</li>
-                    </ul>
-                </div>
-            </div>
+
+        <!-- Information Card -->
+        <div class="booking-info-card">
+            <h3>
+                <i class="fas fa-info-circle"></i>
+                Important Information
+            </h3>
+
+            <ul class="info-list">
+                <li>
+                    <i class="fas fa-check-circle"></i>
+                    <div>
+                        <strong>Approval Required</strong>
+                        Your booking must be approved by an administrator before it becomes active.
+                    </div>
+                </li>
+                <li>
+                    <i class="fas fa-bell"></i>
+                    <div>
+                        <strong>Stay Notified</strong>
+                        You'll receive notifications when your booking status changes.
+                    </div>
+                </li>
+                <li>
+                    <i class="fas fa-users"></i>
+                    <div>
+                        <strong>Lecturer Priority</strong>
+                        Your booking may be cancelled if a lecturer schedules a lab session.
+                    </div>
+                </li>
+                <li>
+                    <i class="fas fa-ban"></i>
+                    <div>
+                        <strong>No Overlaps</strong>
+                        Your booking cannot overlap with existing bookings or sessions.
+                    </div>
+                </li>
+                <li>
+                    <i class="fas fa-clock"></i>
+                    <div>
+                        <strong>Future Bookings</strong>
+                        Bookings must be scheduled for future dates and times.
+                    </div>
+                </li>
+                <li>
+                    <i class="fas fa-pencil-alt"></i>
+                    <div>
+                        <strong>Cancellation</strong>
+                        You can cancel bookings at least 30 minutes before the scheduled time.
+                    </div>
+                </li>
+            </ul>
         </div>
     </div>
 </div>
 
 <script>
-    // Add Bootstrap classes to form elements
+    // Add form control classes
     document.addEventListener('DOMContentLoaded', function() {
-        var formElements = document.querySelectorAll('select, input[type="date"], input[type="time"]');
-        formElements.forEach(function(element) {
-            element.classList.add('form-control');
+        const inputs = document.querySelectorAll('select, input[type="date"], input[type="time"]');
+        inputs.forEach(input => {
+            input.classList.add('form-control');
         });
+
+        // Add error class to fields with errors
+        const form = document.querySelector('form');
+        if (form) {
+            const fieldsWithErrors = form.querySelectorAll('[id^="id_"][class*="error"]');
+            fieldsWithErrors.forEach(field => {
+                field.classList.add('error');
+            });
+        }
     });
 </script>
 {% endblock %}

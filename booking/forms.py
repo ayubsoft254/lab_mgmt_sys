@@ -10,13 +10,25 @@ STUDENT_EMAIL_DOMAIN = 'students.ttu.ac.ke'
 LECTURER_EMAIL_DOMAIN = 'ttu.ac.ke'
 
 class ComputerBookingForm(forms.ModelForm):
-    date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
-    start_time = forms.TimeField(widget=forms.TimeInput(attrs={'type': 'time'}))
-    end_time = forms.TimeField(widget=forms.TimeInput(attrs={'type': 'time'}))
+    date = forms.DateField(widget=forms.DateInput(attrs={
+        'type': 'date',
+        'class': 'form-control'
+    }))
+    start_time = forms.TimeField(widget=forms.TimeInput(attrs={
+        'type': 'time',
+        'class': 'form-control'
+    }))
+    end_time = forms.TimeField(widget=forms.TimeInput(attrs={
+        'type': 'time',
+        'class': 'form-control'
+    }))
     
     class Meta:
         model = ComputerBooking
         fields = ['computer', 'date', 'start_time', 'end_time']
+        widgets = {
+            'computer': forms.Select(attrs={'class': 'form-control'}),
+        }
     
     def __init__(self, *args, **kwargs):
         self.lab_id = kwargs.pop('lab_id', None)
