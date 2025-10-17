@@ -242,12 +242,15 @@
             font-weight: 500;
             transition: all 0.3s ease;
             font-size: 0.95rem;
+            outline: none;
         }
 
-        .user-dropdown-toggle:hover {
+        .user-dropdown-toggle:hover,
+        .user-dropdown-toggle:focus {
             background-color: rgba(255, 255, 255, 0.2);
             border-color: rgba(255, 255, 255, 0.3);
             transform: translateY(-2px);
+            outline: none;
         }
 
         .user-dropdown-menu {
@@ -541,14 +544,14 @@
                     </div>
 
                     <!-- User Dropdown -->
-                    <div class="nav-item relative" x-data="{ open: false }">
-                        <button @click="open = !open" @click.away="open = false" class="user-dropdown-toggle">
+                    <div class="nav-item relative">
+                        <button class="user-dropdown-toggle" id="user-dropdown-btn">
                             <i class="fas fa-user-circle"></i>
                             <span class="hidden lg:inline">{{ user.username }}</span>
                             <i class="fas fa-chevron-down text-xs"></i>
                         </button>
 
-                        <div x-show="open" class="user-dropdown-menu" style="display: none;">
+                        <div class="user-dropdown-menu" id="user-dropdown-menu" style="display: none;">
                             <a href="{% url 'profile' %}">
                                 <i class="fas fa-user"></i>
                                 <span>My Profile</span>
@@ -732,6 +735,35 @@
                 }
             });
         }
+
+        // User dropdown menu functionality
+        const userDropdownBtn = document.getElementById('user-dropdown-btn');
+        const userDropdownMenu = document.getElementById('user-dropdown-menu');
+
+        if (userDropdownBtn && userDropdownMenu) {
+            // Toggle dropdown on button click
+            userDropdownBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const isVisible = userDropdownMenu.style.display !== 'none';
+                userDropdownMenu.style.display = isVisible ? 'none' : 'block';
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                const isClickInside = userDropdownBtn.contains(e.target) || userDropdownMenu.contains(e.target);
+                if (!isClickInside) {
+                    userDropdownMenu.style.display = 'none';
+                }
+            });
+
+            // Close dropdown when clicking a link
+            const dropdownLinks = userDropdownMenu.querySelectorAll('a');
+            dropdownLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    userDropdownMenu.style.display = 'none';
+                });
+            });
+        }
         
         // Add active class to current page link
         document.addEventListener("DOMContentLoaded", function() {
@@ -741,26 +773,6 @@
             navLinks.forEach(link => {
                 if (link.getAttribute('href') === currentPath) {
                     link.classList.add('active');
-                }
-            });
-        });
-
-        // User dropdown menu functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const dropdownToggles = document.querySelectorAll('[role="button"][data-dropdown]');
-            dropdownToggles.forEach(toggle => {
-                toggle.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const menu = this.nextElementSibling;
-                    menu.classList.toggle('hidden');
-                });
-            });
-
-            // Close dropdown when clicking outside
-            document.addEventListener('click', function(e) {
-                const userDropdown = document.querySelector('.user-dropdown-menu');
-                if (userDropdown && !userDropdown.contains(e.target)) {
-                    userDropdown.classList.add('hidden');
                 }
             });
         });
