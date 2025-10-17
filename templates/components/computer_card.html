@@ -1,40 +1,37 @@
 {% load static %}
 
 <!-- Modern Computer Card Component -->
-<div class="computer-card group" data-status="{{ computer.status }}" data-computer-id="{{ computer.id }}">
+<div class="computer-card" data-status="{{ computer.status }}" data-computer-id="{{ computer.id }}" style="animation: slideInUp 0.5s ease-out both;">
     <!-- Card Container -->
-    <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 hover:border-ttu-green">
-        
-        <!-- Status Badge Background -->
-        <div class="relative h-2 bg-gradient-to-r 
-            {% if computer.status == 'available' %}from-green-400 to-green-500{% elif computer.status == 'maintenance' %}from-red-400 to-red-500{% else %}from-amber-400 to-amber-500{% endif %}">
-        </div>
-
+    <div class="card border-0 shadow-sm h-100 transition-all" style="
+        border-top: 4px solid {% if computer.status == 'available' %}#10b981{% elif computer.status == 'maintenance' %}#ef4444{% else %}#f59e0b{% endif %} !important;
+        border-radius: 0.75rem;
+    ">
         <!-- Card Content -->
-        <div class="p-5">
+        <div class="card-body d-flex flex-column p-4">
             <!-- Header Section -->
-            <div class="flex items-start justify-between mb-4">
-                <div class="flex-1">
-                    <h3 class="text-lg font-bold text-gray-800">
-                        <i class="fas fa-desktop text-ttu-green mr-2"></i>
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="flex-grow-1">
+                    <h5 class="card-title mb-0" style="color: #1f2937; font-weight: 700;">
+                        <i class="fas fa-desktop text-ttu-green me-2"></i>
                         Computer #{{ computer.computer_number }}
-                    </h3>
+                    </h5>
                 </div>
                 <!-- Status Badge -->
-                <div class="flex-shrink-0">
+                <div class="ms-2">
                     {% if computer.status == 'available' %}
-                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
-                            <span class="w-2 h-2 bg-green-600 rounded-full animate-pulse"></span>
+                        <span class="badge bg-success" style="font-size: 0.7rem; padding: 0.35rem 0.6rem;">
+                            <span class="badge bg-light text-success me-1" style="height: 0.5rem; width: 0.5rem; display: inline-block; border-radius: 50%;"></span>
                             Available
                         </span>
                     {% elif computer.status == 'maintenance' %}
-                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">
-                            <span class="w-2 h-2 bg-red-600"></span>
+                        <span class="badge bg-danger" style="font-size: 0.7rem; padding: 0.35rem 0.6rem;">
+                            <span class="badge bg-light text-danger me-1" style="height: 0.5rem; width: 0.5rem; display: inline-block; border-radius: 50%;"></span>
                             Maintenance
                         </span>
                     {% else %}
-                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
-                            <span class="w-2 h-2 bg-amber-600"></span>
+                        <span class="badge bg-warning text-dark" style="font-size: 0.7rem; padding: 0.35rem 0.6rem;">
+                            <span class="badge bg-light text-warning me-1" style="height: 0.5rem; width: 0.5rem; display: inline-block; border-radius: 50%;"></span>
                             Reserved
                         </span>
                     {% endif %}
@@ -43,43 +40,101 @@
 
             <!-- Specifications Section -->
             {% if computer.specs %}
-                <div class="mb-4 pb-4 border-b border-gray-200">
-                    <p class="text-sm text-gray-600 leading-relaxed">
-                        <i class="fas fa-microchip text-gray-400 mr-2"></i>
+                <div class="mb-3 pb-3" style="border-bottom: 1px solid #e5e7eb;">
+                    <p class="card-text" style="font-size: 0.875rem; color: #6b7280; margin: 0;">
+                        <i class="fas fa-microchip me-2" style="color: #9ca3af;"></i>
                         {{ computer.specs|truncatewords:20 }}
                     </p>
                 </div>
             {% endif %}
 
-            <!-- Footer Section with Action Button -->
-            <div class="flex gap-2">
+            <!-- Footer Section with Action Button - Flex to bottom -->
+            <div class="mt-auto">
                 {% if computer.status == 'available' and user.is_student %}
                     <a href="{% url 'computer_booking' lab.id computer.id %}" 
-                       class="flex-1 px-4 py-2.5 bg-gradient-to-r from-ttu-green to-ttu-dark-green text-white font-semibold rounded-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 text-sm">
+                       class="btn btn-ttu w-100 btn-sm d-flex align-items-center justify-content-center gap-2"
+                       style="font-weight: 600; font-size: 0.875rem; padding: 0.6rem 0.5rem;">
                         <i class="fas fa-plus"></i>
-                        <span class="hidden sm:inline">Book Now</span>
-                        <span class="sm:hidden">Book</span>
+                        <span class="d-none d-sm-inline">Book Now</span>
+                        <span class="d-sm-none">Book</span>
                     </a>
                 {% elif computer.status == 'available' and not user.is_student %}
-                    <div class="flex-1 px-4 py-2.5 bg-gray-100 text-gray-600 font-semibold rounded-lg flex items-center justify-center gap-2 text-sm">
+                    <button class="btn btn-light w-100 btn-sm d-flex align-items-center justify-content-center gap-2" 
+                            style="color: #6b7280; font-weight: 600; font-size: 0.875rem; padding: 0.6rem 0.5rem;" disabled>
                         <i class="fas fa-info-circle"></i>
-                        <span class="hidden sm:inline">Students Only</span>
-                        <span class="sm:hidden">View</span>
-                    </div>
+                        <span class="d-none d-sm-inline">Students Only</span>
+                        <span class="d-sm-none">View</span>
+                    </button>
                 {% elif computer.status == 'maintenance' %}
-                    <div class="flex-1 px-4 py-2.5 bg-red-100 text-red-700 font-semibold rounded-lg flex items-center justify-center gap-2 text-sm">
+                    <button class="btn w-100 btn-sm d-flex align-items-center justify-content-center gap-2" 
+                            style="background-color: #fee2e2; color: #991b1b; font-weight: 600; font-size: 0.875rem; padding: 0.6rem 0.5rem; border: none;" disabled>
                         <i class="fas fa-tools"></i>
-                        <span class="hidden sm:inline">Under Maintenance</span>
-                        <span class="sm:hidden">Unavailable</span>
-                    </div>
+                        <span class="d-none d-sm-inline">Under Maintenance</span>
+                        <span class="d-sm-none">Unavailable</span>
+                    </button>
                 {% else %}
-                    <div class="flex-1 px-4 py-2.5 bg-amber-100 text-amber-700 font-semibold rounded-lg flex items-center justify-center gap-2 text-sm">
+                    <button class="btn w-100 btn-sm d-flex align-items-center justify-content-center gap-2" 
+                            style="background-color: #fef3c7; color: #92400e; font-weight: 600; font-size: 0.875rem; padding: 0.6rem 0.5rem; border: none;" disabled>
                         <i class="fas fa-lock"></i>
-                        <span class="hidden sm:inline">Reserved</span>
-                        <span class="sm:hidden">Booked</span>
-                    </div>
+                        <span class="d-none d-sm-inline">Reserved</span>
+                        <span class="d-sm-none">Booked</span>
+                    </button>
                 {% endif %}
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .computer-card {
+        height: 100%;
+    }
+    
+    .computer-card .card {
+        height: 100%;
+        transition: all 0.3s ease;
+    }
+    
+    .computer-card .card:hover {
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15) !important;
+        transform: translateY(-4px);
+    }
+    
+    .computer-card .btn-ttu {
+        background: linear-gradient(135deg, var(--ttu-green) 0%, var(--ttu-dark-green) 100%);
+        color: white !important;
+        border: none;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    
+    .computer-card .btn-ttu:hover {
+        box-shadow: 0 6px 16px rgba(44, 110, 73, 0.3);
+        transform: translateY(-2px);
+        color: white !important;
+        text-decoration: none;
+    }
+    
+    .computer-card .btn-ttu:focus {
+        box-shadow: 0 0 0 0.25rem rgba(44, 110, 73, 0.25);
+        color: white !important;
+        text-decoration: none;
+    }
+    
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .computer-card .card-body {
+            padding: 1rem !important;
+        }
+    }
+</style>
