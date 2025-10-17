@@ -122,6 +122,10 @@ def home_view(request):
     
     labs = Lab.objects.all()
     
+    # Add available_computers count for each lab
+    for lab in labs:
+        lab.available_computers = lab.computers.filter(status='available').count()
+    
     return render(request, 'home.html', {
         'labs': labs,
         'upcoming_bookings': upcoming_bookings,
