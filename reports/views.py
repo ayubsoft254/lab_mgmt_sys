@@ -35,28 +35,28 @@ def reports_dashboard(request):
             {
                 'title': 'System Usage Report',
                 'description': 'Comprehensive system usage including lab statistics, computer usage, and attendance data',
-                'url': 'system_usage_report',
+                'url': 'system_usage',
                 'icon': 'chart-line',
                 'color': 'primary'
             },
             {
                 'title': 'Lab Utilization Report',
                 'description': 'Detailed lab usage, capacity analysis, and utilization trends',
-                'url': 'lab_utilization_report',
+                'url': 'lab_utilization',
                 'icon': 'bar-chart',
                 'color': 'info'
             },
             {
                 'title': 'Computer Inventory Report',
                 'description': 'Computer status, active machines, maintenance schedule, and usage metrics',
-                'url': 'computer_inventory_report',
+                'url': 'computer_inventory',
                 'icon': 'desktop',
                 'color': 'success'
             },
             {
                 'title': 'Attendance Report',
                 'description': 'Attendance statistics, student participation, and engagement metrics',
-                'url': 'attendance_report',
+                'url': 'attendance',
                 'icon': 'clipboard-check',
                 'color': 'warning'
             }
