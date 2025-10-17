@@ -36,56 +36,80 @@
     <div class="container mx-auto px-4 py-8 md:py-12">
         <!-- Available Labs Section -->
         <section class="mb-12">
-            <div class="flex items-center gap-3 mb-6">
-                <i class="fas fa-flask text-ttu-green text-2xl"></i>
-                <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Available Labs</h2>
+            <div class="flex items-center gap-3 mb-8">
+                <i class="fas fa-flask text-ttu-green text-3xl"></i>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Available <span class="text-ttu-green">Labs</span></h2>
             </div>
             
             {% if labs %}
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                     {% for lab in labs %}
-                        <div class="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden hover:translate-y-[-4px]">
-                            <!-- Lab Header -->
-                            <div class="h-24 bg-gradient-to-r from-ttu-green to-ttu-dark-green relative overflow-hidden">
-                                <div class="absolute inset-0 opacity-10">
-                                    <i class="fas fa-flask text-white text-6xl absolute -top-2 -right-4"></i>
-                                </div>
+                        <div class="group bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-2">
+                            <!-- Lab Image Header with Overlay -->
+                            <div class="relative h-56 overflow-hidden bg-gradient-to-b from-ttu-green to-ttu-dark-green">
+                                {% if lab.image %}
+                                    <img src="{{ lab.image.url }}" alt="{{ lab.name }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                                {% else %}
+                                    <div class="w-full h-full flex items-center justify-center">
+                                        <i class="fas fa-flask text-white text-6xl opacity-20"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+                                
+                                <!-- Status Badge -->
+                                {% if lab.available_computers > 0 %}
+                                    <span class="absolute top-4 right-4 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                                        <i class="fas fa-check-circle"></i> {{ lab.available_computers }} Available
+                                    </span>
+                                {% else %}
+                                    <span class="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">FULL</span>
+                                {% endif %}
                             </div>
                             
                             <!-- Lab Content -->
-                            <div class="p-5">
-                                <h3 class="text-xl font-bold text-gray-800 mb-1">{{ lab.name }}</h3>
+                            <div class="p-6">
+                                <!-- Header with Icon -->
+                                <div class="flex items-center mb-4">
+                                    <div class="w-12 h-12 bg-ttu-green rounded-lg flex items-center justify-center mr-3 text-white shadow-md">
+                                        <i class="fas fa-flask text-lg"></i>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-gray-900">{{ lab.name }}</h3>
+                                </div>
+                                
+                                <!-- Location -->
                                 <p class="text-ttu-green text-sm font-medium mb-3 flex items-center gap-2">
                                     <i class="fas fa-map-marker-alt"></i>{{ lab.location }}
                                 </p>
                                 
-                                <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ lab.description|truncatewords:15 }}</p>
+                                <!-- Description -->
+                                <p class="text-gray-600 text-sm mb-5 leading-relaxed">{{ lab.description|truncatewords:18 }}</p>
                                 
-                                <!-- Lab Stats -->
-                                <div class="bg-gray-50 rounded-lg p-3 mb-4 flex items-center justify-between">
-                                    <div class="text-center flex-1">
+                                <!-- Lab Stats Card -->
+                                <div class="bg-gradient-to-r from-ttu-light to-gray-50 rounded-lg p-4 mb-5 flex justify-around">
+                                    <div class="text-center">
                                         <div class="text-2xl font-bold text-ttu-green">{{ lab.capacity }}</div>
-                                        <div class="text-xs text-gray-600">Computers</div>
+                                        <div class="text-xs text-gray-600 font-medium mt-1">Total</div>
                                     </div>
                                     <div class="h-12 w-px bg-gray-300"></div>
-                                    <div class="text-center flex-1">
-                                        <div class="text-2xl font-bold text-blue-600">{{ lab.available_computers|default:0 }}</div>
-                                        <div class="text-xs text-gray-600">Available</div>
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold text-green-600">{{ lab.available_computers|default:0 }}</div>
+                                        <div class="text-xs text-gray-600 font-medium mt-1">Available</div>
                                     </div>
                                 </div>
                                 
                                 <!-- Action Button -->
-                                <a href="{% url 'lab_detail' lab.id %}" class="block w-full bg-ttu-green text-white py-2 rounded-lg font-medium text-center hover:bg-ttu-dark-green transition">
-                                    View Lab Details →
+                                <a href="{% url 'lab_detail' lab.id %}" class="block w-full bg-ttu-green text-white py-3 px-4 rounded-lg font-semibold text-center hover:bg-ttu-dark-green transition-all duration-300 shadow-md hover:shadow-lg hover:translate-y-[-1px] flex items-center justify-center gap-2">
+                                    Explore Lab <i class="fas fa-arrow-right text-sm"></i>
                                 </a>
                             </div>
                         </div>
                     {% endfor %}
                 </div>
             {% else %}
-                <div class="bg-white rounded-lg p-8 text-center">
-                    <i class="fas fa-inbox text-4xl text-gray-300 mb-4"></i>
-                    <p class="text-gray-500 text-lg">No labs available at the moment.</p>
+                <div class="bg-gradient-to-br from-white to-gray-50 rounded-xl p-12 text-center shadow-lg border border-gray-100">
+                    <i class="fas fa-inbox text-5xl text-gray-300 mb-4 inline-block"></i>
+                    <p class="text-gray-600 text-lg font-medium">No labs available at the moment.</p>
+                    <p class="text-gray-500 text-sm mt-2">Please check back later.</p>
                 </div>
             {% endif %}
         </section>
@@ -299,11 +323,45 @@
 </div>
 
 <style>
+    :root {
+        --ttu-green: #2c6e49;
+        --ttu-dark-green: #1e4c33;
+        --ttu-light: #f2f9f5;
+    }
+    
+    .bg-ttu-green {
+        background-color: var(--ttu-green);
+    }
+    
+    .bg-ttu-dark-green {
+        background-color: var(--ttu-dark-green);
+    }
+    
+    .bg-ttu-light {
+        background-color: var(--ttu-light);
+    }
+    
+    .text-ttu-green {
+        color: var(--ttu-green);
+    }
+
     .line-clamp-2 {
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
+    }
+    
+    /* Smooth transitions for interactive elements */
+    .transition-all {
+        transition-property: all;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 300ms;
+    }
+    
+    /* Group hover effects */
+    .group:hover .group-hover\:scale-110 {
+        transform: scale(1.1);
     }
 
     @media (max-width: 768px) {
@@ -314,6 +372,23 @@
         .text-3xl {
             font-size: 1.875rem;
         }
+        
+        .text-4xl {
+            font-size: 2rem;
+        }
+    }
+    
+    /* Card enhancement */
+    .shadow-lg {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    
+    .shadow-xl {
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    .shadow-2xl {
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     }
 </style>
 {% endblock %}
