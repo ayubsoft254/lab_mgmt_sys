@@ -8,6 +8,7 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.conf import settings
 from django.utils import timezone
+from django.urls import reverse
 import logging
 
 logger = logging.getLogger(__name__)
@@ -29,6 +30,9 @@ def send_booking_approval_email(booking):
     try:
         subject = f"Your Computer Booking Has Been Approved - {booking.computer}"
         
+        # Generate booking history URL
+        booking_url = f"{settings.BASE_URL}/profile/booking-history/" if settings.BASE_URL else "#"
+        
         # Prepare context for the email template
         context = {
             'student_name': booking.student.get_full_name(),
@@ -38,7 +42,7 @@ def send_booking_approval_email(booking):
             'end_time': booking.end_time.strftime('%I:%M %p'),
             'booking_code': booking.booking_code,
             'purpose': booking.purpose or 'Not specified',
-            'booking_url': f"{settings.BASE_URL}/bookings/{booking.id}/" if settings.BASE_URL else "#",
+            'booking_url': booking_url,
         }
         
         # Render HTML and text versions
@@ -84,6 +88,9 @@ def send_booking_rejection_email(booking, rejection_reason=""):
     try:
         subject = f"Your Computer Booking Has Been Rejected - {booking.computer}"
         
+        # Generate support URL
+        support_url = f"{settings.BASE_URL}/support/" if settings.BASE_URL else "#"
+        
         context = {
             'student_name': booking.student.get_full_name(),
             'computer': booking.computer,
@@ -91,7 +98,7 @@ def send_booking_rejection_email(booking, rejection_reason=""):
             'start_time': booking.start_time.strftime('%B %d, %Y at %I:%M %p'),
             'end_time': booking.end_time.strftime('%I:%M %p'),
             'rejection_reason': rejection_reason or 'Booking request could not be accommodated.',
-            'support_url': f"{settings.BASE_URL}/support/" if settings.BASE_URL else "#",
+            'support_url': support_url,
         }
         
         html_message = render_to_string('emails/booking_rejected.html', context)
@@ -134,6 +141,9 @@ def send_session_approval_email(session):
     try:
         subject = f"Your Lab Session Has Been Approved - {session.title}"
         
+        # Generate recurring sessions list URL
+        sessions_url = f"{settings.BASE_URL}/recurring/sessions/" if settings.BASE_URL else "#"
+        
         context = {
             'lecturer_name': session.lecturer.get_full_name(),
             'session_title': session.title,
@@ -141,7 +151,7 @@ def send_session_approval_email(session):
             'start_time': session.start_time.strftime('%B %d, %Y at %I:%M %p'),
             'end_time': session.end_time.strftime('%I:%M %p'),
             'student_count': session.attending_students.count(),
-            'session_url': f"{settings.BASE_URL}/sessions/{session.id}/" if settings.BASE_URL else "#",
+            'session_url': sessions_url,
         }
         
         html_message = render_to_string('emails/session_approved.html', context)
@@ -185,6 +195,9 @@ def send_session_rejection_email(session, rejection_reason=""):
     try:
         subject = f"Your Lab Session Has Been Rejected - {session.title}"
         
+        # Generate support URL
+        support_url = f"{settings.BASE_URL}/support/" if settings.BASE_URL else "#"
+        
         context = {
             'lecturer_name': session.lecturer.get_full_name(),
             'session_title': session.title,
@@ -192,7 +205,7 @@ def send_session_rejection_email(session, rejection_reason=""):
             'start_time': session.start_time.strftime('%B %d, %Y at %I:%M %p'),
             'end_time': session.end_time.strftime('%I:%M %p'),
             'rejection_reason': rejection_reason or 'Session request could not be accommodated.',
-            'support_url': f"{settings.BASE_URL}/support/" if settings.BASE_URL else "#",
+            'support_url': support_url,
         }
         
         html_message = render_to_string('emails/session_rejected.html', context)
@@ -237,6 +250,9 @@ def send_booking_cancellation_email(booking, cancelled_by=None, reason=""):
     try:
         subject = f"Your Computer Booking Has Been Cancelled - {booking.computer}"
         
+        # Generate support URL
+        support_url = f"{settings.BASE_URL}/support/" if settings.BASE_URL else "#"
+        
         context = {
             'student_name': booking.student.get_full_name(),
             'computer': booking.computer,
@@ -245,7 +261,7 @@ def send_booking_cancellation_email(booking, cancelled_by=None, reason=""):
             'end_time': booking.end_time.strftime('%I:%M %p'),
             'cancelled_by': cancelled_by or 'Administrator',
             'cancellation_reason': reason or 'No reason provided.',
-            'support_url': f"{settings.BASE_URL}/support/" if settings.BASE_URL else "#",
+            'support_url': support_url,
         }
         
         html_message = render_to_string('emails/booking_cancelled.html', context)
@@ -290,6 +306,9 @@ def send_session_cancellation_email(session, cancelled_by=None, reason=""):
     try:
         subject = f"Your Lab Session Has Been Cancelled - {session.title}"
         
+        # Generate support URL
+        support_url = f"{settings.BASE_URL}/support/" if settings.BASE_URL else "#"
+        
         context = {
             'lecturer_name': session.lecturer.get_full_name(),
             'session_title': session.title,
@@ -298,7 +317,7 @@ def send_session_cancellation_email(session, cancelled_by=None, reason=""):
             'end_time': session.end_time.strftime('%I:%M %p'),
             'cancelled_by': cancelled_by or 'Administrator',
             'cancellation_reason': reason or 'No reason provided.',
-            'support_url': f"{settings.BASE_URL}/support/" if settings.BASE_URL else "#",
+            'support_url': support_url,
         }
         
         html_message = render_to_string('emails/session_cancelled.html', context)
