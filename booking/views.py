@@ -1456,6 +1456,7 @@ def admin_check_in_dashboard(request):
             'today_sessions': today_sessions,
             'booking_attendance': booking_attendance,
             'session_attendance': session_attendance,  # Add this for session attendance counts
+            'pending_count': booking_attendance['total'] - booking_attendance['checked_in'] - booking_attendance['late'],
             'today': selected_date,
             'tomorrow': tomorrow,
             'now': now,

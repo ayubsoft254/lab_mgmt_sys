@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load humanize %}
 {% load booking_extras %}
 
 {% block title %}Check-in Dashboard - Lab Management System{% endblock %}
@@ -68,7 +67,7 @@
                                         <h2 class="mb-0 text-success fw-bold">{{ booking_attendance.checked_in }}</h2>
                                         <small class="text-muted">
                                             {% if booking_attendance.total > 0 %}
-                                                {{ booking_attendance.checked_in|add:0|mul:100|div:booking_attendance.total|floatformat:0 }}% checked in
+                                                ({{ booking_attendance.checked_in }}/{{ booking_attendance.total }})
                                             {% endif %}
                                         </small>
                                     </div>
@@ -112,7 +111,7 @@
                             
                             <input type="radio" class="btn-check status-filter" name="status-filter" id="filter-pending" value="pending">
                             <label class="btn btn-outline-secondary flex-grow-1" for="filter-pending">
-                                Pending ({{ booking_attendance.total|add:0|add:-booking_attendance.checked_in|add:-booking_attendance.late }})
+                                Pending ({{ pending_count|default:"0" }})
                             </label>
                             
                             <input type="radio" class="btn-check status-filter" name="status-filter" id="filter-present" value="present">
