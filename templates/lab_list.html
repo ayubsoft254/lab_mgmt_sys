@@ -6,20 +6,20 @@
 {% block content %}
 <div class="bg-gradient-to-br from-gray-50 via-white to-gray-100 min-h-screen">
     <!-- Header Section -->
-    <div class="bg-gradient-to-r from-ttu-green via-ttu-dark-green to-ttu-green text-white py-8 md:py-12 px-4">
+    <div style="background: linear-gradient(to right, #2c6e49, #1e4c33, #2c6e49); color: white;" class="py-8 md:py-12 px-4">
         <div class="container mx-auto max-w-7xl">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 class="text-4xl md:text-5xl font-bold mb-2">
+                    <h1 style="color: white; font-weight: 700; font-size: 2.25rem;" class="md:text-5xl mb-2">
                         All Available Labs
                     </h1>
-                    <p class="text-green-100 text-lg">
+                    <p style="color: #f0fdf4; font-size: 1.125rem;">
                         Browse and book computer labs for your studies
                     </p>
                 </div>
-                <div class="bg-white/20 backdrop-blur-sm rounded-lg px-6 py-3 border border-white/30">
-                    <div class="text-3xl font-bold">{{ labs|length }}</div>
-                    <div class="text-green-100 text-sm">Available Labs</div>
+                <div style="background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.3);" class="backdrop-blur-sm rounded-lg px-6 py-3">
+                    <div style="color: white; font-size: 1.875rem; font-weight: 700;">{{ labs|length }}</div>
+                    <div style="color: #f0fdf4; font-size: 0.875rem;">Available Labs</div>
                 </div>
             </div>
         </div>
