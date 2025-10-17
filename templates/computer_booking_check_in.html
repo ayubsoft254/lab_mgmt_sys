@@ -4,88 +4,194 @@
 {% block title %}Check-in Student - Lab Management System{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row">
-        <div class="col-md-8 mx-auto">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Student Card Header -->
+            <div class="card shadow-lg mb-4 border-0">
+                <div class="card-body bg-gradient p-4">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <div class="avatar-large bg-ttu-green text-white d-flex align-items-center justify-content-center fw-bold" style="width: 80px; height: 80px; border-radius: 50%; font-size: 32px; box-shadow: 0 4px 8px rgba(44, 110, 73, 0.3);">
+                                {{ booking.student.first_name|first }}{{ booking.student.last_name|first }}
+                            </div>
+                        </div>
+                        <div class="col">
+                            <h2 class="mb-0 text-ttu-green fw-bold">{{ booking.student.get_full_name }}</h2>
+                            <p class="text-muted mb-2">@{{ booking.student.username }}</p>
+                            <div class="d-flex gap-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-school me-1"></i>{{ booking.student.get_school_display|default:"Not specified" }}
+                                </small>
+                                <small class="text-muted">
+                                    <i class="fas fa-book me-1"></i>{{ booking.student.course|default:"Not specified" }}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col-auto text-end">
+                            {% if booking.attendance %}
+                                <span class="badge {% if booking.attendance.status == 'present' %}bg-success{% elif booking.attendance.status == 'late' %}bg-warning{% else %}bg-danger{% endif %} p-2" style="font-size: 0.9rem;">
+                                    <i class="fas {% if booking.attendance.status == 'present' %}fa-check-circle{% elif booking.attendance.status == 'late' %}fa-clock{% else %}fa-times-circle{% endif %} me-1"></i>
+                                    Already {{ booking.attendance.get_status_display|lower }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking Details Section -->
+            <div class="card shadow-sm mb-4 border-0">
+                <div class="card-header bg-light border-0 py-3">
                     <h5 class="mb-0">
-                        <i class="fas fa-clipboard-check me-2"></i>
-                        Student Check-in
+                        <i class="fas fa-info-circle me-2 text-ttu-green"></i>
+                        Booking Details
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div class="row mb-4">
+                    <div class="row g-4">
+                        <!-- Date & Time -->
                         <div class="col-md-6">
-                            <h6 class="text-muted">Student</h6>
-                            <p class="mb-0">{{ booking.student.get_full_name }}</p>
-                            <small class="text-muted">{{ booking.student.username }}</small>
+                            <div class="info-box p-3 bg-light rounded">
+                                <small class="text-muted d-block mb-1">
+                                    <i class="fas fa-calendar me-2"></i>Date
+                                </small>
+                                <h6 class="mb-0">{{ booking.start_time|date:"l, F j, Y" }}</h6>
+                            </div>
                         </div>
+
+                        <!-- Time -->
                         <div class="col-md-6">
-                            <h6 class="text-muted">Computer</h6>
-                            <p class="mb-0">{{ booking.computer }}</p>
-                            <small class="text-muted">{{ booking.computer.lab.name }}</small>
+                            <div class="info-box p-3 bg-light rounded">
+                                <small class="text-muted d-block mb-1">
+                                    <i class="fas fa-clock me-2"></i>Time Slot
+                                </small>
+                                <h6 class="mb-0">{{ booking.start_time|time:"H:i" }} - {{ booking.end_time|time:"H:i" }}</h6>
+                            </div>
+                        </div>
+
+                        <!-- Computer -->
+                        <div class="col-md-6">
+                            <div class="info-box p-3 bg-light rounded">
+                                <small class="text-muted d-block mb-1">
+                                    <i class="fas fa-desktop me-2"></i>Computer
+                                </small>
+                                <h6 class="mb-0">{{ booking.computer }}</h6>
+                                <small class="text-muted">{{ booking.computer.lab.name }}</small>
+                            </div>
+                        </div>
+
+                        <!-- Purpose -->
+                        <div class="col-md-6">
+                            <div class="info-box p-3 bg-light rounded">
+                                <small class="text-muted d-block mb-1">
+                                    <i class="fas fa-comment me-2"></i>Purpose
+                                </small>
+                                <h6 class="mb-0">{{ booking.purpose|default:"Not specified" }}</h6>
+                            </div>
+                        </div>
+
+                        <!-- Time Status -->
+                        <div class="col-12">
+                            {% if booking.start_time <= now %}
+                                <div class="alert alert-{% if booking.attendance %}info{% else %}danger{% endif %} mb-0" role="alert">
+                                    <i class="fas fa-{% if booking.attendance %}info-circle{% else %}exclamation-triangle{% endif %} me-2"></i>
+                                    {% if booking.attendance %}
+                                        This booking was checked in at {{ booking.attendance.check_in_time|time:"H:i" }}
+                                    {% else %}
+                                        <strong>Action Required:</strong> This booking has started and requires immediate check-in
+                                    {% endif %}
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info mb-0" role="alert">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    This booking will start in {{ now|timeuntil:booking.start_time }}
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
-                    
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <h6 class="text-muted">Booking Time</h6>
-                            <p class="mb-0">{{ booking.start_time|date:"F j, Y" }}</p>
-                            <small class="text-muted">{{ booking.start_time|time:"H:i" }} - {{ booking.end_time|time:"H:i" }}</small>
-                        </div>
-                        <div class="col-md-6">
-                            <h6 class="text-muted">Purpose</h6>
-                            <p class="mb-0">{{ booking.purpose|default:"Not specified" }}</p>
-                        </div>
-                    </div>
-                    
-                    <hr class="my-4">
-                    
-                    <h5 class="mb-3">Record Attendance</h5>
+                </div>
+            </div>
+
+            <!-- Attendance Recording Section -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-light border-0 py-3">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clipboard-check me-2 text-ttu-green"></i>
+                        Record Attendance
+                    </h5>
+                </div>
+                <div class="card-body">
                     <form method="post">
                         {% csrf_token %}
                         
-                        <div class="mb-3">
-                            <label class="form-label">Attendance Status</label>
-                            <div class="btn-group w-100" role="group">
+                        <!-- Attendance Status Selection -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-check-circle me-2 text-ttu-green"></i>Attendance Status
+                            </label>
+                            <div class="row g-3">
                                 {% for value, label in form.fields.status.choices %}
-                                <input type="radio" class="btn-check" name="status" id="status_{{ value }}" value="{{ value }}" 
-                                    {% if form.status.value == value %}checked{% endif %}>
-                                <label class="btn btn-outline-{% if value == 'present' %}success{% elif value == 'late' %}warning{% elif value == 'excused' %}info{% else %}danger{% endif %}" 
-                                    for="status_{{ value }}">
-                                    {{ label }}
-                                </label>
+                                <div class="col-md-6">
+                                    <input type="radio" class="btn-check" name="status" id="status_{{ value }}" value="{{ value }}" 
+                                        {% if form.status.value == value %}checked{% endif %} required>
+                                    <label class="btn btn-outline-{% if value == 'present' %}success{% elif value == 'late' %}warning{% elif value == 'excused' %}info{% else %}danger{% endif %} w-100 p-3 text-start" 
+                                        for="status_{{ value }}">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas {% if value == 'present' %}fa-check-circle fa-lg{% elif value == 'late' %}fa-hourglass-end fa-lg{% elif value == 'excused' %}fa-ban fa-lg{% else %}fa-times-circle fa-lg{% endif %} me-3"></i>
+                                            <div>
+                                                <div class="fw-semibold">{{ label }}</div>
+                                                {% if value == 'present' %}
+                                                    <small class="text-muted">Student arrived on time</small>
+                                                {% elif value == 'late' %}
+                                                    <small class="text-muted">Student arrived late</small>
+                                                {% elif value == 'excused' %}
+                                                    <small class="text-muted">Absence is excused</small>
+                                                {% else %}
+                                                    <small class="text-muted">Student did not attend</small>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
                                 {% endfor %}
                             </div>
                             {% if form.status.errors %}
-                                <div class="invalid-feedback d-block">{{ form.status.errors }}</div>
+                                <div class="invalid-feedback d-block mt-2">{{ form.status.errors }}</div>
                             {% endif %}
                         </div>
-                        
-                        <div class="mb-3">
-                            <label for="{{ form.notes.id_for_label }}" class="form-label">Notes</label>
+
+                        <!-- Notes Section -->
+                        <div class="mb-4">
+                            <label for="{{ form.notes.id_for_label }}" class="form-label fw-semibold">
+                                <i class="fas fa-sticky-note me-2 text-ttu-green"></i>Notes (Optional)
+                            </label>
                             {{ form.notes }}
+                            <small class="text-muted d-block mt-2">Add any relevant comments about this attendance record</small>
                             {% if form.notes.errors %}
                                 <div class="invalid-feedback d-block">{{ form.notes.errors }}</div>
                             {% endif %}
                         </div>
-                        
-                        <div class="mb-3">
-                            <label for="{{ form.check_out_time.id_for_label }}" class="form-label">Check-out Time (Optional)</label>
+
+                        <!-- Check-out Time Section -->
+                        <div class="mb-4">
+                            <label for="{{ form.check_out_time.id_for_label }}" class="form-label fw-semibold">
+                                <i class="fas fa-sign-out-alt me-2 text-ttu-green"></i>Check-out Time (Optional)
+                            </label>
                             {{ form.check_out_time }}
-                            <small class="form-text text-muted">Leave empty if student hasn't checked out yet</small>
+                            <small class="text-muted d-block mt-2">Record when the student leaves. Leave empty if they haven't checked out yet</small>
                             {% if form.check_out_time.errors %}
                                 <div class="invalid-feedback d-block">{{ form.check_out_time.errors }}</div>
                             {% endif %}
                         </div>
-                        
-                        <div class="d-flex justify-content-between mt-4">
-                            <a href="{% url 'admin_check_in_dashboard' %}" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2 justify-content-between mt-5">
+                            <a href="{% url 'admin_check_in_dashboard' %}" class="btn btn-outline-secondary px-4">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
                             </a>
-                            <button type="submit" class="btn btn-ttu">
-                                <i class="fas fa-save me-1"></i> Record Attendance
+                            <button type="submit" class="btn btn-ttu btn-lg px-5">
+                                <i class="fas fa-save me-2"></i>Record Attendance
                             </button>
                         </div>
                     </form>
@@ -94,4 +200,48 @@
         </div>
     </div>
 </div>
+
+<style>
+    .bg-gradient {
+        background: linear-gradient(135deg, #2c6e49 0%, #1e4c33 100%);
+        color: white;
+    }
+
+    .info-box {
+        border-left: 4px solid #2c6e49;
+        transition: all 0.2s ease;
+    }
+
+    .info-box:hover {
+        background-color: #e8f4f0 !important;
+    }
+
+    .avatar-large {
+        font-weight: bold;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-check:checked + .btn {
+        box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.5);
+    }
+
+    .btn-outline-success:checked,
+    .btn-outline-warning:checked,
+    .btn-outline-info:checked,
+    .btn-outline-danger:checked {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    @media (max-width: 768px) {
+        .avatar-large {
+            width: 60px !important;
+            height: 60px !important;
+            font-size: 24px;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+        }
+    }
+</style>
 {% endblock %}

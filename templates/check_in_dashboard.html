@@ -9,56 +9,125 @@
     <div class="row">
         <div class="col-12 mb-4">
             <div class="card shadow-sm">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
-                        <i class="fas fa-clipboard-check me-2"></i>
-                        Attendance Dashboard - {{ today|date:"l, F j, Y" }}
-                    </h5>
-                    <div>
-                        <!-- Fixed date navigation -->
-                        <form class="d-flex align-items-center" method="get">
-                            <div class="input-group me-3" style="max-width: 200px;">
-                                <input type="date" name="date" class="form-control" value="{{ today|date:'Y-m-d' }}">
-                                <button class="btn btn-outline-secondary" type="submit">Go</button>
+                <div class="card-header bg-white">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h5 class="mb-0">
+                                <i class="fas fa-clipboard-check me-2 text-ttu-green"></i>
+                                Attendance Dashboard - {{ today|date:"l, F j, Y" }}
+                            </h5>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center gap-2">
+                                <!-- Search Box -->
+                                <div class="flex-grow-1">
+                                    <input type="text" id="studentSearch" class="form-control form-control-sm" placeholder="Search student name or ID...">
+                                </div>
+                                <!-- View Toggle -->
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button type="button" class="btn btn-outline-secondary active view-toggle" data-view="table">
+                                        <i class="fas fa-list"></i> List
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary view-toggle" data-view="cards">
+                                        <i class="fas fa-th"></i> Cards
+                                    </button>
+                                </div>
+                                <!-- Date navigation -->
+                                <form class="d-flex align-items-center" method="get" style="gap: 0.5rem;">
+                                    <div class="input-group input-group-sm" style="max-width: 200px;">
+                                        <input type="date" name="date" class="form-control" value="{{ today|date:'Y-m-d' }}">
+                                        <button class="btn btn-outline-secondary" type="submit">Go</button>
+                                    </div>
+                                    <a href="?date={{ today|date:'Y-m-d' }}" class="btn btn-outline-secondary btn-sm">Today</a>
+                                    <a href="?date={{ tomorrow|date:'Y-m-d' }}" class="btn btn-outline-secondary btn-sm">Tomorrow</a>
+                                </form>
                             </div>
-                            <a href="?date={{ today|date:'Y-m-d' }}" class="btn btn-outline-secondary btn-sm me-2">Today</a>
-                            <a href="?date={{ tomorrow|date:'Y-m-d' }}" class="btn btn-outline-secondary btn-sm">Tomorrow</a>
-                        </form>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="row mb-4">
-                        <div class="col-md-3">
-                            <div class="card bg-light">
-                                <div class="card-body text-center">
-                                    <h3 class="mb-0">{{ booking_attendance.total }}</h3>
-                                    <p class="text-muted mb-0">Total Bookings</p>
+                    <!-- Stats Row with improved styling -->
+                    <div class="row mb-4 g-3">
+                        <div class="col-lg-3 col-md-6">
+                            <div class="stat-card stat-primary p-3 rounded border-start border-5 border-info bg-light">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <p class="text-muted small mb-1">Total Expected</p>
+                                        <h2 class="mb-0 text-info fw-bold">{{ booking_attendance.total }}</h2>
+                                    </div>
+                                    <i class="fas fa-users fa-2x text-info opacity-25"></i>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="card bg-success text-white">
-                                <div class="card-body text-center">
-                                    <h3 class="mb-0">{{ booking_attendance.checked_in }}</h3>
-                                    <p class="mb-0">Present</p>
+                        <div class="col-lg-3 col-md-6">
+                            <div class="stat-card stat-success p-3 rounded border-start border-5 border-success bg-light">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <p class="text-muted small mb-1">Present</p>
+                                        <h2 class="mb-0 text-success fw-bold">{{ booking_attendance.checked_in }}</h2>
+                                        <small class="text-muted">
+                                            {% if booking_attendance.total > 0 %}
+                                                {{ booking_attendance.checked_in|add:0|mul:100|div:booking_attendance.total|floatformat:0 }}% checked in
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                    <i class="fas fa-check-circle fa-2x text-success opacity-25"></i>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="card bg-warning">
-                                <div class="card-body text-center">
-                                    <h3 class="mb-0">{{ booking_attendance.late }}</h3>
-                                    <p class="mb-0">Late</p>
+                        <div class="col-lg-3 col-md-6">
+                            <div class="stat-card stat-warning p-3 rounded border-start border-5 border-warning bg-light">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <p class="text-muted small mb-1">Late Arrivals</p>
+                                        <h2 class="mb-0 text-warning fw-bold">{{ booking_attendance.late }}</h2>
+                                        <small class="text-muted">arrived after scheduled time</small>
+                                    </div>
+                                    <i class="fas fa-clock fa-2x text-warning opacity-25"></i>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="card bg-danger text-white">
-                                <div class="card-body text-center">
-                                    <h3 class="mb-0">{{ booking_attendance.absent }}</h3>
-                                    <p class="mb-0">Absent</p>
+                        <div class="col-lg-3 col-md-6">
+                            <div class="stat-card stat-danger p-3 rounded border-start border-5 border-danger bg-light">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <p class="text-muted small mb-1">No-shows</p>
+                                        <h2 class="mb-0 text-danger fw-bold">{{ booking_attendance.absent }}</h2>
+                                        <small class="text-muted">not checked in</small>
+                                    </div>
+                                    <i class="fas fa-times-circle fa-2x text-danger opacity-25"></i>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Status Filter Tabs -->
+                    <div class="mb-3">
+                        <div class="btn-group btn-group-sm w-100 d-flex" role="group">
+                            <input type="radio" class="btn-check status-filter" name="status-filter" id="filter-all" value="all" checked>
+                            <label class="btn btn-outline-secondary flex-grow-1" for="filter-all">
+                                All ({{ booking_attendance.total }})
+                            </label>
+                            
+                            <input type="radio" class="btn-check status-filter" name="status-filter" id="filter-pending" value="pending">
+                            <label class="btn btn-outline-secondary flex-grow-1" for="filter-pending">
+                                Pending ({{ booking_attendance.total|add:0|add:-booking_attendance.checked_in|add:-booking_attendance.late }})
+                            </label>
+                            
+                            <input type="radio" class="btn-check status-filter" name="status-filter" id="filter-present" value="present">
+                            <label class="btn btn-outline-secondary flex-grow-1" for="filter-present">
+                                Present ({{ booking_attendance.checked_in }})
+                            </label>
+                            
+                            <input type="radio" class="btn-check status-filter" name="status-filter" id="filter-late" value="late">
+                            <label class="btn btn-outline-secondary flex-grow-1" for="filter-late">
+                                Late ({{ booking_attendance.late }})
+                            </label>
+                            
+                            <input type="radio" class="btn-check status-filter" name="status-filter" id="filter-absent" value="absent">
+                            <label class="btn btn-outline-secondary flex-grow-1" for="filter-absent">
+                                Absent ({{ booking_attendance.absent }})
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -70,78 +139,156 @@
         <!-- Computer Bookings -->
         <div class="col-lg-6">
             <div class="card shadow-sm mb-4">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-desktop me-2"></i>
-                        Computer Bookings
-                    </h5>
+                <div class="card-header bg-white border-bottom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-desktop me-2 text-ttu-green"></i>
+                            Computer Bookings
+                        </h5>
+                        <span class="badge bg-light text-dark">{{ today_bookings|length }} bookings</span>
+                    </div>
                 </div>
                 <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th>Student</th>
-                                    <th>Computer</th>
-                                    <th>Time</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                    <!-- List View -->
+                    <div class="booking-list-view" id="bookingListView">
+                        {% if today_bookings %}
+                            <div class="list-group list-group-flush">
                                 {% for booking in today_bookings %}
-                                <tr>
-                                    <td>
-                                        <div>{{ booking.student.get_full_name }}</div>
-                                        <small class="text-muted">{{ booking.student.username }}</small>
-                                    </td>
-                                    <td>{{ booking.computer }}</td>
-                                    <td>
-                                        <div>{{ booking.start_time|time:"H:i" }} - {{ booking.end_time|time:"H:i" }}</div>
-                                        <small class="{% if booking.start_time <= now %}text-success{% else %}text-muted{% endif %}">
-                                            {% if booking.start_time <= now %}
-                                                Started {{ booking.start_time|timesince }} ago
-                                            {% else %}
-                                                Starts in {{ now|timeuntil:booking.start_time }}
-                                            {% endif %}
-                                        </small>
-                                    </td>
-                                    <td>
-                                        {% if booking.attendance %}
-                                            <span class="badge {% if booking.attendance.status == 'present' %}bg-success{% elif booking.attendance.status == 'late' %}bg-warning{% elif booking.attendance.status == 'excused' %}bg-info{% else %}bg-danger{% endif %}">
-                                                {{ booking.attendance.get_status_display }}
-                                            </span>
-                                            {% if booking.attendance.check_in_time %}
-                                                <br>
-                                                <small class="text-muted">{{ booking.attendance.check_in_time|time:"H:i" }}</small>
-                                            {% endif %}
-                                        {% else %}
-                                            <span class="badge bg-secondary">Not Checked In</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <div class="btn-group" role="group">
-                                            <button type="button" class="btn btn-sm btn-success quick-check-in" data-booking-id="{{ booking.id }}" data-status="present" {% if booking.attendance %}disabled{% endif %}>
-                                                <i class="fas fa-check"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-warning quick-check-in" data-booking-id="{{ booking.id }}" data-status="late" {% if booking.attendance %}disabled{% endif %}>
-                                                <i class="fas fa-clock"></i>
-                                            </button>
-                                            <a href="{% url 'computer_booking_check_in' booking.id %}" class="btn btn-sm btn-primary">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
+                                <div class="list-group-item booking-row {% if booking.attendance %}checked-in{% elif booking.start_time <= now %}overdue{% endif %}" data-booking-id="{{ booking.id }}" data-status="{% if booking.attendance %}{{ booking.attendance.status }}{% else %}pending{% endif %}">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <!-- Left: Student Info -->
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <!-- Student Avatar -->
+                                                <div class="avatar-circle bg-ttu-green text-white d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px; border-radius: 50%; font-size: 14px;">
+                                                    {{ booking.student.first_name|first }}{{ booking.student.last_name|first }}
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-1">{{ booking.student.get_full_name }}</h6>
+                                                    <small class="text-muted">{{ booking.student.username }}</small>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="5" class="text-center py-4">
-                                        No computer bookings for today.
-                                    </td>
-                                </tr>
+
+                                        <!-- Middle: Time & Computer Info -->
+                                        <div class="text-center mx-3">
+                                            <small class="text-muted d-block">{{ booking.computer }}</small>
+                                            <div class="small fw-semibold">{{ booking.start_time|time:"H:i" }} - {{ booking.end_time|time:"H:i" }}</div>
+                                            {% if booking.start_time <= now %}
+                                                <span class="badge bg-danger small mt-1">
+                                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                                    {% if booking.attendance %}
+                                                        Checked in
+                                                    {% else %}
+                                                        Overdue
+                                                    {% endif %}
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-info small mt-1">
+                                                    <i class="fas fa-info-circle me-1"></i>
+                                                    Upcoming
+                                                </span>
+                                            {% endif %}
+                                        </div>
+
+                                        <!-- Right: Status & Actions -->
+                                        <div class="text-end" style="min-width: 150px;">
+                                            <div class="mb-2">
+                                                {% if booking.attendance %}
+                                                    <span class="badge {% if booking.attendance.status == 'present' %}bg-success{% elif booking.attendance.status == 'late' %}bg-warning{% elif booking.attendance.status == 'excused' %}bg-info{% else %}bg-danger{% endif %} larger-badge">
+                                                        <i class="fas {% if booking.attendance.status == 'present' %}fa-check-circle{% elif booking.attendance.status == 'late' %}fa-clock{% elif booking.attendance.status == 'excused' %}fa-ban{% else %}fa-times-circle{% endif %} me-1"></i>
+                                                        {{ booking.attendance.get_status_display }}
+                                                    </span>
+                                                    {% if booking.attendance.check_in_time %}
+                                                        <br>
+                                                        <small class="text-muted d-block mt-1">{{ booking.attendance.check_in_time|time:"H:i" }}</small>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="badge bg-secondary">Not Checked</span>
+                                                {% endif %}
+                                            </div>
+                                            <!-- Action Buttons -->
+                                            <div class="btn-group btn-group-sm" role="group" style="width: 100%;">
+                                                {% if not booking.attendance %}
+                                                    <button type="button" class="btn btn-success btn-sm quick-check-in flex-grow-1" data-booking-id="{{ booking.id }}" data-status="present" title="Check in - Present">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-warning btn-sm quick-check-in flex-grow-1" data-booking-id="{{ booking.id }}" data-status="late" title="Check in - Late">
+                                                        <i class="fas fa-clock"></i>
+                                                    </button>
+                                                {% endif %}
+                                                <a href="{% url 'computer_booking_check_in' booking.id %}" class="btn btn-primary btn-sm flex-grow-1" title="View Details">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 {% endfor %}
-                            </tbody>
-                        </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-inbox fa-3x text-muted mb-3 d-block"></i>
+                                <p class="text-muted">No computer bookings for today</p>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Card View -->
+                    <div class="booking-card-view d-none" id="bookingCardView">
+                        <div class="row g-3 p-3">
+                            {% if today_bookings %}
+                                {% for booking in today_bookings %}
+                                <div class="col-md-6 booking-card-item" data-booking-id="{{ booking.id }}" data-status="{% if booking.attendance %}{{ booking.attendance.status }}{% else %}pending{% endif %}">
+                                    <div class="card h-100 border-start border-5 {% if booking.attendance %}border-{% if booking.attendance.status == 'present' %}success{% elif booking.attendance.status == 'late' %}warning{% else %}danger{% endif %}{% elif booking.start_time <= now %}border-danger{% else %}border-info{% endif %}">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-start justify-content-between mb-2">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <div class="avatar-circle bg-ttu-green text-white d-flex align-items-center justify-content-center fw-bold" style="width: 50px; height: 50px; border-radius: 50%; font-size: 16px;">
+                                                        {{ booking.student.first_name|first }}{{ booking.student.last_name|first }}
+                                                    </div>
+                                                </div>
+                                                {% if booking.attendance %}
+                                                    <span class="badge {% if booking.attendance.status == 'present' %}bg-success{% elif booking.attendance.status == 'late' %}bg-warning{% else %}bg-danger{% endif %}">
+                                                        {{ booking.attendance.get_status_display }}
+                                                    </span>
+                                                {% else %}
+                                                    <span class="badge {% if booking.start_time <= now %}bg-danger{% else %}bg-info{% endif %}">
+                                                        {% if booking.start_time <= now %}Overdue{% else %}Upcoming{% endif %}
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                            <h6 class="card-title mb-1">{{ booking.student.get_full_name }}</h6>
+                                            <small class="text-muted d-block mb-2">{{ booking.student.username }}</small>
+                                            
+                                            <div class="mb-2">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-desktop me-1"></i>{{ booking.computer }}
+                                                </small>
+                                            </div>
+                                            <div class="mb-3">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-clock me-1"></i>{{ booking.start_time|time:"H:i" }} - {{ booking.end_time|time:"H:i" }}
+                                                </small>
+                                            </div>
+
+                                            <div class="d-grid gap-2">
+                                                <a href="{% url 'computer_booking_check_in' booking.id %}" class="btn btn-primary btn-sm">
+                                                    <i class="fas fa-check-circle me-1"></i> Check In
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="col-12">
+                                    <div class="alert alert-info mb-0">
+                                        <i class="fas fa-info-circle me-2"></i>No computer bookings for today
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -150,71 +297,109 @@
         <!-- Lab Sessions -->
         <div class="col-lg-6">
             <div class="card shadow-sm mb-4">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-users me-2"></i>
-                        Lab Sessions
-                    </h5>
+                <div class="card-header bg-white border-bottom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-users me-2 text-ttu-green"></i>
+                            Lab Sessions
+                        </h5>
+                        <span class="badge bg-light text-dark">{{ today_sessions|length }} sessions</span>
+                    </div>
                 </div>
                 <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th>Title</th>
-                                    <th>Lab</th>
-                                    <th>Time</th>
-                                    <th>Students</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                    <!-- List View -->
+                    <div class="session-list-view" id="sessionListView">
+                        {% if today_sessions %}
+                            <div class="list-group list-group-flush">
                                 {% for session in today_sessions %}
-                                <tr>
-                                    <td>
-                                        <div>{{ session.title }}</div>
-                                        <small class="text-muted">{{ session.lecturer.get_full_name }}</small>
-                                    </td>
-                                    <td>{{ session.lab.name }}</td>
-                                    <td>
-                                        <div>{{ session.start_time|time:"H:i" }} - {{ session.end_time|time:"H:i" }}</div>
-                                        <small class="{% if session.start_time <= now %}text-success{% else %}text-muted{% endif %}">
-                                            {% if session.start_time <= now %}
-                                                Started {{ session.start_time|timesince }} ago
-                                            {% else %}
-                                                Starts in {{ now|timeuntil:session.start_time }}
-                                            {% endif %}
-                                        </small>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div>{{ session.attending_students.count }}</div>
-                                            <div class="ms-2">
+                                <div class="list-group-item session-row {% if session.start_time <= now %}active{% else %}upcoming{% endif %}" data-session-id="{{ session.id }}">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <!-- Left: Session Info -->
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">{{ session.title }}</h6>
+                                            <small class="text-muted d-block">{{ session.lecturer.get_full_name }} • {{ session.lab.name }}</small>
+                                            <small class="text-muted d-block mt-1">{{ session.start_time|time:"H:i" }} - {{ session.end_time|time:"H:i" }}</small>
+                                        </div>
+
+                                        <!-- Right: Attendance Info & Actions -->
+                                        <div class="text-end">
+                                            <div class="mb-2">
+                                                <span class="badge bg-light text-dark">
+                                                    <i class="fas fa-users me-1"></i>{{ session.attending_students.count }} students
+                                                </span>
                                                 {% if session_attendance %}
                                                     {% with present_count=session_attendance|get_item:session.id|default:0 %}
                                                         {% if present_count > 0 %}
-                                                            <span class="badge bg-success">{{ present_count }} present</span>
+                                                            <br>
+                                                            <span class="badge bg-success small mt-1">
+                                                                <i class="fas fa-check-circle me-1"></i>{{ present_count }} present
+                                                            </span>
                                                         {% endif %}
                                                     {% endwith %}
                                                 {% endif %}
                                             </div>
+                                            <a href="{% url 'lab_session_attendance' session.id %}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-clipboard-list me-1"></i> Manage
+                                            </a>
                                         </div>
-                                    </td>
-                                    <td>
-                                        <a href="{% url 'lab_session_attendance' session.id %}" class="btn btn-sm btn-primary">
-                                            <i class="fas fa-clipboard-list me-1"></i> Attendance
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="5" class="text-center py-4">
-                                        No lab sessions for today.
-                                    </td>
-                                </tr>
+                                    </div>
+                                </div>
                                 {% endfor %}
-                            </tbody>
-                        </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-inbox fa-3x text-muted mb-3 d-block"></i>
+                                <p class="text-muted">No lab sessions for today</p>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Card View -->
+                    <div class="session-card-view d-none" id="sessionCardView">
+                        <div class="row g-3 p-3">
+                            {% if today_sessions %}
+                                {% for session in today_sessions %}
+                                <div class="col-md-6 session-card-item" data-session-id="{{ session.id }}">
+                                    <div class="card h-100 border-start border-5 {% if session.start_time <= now %}border-success{% else %}border-info{% endif %}">
+                                        <div class="card-body">
+                                            <div class="mb-2">
+                                                <span class="badge {% if session.start_time <= now %}bg-success{% else %}bg-info{% endif %}">
+                                                    {% if session.start_time <= now %}Active{% else %}Upcoming{% endif %}
+                                                </span>
+                                            </div>
+                                            <h6 class="card-title mb-2">{{ session.title }}</h6>
+                                            <small class="text-muted d-block mb-1">
+                                                <i class="fas fa-user-tie me-1"></i>{{ session.lecturer.get_full_name }}
+                                            </small>
+                                            <small class="text-muted d-block mb-1">
+                                                <i class="fas fa-building me-1"></i>{{ session.lab.name }}
+                                            </small>
+                                            <small class="text-muted d-block mb-3">
+                                                <i class="fas fa-clock me-1"></i>{{ session.start_time|time:"H:i" }} - {{ session.end_time|time:"H:i" }}
+                                            </small>
+
+                                            <div class="mb-3">
+                                                <small class="text-muted d-block mb-1">Attendance:</small>
+                                                <h5 class="mb-0">{{ session.attending_students.count }} <small class="text-muted">/ students</small></h5>
+                                            </div>
+
+                                            <div class="d-grid gap-2">
+                                                <a href="{% url 'lab_session_attendance' session.id %}" class="btn btn-primary btn-sm">
+                                                    <i class="fas fa-clipboard-list me-1"></i> Record Attendance
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="col-12">
+                                    <div class="alert alert-info mb-0">
+                                        <i class="fas fa-info-circle me-2"></i>No lab sessions for today
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -314,15 +499,226 @@
 {% endblock %}
 
 {% block extra_js %}
+<style>
+    /* Enhanced styling for check-in dashboard */
+    .avatar-circle {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        font-size: 14px;
+    }
+
+    .stat-card {
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .booking-row {
+        padding: 1rem;
+        border-bottom: 1px solid #e9ecef;
+        transition: all 0.2s ease;
+    }
+
+    .booking-row:hover {
+        background-color: #f8f9fa;
+    }
+
+    .booking-row.checked-in {
+        background-color: #f0f8f4;
+    }
+
+    .booking-row.overdue {
+        background-color: #fff5f5;
+    }
+
+    .session-row {
+        padding: 1rem;
+        border-bottom: 1px solid #e9ecef;
+        transition: all 0.2s ease;
+    }
+
+    .session-row:hover {
+        background-color: #f8f9fa;
+    }
+
+    .larger-badge {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    .status-filter {
+        display: none;
+    }
+
+    .status-filter:checked + label {
+        background-color: #2c6e49 !important;
+        color: white !important;
+        border-color: #2c6e49 !important;
+    }
+
+    .view-toggle.active {
+        background-color: #2c6e49 !important;
+        color: white !important;
+        border-color: #2c6e49 !important;
+    }
+
+    .booking-card-item,
+    .session-card-item {
+        transition: all 0.2s ease;
+    }
+
+    .booking-card-item:hover,
+    .session-card-item:hover {
+        transform: translateY(-4px);
+    }
+
+    .booking-card-item .card,
+    .session-card-item .card {
+        transition: all 0.2s ease;
+    }
+
+    .booking-card-item:hover .card,
+    .session-card-item:hover .card {
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-group-sm > .btn,
+    .btn-group-sm > .btn-group > .btn {
+        border-radius: 0.25rem;
+    }
+
+    @media (max-width: 768px) {
+        .booking-row,
+        .session-row {
+            padding: 0.75rem;
+        }
+
+        .avatar-circle {
+            width: 36px !important;
+            height: 36px !important;
+            font-size: 12px;
+        }
+
+        .btn-group-sm {
+            gap: 0.25rem;
+        }
+
+        .booking-row .btn-group-sm {
+            flex-wrap: wrap;
+        }
+    }
+
+    /* Hide elements based on filters */
+    .booking-row.hidden,
+    .session-row.hidden {
+        display: none;
+    }
+
+    /* Empty state styling */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #6c757d;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+</style>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const studentSearch = document.getElementById('studentSearch');
+    const statusFilters = document.querySelectorAll('.status-filter');
+    const viewToggles = document.querySelectorAll('.view-toggle');
+    
+    // Search functionality
+    if (studentSearch) {
+        studentSearch.addEventListener('keyup', function() {
+            const searchTerm = this.value.toLowerCase();
+            const bookingRows = document.querySelectorAll('.booking-row, .booking-card-item');
+            
+            bookingRows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.classList.toggle('hidden', !text.includes(searchTerm));
+            });
+        });
+    }
+
+    // Status filter functionality
+    statusFilters.forEach(filter => {
+        filter.addEventListener('change', function() {
+            filterByStatus(this.value);
+        });
+    });
+
+    function filterByStatus(status) {
+        const bookingRows = document.querySelectorAll('.booking-row');
+        const bookingCards = document.querySelectorAll('.booking-card-item');
+        
+        bookingRows.forEach(row => {
+            const rowStatus = row.getAttribute('data-status');
+            if (status === 'all' || rowStatus === status) {
+                row.classList.remove('hidden');
+            } else {
+                row.classList.add('hidden');
+            }
+        });
+
+        bookingCards.forEach(card => {
+            const cardStatus = card.getAttribute('data-status');
+            if (status === 'all' || cardStatus === status) {
+                card.classList.remove('hidden');
+            } else {
+                card.classList.add('hidden');
+            }
+        });
+    }
+
+    // View toggle functionality
+    viewToggles.forEach(toggle => {
+        toggle.addEventListener('click', function() {
+            const view = this.getAttribute('data-view');
+            
+            // Update active state
+            viewToggles.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+
+            // Toggle views
+            const listView = document.getElementById('bookingListView');
+            const cardView = document.getElementById('bookingCardView');
+            
+            if (view === 'cards') {
+                listView.classList.add('d-none');
+                cardView.classList.remove('d-none');
+            } else {
+                listView.classList.remove('d-none');
+                cardView.classList.add('d-none');
+            }
+
+            // Save preference
+            localStorage.setItem('checkinViewPreference', view);
+        });
+    });
+
+    // Restore view preference
+    const savedView = localStorage.getItem('checkinViewPreference') || 'table';
+    const viewBtn = document.querySelector(`[data-view="${savedView}"]`);
+    if (viewBtn && savedView === 'cards') {
+        viewBtn.click();
+    }
+
     // Quick check-in buttons
     document.querySelectorAll('.quick-check-in').forEach(button => {
         button.addEventListener('click', function() {
             const bookingId = this.getAttribute('data-booking-id');
             const status = this.getAttribute('data-status');
-            const row = this.closest('tr');
-            const statusCell = row.querySelector('td:nth-child(4)');
+            const row = this.closest('.booking-row');
+            const statusCell = row.querySelector('.larger-badge');
             const actionButtons = row.querySelectorAll('.quick-check-in');
             
             // Disable buttons immediately to prevent double-clicks
@@ -353,12 +749,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Update UI
                     const badgeClass = status === 'present' ? 'bg-success' : 'bg-warning';
                     statusCell.innerHTML = `
-                        <span class="badge ${badgeClass}">
+                        <span class="badge ${badgeClass} larger-badge">
+                            <i class="fas ${status === 'present' ? 'fa-check-circle' : 'fa-clock'} me-1"></i>
                             ${data.attendance.status_display}
                         </span>
                         <br>
-                        <small class="text-muted">${data.attendance.check_in_time}</small>
+                        <small class="text-muted d-block mt-1">${data.attendance.check_in_time}</small>
                     `;
+                    
+                    // Update row status
+                    row.classList.add('checked-in');
+                    row.setAttribute('data-status', status);
                     
                     // Restore button UI but keep disabled
                     this.innerHTML = status === 'present' ? 
@@ -370,7 +771,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     alert.className = 'alert alert-success alert-dismissible fade show mt-3';
                     alert.innerHTML = `
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        Attendance marked successfully!
+                        <i class="fas fa-check-circle me-2"></i>Attendance marked successfully!
                     `;
                     document.querySelector('.container-fluid').prepend(alert);
                     
@@ -401,7 +802,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert.className = 'alert alert-danger alert-dismissible fade show mt-3';
                 alert.innerHTML = `
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    Failed to record attendance: ${error.message || 'Please try again.'}
+                    <i class="fas fa-exclamation-circle me-2"></i>Failed to record attendance: ${error.message || 'Please try again.'}
                 `;
                 document.querySelector('.container-fluid').prepend(alert);
                 
