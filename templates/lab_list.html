@@ -98,7 +98,7 @@
                             </div>
                             
                             <!-- Booking Button -->
-                            <a href="{% url 'lab_detail' lab.id %}" class="block w-full bg-gradient-to-r from-ttu-green to-ttu-dark-green hover:shadow-lg text-white py-3 px-4 rounded-lg font-semibold text-center transition-all duration-300 flex items-center justify-center gap-2">
+                            <a href="{% url 'lab_detail' lab.id %}" class="booking-btn">
                                 <i class="fas fa-calendar-check"></i>
                                 View Details & Book
                             </a>
@@ -196,6 +196,30 @@
 
     .animate-pulse {
         animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    .booking-btn {
+        display: block;
+        width: 100%;
+        background: linear-gradient(to right, #2c6e49, #1e4c33);
+        color: white;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-align: center;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .booking-btn:hover {
+        box-shadow: 0 10px 25px rgba(44, 110, 73, 0.3);
+        transform: translateY(-2px);
+        color: white;
+        text-decoration: none;
     }
 </style>
 {% endblock %}
