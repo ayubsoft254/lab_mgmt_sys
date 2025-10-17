@@ -4,43 +4,32 @@
 {% block title %}Home - Lab Management System{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
-    <!-- Hero Section with Modern Design -->
+<div class="bg-gradient-to-br from-gray-50 via-white to-gray-100">
+    <!-- Compact Hero Section -->
     <div class="relative overflow-hidden bg-gradient-to-r from-ttu-green via-ttu-dark-green to-ttu-green">
-        <!-- Decorative background elements -->
-        <div class="absolute inset-0 opacity-10">
-            <div class="absolute top-0 left-1/4 w-72 h-72 bg-white rounded-full mix-blend-overlay filter blur-3xl animate-pulse"></div>
-            <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-white rounded-full mix-blend-overlay filter blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
-        </div>
-        
-        <div class="relative z-10 text-white py-12 md:py-16 px-4">
+        <div class="relative z-10 text-white py-6 md:py-8 px-4">
             <div class="container mx-auto max-w-7xl">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                    <div class="space-y-3">
-                        <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold">
                             Welcome Back<span class="text-green-200">!</span>
                         </h1>
                         {% if user.is_authenticated %}
-                            <p class="text-green-50 text-lg md:text-xl flex items-center gap-2">
-                                <span class="opacity-90">Hello,</span>
-                                <span class="font-bold bg-white/20 px-4 py-1 rounded-full backdrop-blur-sm">{{ user.username }}</span>
+                            <p class="text-green-100 text-sm md:text-base mt-1">
+                                Hello, <span class="font-semibold">{{ user.username }}</span>
                             </p>
                         {% else %}
-                            <p class="text-green-50 text-lg md:text-xl">Welcome to the Lab Management System</p>
+                            <p class="text-green-100 text-sm md:text-base mt-1">Welcome to Lab Management System</p>
                         {% endif %}
                     </div>
                     
                     {% if user.is_authenticated and notifications %}
-                        <div class="w-full md:w-auto bg-white/10 backdrop-blur-xl rounded-2xl px-6 py-4 border border-white/20 shadow-2xl hover:bg-white/15 transition-all duration-300">
-                            <div class="flex items-center gap-3 mb-3">
-                                <div class="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center animate-bounce">
-                                    <i class="fas fa-bell text-ttu-green text-lg"></i>
-                                </div>
-                                <span class="font-bold text-lg">{{ notifications|length }} Notification{{ notifications|length|pluralize }}</span>
-                            </div>
-                            <a href="{% url 'notification_list' %}" class="inline-block w-full bg-white text-ttu-green px-5 py-2.5 rounded-xl font-semibold hover:bg-green-50 transition-all duration-300 text-center shadow-lg hover:shadow-xl hover:scale-105">
-                                View All <i class="fas fa-arrow-right ml-1"></i>
-                            </a>
+                        <div class="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20 text-sm">
+                            <p class="font-semibold">
+                                <i class="fas fa-bell text-yellow-300 mr-1"></i>
+                                {{ notifications|length }} Notification{{ notifications|length|pluralize }}
+                            </p>
+                            <a href="{% url 'notification_list' %}" class="text-white hover:text-green-200 text-xs mt-1 inline-block">View →</a>
                         </div>
                     {% endif %}
                 </div>
@@ -49,13 +38,13 @@
     </div>
 
     <!-- Main Content -->
-    <div class="container mx-auto px-4 py-8 md:py-12 max-w-7xl">
+    <div class="container mx-auto px-4 py-6 md:py-8 max-w-7xl">
         <!-- Header -->
-        <div class="text-center mb-8">
-            <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-2">
+        <div class="text-center mb-6">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-1">
                 Available <span class="text-transparent bg-clip-text bg-gradient-to-r from-ttu-green to-ttu-dark-green">Labs</span>
             </h2>
-            <p class="text-gray-600 text-base md:text-lg max-w-2xl mx-auto">
+            <p class="text-gray-600 text-sm md:text-base">
                 Choose your perfect lab and start booking now
             </p>
         </div>
