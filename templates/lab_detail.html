@@ -1,100 +1,456 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}{{ lab.name }} - Lab Details{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/lab_detail_enhanced.css' %}">
+<style>
+    /* Lab Detail Page Specific Styles */
+    .lab-hero {
+        background: linear-gradient(135deg, var(--ttu-green) 0%, var(--ttu-dark-green) 100%);
+        color: white;
+        padding: 2rem 1rem;
+        border-radius: 0.75rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(44, 110, 73, 0.2);
+    }
+
+    .lab-hero h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .lab-hero .location {
+        font-size: 1.1rem;
+        opacity: 0.95;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Info Cards Grid */
+    .info-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    @media (max-width: 768px) {
+        .info-cards-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .info-card {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+    }
+
+    .info-card:hover {
+        shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+        border-color: var(--ttu-green);
+    }
+
+    .info-card-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .info-card-header i {
+        font-size: 1.5rem;
+        color: var(--ttu-green);
+        width: 2rem;
+        height: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(44, 110, 73, 0.1);
+        border-radius: 0.5rem;
+    }
+
+    .info-card-header h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    .capacity-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, var(--ttu-green) 0%, var(--ttu-dark-green) 100%);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    /* Computer List Section */
+    .computers-section {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 2rem 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e5e7eb;
+    }
+
+    .computers-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .computers-header h2 {
+        margin: 0;
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .computers-header i {
+        color: var(--ttu-green);
+    }
+
+    .filter-tabs {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-tab {
+        padding: 0.5rem 1rem;
+        border: 2px solid #e5e7eb;
+        background: white;
+        color: #6b7280;
+        border-radius: 9999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .filter-tab:hover {
+        border-color: var(--ttu-green);
+        color: var(--ttu-green);
+    }
+
+    .filter-tab.active {
+        background: var(--ttu-green);
+        color: white;
+        border-color: var(--ttu-green);
+    }
+
+    .filter-tab .badge {
+        background: rgba(255, 255, 255, 0.3);
+        padding: 0.25rem 0.5rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: bold;
+    }
+
+    /* Computers Grid */
+    .computers-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .computers-grid {
+            grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
+        }
+    }
+
+    @media (max-width: 1024px) and (min-width: 768px) {
+        .computers-grid {
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        }
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1.5rem;
+    }
+
+    .empty-state-icon {
+        font-size: 3rem;
+        color: #d1d5db;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+        font-size: 1.25rem;
+        color: #6b7280;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: #9ca3af;
+    }
+
+    /* Stats Bar */
+    .stats-bar {
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--ttu-green);
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: #6b7280;
+    }
+
+    /* Back Button */
+    .back-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: white;
+        color: var(--ttu-green);
+        border: 2px solid var(--ttu-green);
+        border-radius: 0.5rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        margin-top: 2rem;
+    }
+
+    .back-button:hover {
+        background: var(--ttu-green);
+        color: white;
+        transform: translateX(-2px);
+    }
+
+    /* Responsive Typography */
+    @media (max-width: 640px) {
+        .lab-hero h1 {
+            font-size: 2rem;
+        }
+
+        .computers-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .info-cards-grid {
+            gap: 1rem;
+        }
+
+        .computers-section {
+            padding: 1.5rem 1rem;
+        }
+    }
+
+    /* Loading animation for future enhancements */
+    @keyframes shimmer {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    .skeleton-loader {
+        animation: shimmer 1.5s infinite;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h1>{{ lab.name }}</h1>
-            <p class="lead">{{ lab.location }}</p>
-        </div>
+<div class="w-full max-w-7xl mx-auto px-4">
+    <!-- Lab Hero Section -->
+    <div class="lab-hero">
+        <h1>
+            <i class="fas fa-flask"></i>
+            {{ lab.name }}
+        </h1>
+        <p class="location">
+            <i class="fas fa-map-marker-alt"></i>
+            {{ lab.location }}
+        </p>
     </div>
 
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h2>Lab Information</h2>
-                </div>
-                <div class="card-body">
-                    <p><strong>Description:</strong> {{ lab.description }}</p>
-                    <p><strong>Capacity:</strong> {{ lab.capacity }} computers</p>
-                    {% if user.is_student %}
-                        <a href="{% url 'student_booking' lab.id %}" class="btn btn-primary">Book a Computer</a>
-                    {% endif %}
-                </div>
+    <!-- Info Cards Grid -->
+    <div class="info-cards-grid">
+        <!-- Lab Information Card -->
+        <div class="info-card">
+            <div class="info-card-header">
+                <i class="fas fa-info-circle"></i>
+                <h3>Lab Information</h3>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h2>Upcoming Sessions</h2>
+            <p class="text-gray-700 text-sm leading-relaxed mb-4">
+                {{ lab.description|default:"No description available." }}
+            </p>
+            <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+                <span class="text-gray-600 font-semibold">Total Capacity</span>
+                <span class="capacity-badge">
+                    <i class="fas fa-desktop mr-1"></i>
+                    {{ lab.capacity }} Computers
+                </span>
+            </div>
+            {% if user.is_student %}
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <a href="{% url 'student_booking' lab.id %}" 
+                       class="w-full inline-block px-4 py-2.5 bg-gradient-to-r from-ttu-green to-ttu-dark-green text-white font-semibold rounded-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 text-center text-sm">
+                        <i class="fas fa-calendar-plus mr-2"></i>
+                        Book Custom Time
+                    </a>
                 </div>
-                <div class="card-body">
-                    {% if upcoming_sessions %}
-                        <div class="list-group">
-                            {% for session in upcoming_sessions %}
-                                <div class="list-group-item">
-                                    <h5 class="mb-1">{{ session.title }}</h5>
-                                    <p class="mb-1"><strong>Date:</strong> {{ session.start_time|date:"M d, Y" }}</p>
-                                    <p class="mb-1"><strong>Time:</strong> {{ session.start_time|date:"H:i" }} - {{ session.end_time|date:"H:i" }}</p>
-                                    <small class="text-muted">Booked by: {{ session.lecturer.username }}</small>
-                                </div>
-                            {% endfor %}
+            {% endif %}
+        </div>
+
+        <!-- Upcoming Sessions Card -->
+        <div class="info-card">
+            <div class="info-card-header">
+                <i class="fas fa-calendar-alt"></i>
+                <h3>Upcoming Sessions</h3>
+            </div>
+            {% if upcoming_sessions %}
+                <div class="space-y-3">
+                    {% for session in upcoming_sessions|slice:":3" %}
+                        <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 hover:border-ttu-green transition-colors">
+                            <p class="font-semibold text-sm text-gray-800">{{ session.title }}</p>
+                            <p class="text-xs text-gray-600 mt-1">
+                                <i class="fas fa-calendar text-ttu-green mr-1"></i>
+                                {{ session.start_time|date:"M d, Y" }}
+                            </p>
+                            <p class="text-xs text-gray-600">
+                                <i class="fas fa-clock text-ttu-green mr-1"></i>
+                                {{ session.start_time|date:"H:i" }} - {{ session.end_time|date:"H:i" }}
+                            </p>
                         </div>
-                    {% else %}
-                        <p>No upcoming sessions scheduled for this lab.</p>
+                    {% endfor %}
+                    {% if upcoming_sessions|length > 3 %}
+                        <p class="text-xs text-gray-500 text-center pt-2">
+                            +{{ upcoming_sessions|length|add:"-3" }} more session(s)
+                        </p>
                     {% endif %}
                 </div>
-            </div>
+            {% else %}
+                <p class="text-sm text-gray-500 text-center py-4">
+                    <i class="fas fa-inbox text-gray-400 text-lg mb-2 block"></i>
+                    No upcoming sessions
+                </p>
+            {% endif %}
         </div>
-    </div>
 
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <h2>Available Computers</h2>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        {% for computer in computers %}
-                            <div class="col-md-3 mb-3">
-                                <div class="card {% if computer.status == 'available' %}border-success{% elif computer.status == 'maintenance' %}border-danger{% else %}border-warning{% endif %}">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Computer #{{ computer.computer_number }}</h5>
-                                        <p class="card-text"><strong>Status:</strong> 
-                                            {% if computer.status == 'available' %}
-                                                <span class="badge bg-success">Available</span>
-                                            {% elif computer.status == 'maintenance' %}
-                                                <span class="badge bg-danger">Under Maintenance</span>
-                                            {% else %}
-                                                <span class="badge bg-warning text-dark">Reserved</span>
-                                            {% endif %}
-                                        </p>
-                                        <p class="card-text">{{ computer.specs|truncatewords:10 }}</p>
-                                        {% if computer.status == 'available' and user.is_student %}
-                                            <a href="{% url 'computer_booking' lab.id computer.id %}" class="btn btn-sm btn-success">Book This Computer</a>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        {% empty %}
-                            <div class="col-12">
-                                <p>No computers are registered for this lab.</p>
-                            </div>
-                        {% endfor %}
+        <!-- Computer Stats Card -->
+        <div class="info-card">
+            <div class="info-card-header">
+                <i class="fas fa-chart-pie"></i>
+                <h3>Computer Status</h3>
+            </div>
+            <div class="space-y-3">
+                {% with available=computers|dictsort:"status" %}
+                    <div class="flex items-center justify-between p-2 bg-green-50 rounded-lg">
+                        <span class="text-sm text-gray-700 font-semibold">Available</span>
+                        <span class="inline-block w-8 h-8 bg-green-500 text-white rounded-lg flex items-center justify-center text-sm font-bold">
+                            {{ available|length|default:"0" }}
+                        </span>
                     </div>
+                {% endwith %}
+                <div class="flex items-center justify-between p-2 bg-amber-50 rounded-lg">
+                    <span class="text-sm text-gray-700 font-semibold">Reserved</span>
+                    <span class="inline-block w-8 h-8 bg-amber-500 text-white rounded-lg flex items-center justify-center text-sm font-bold">
+                        {{ computers|length|default:"0" }}
+                    </span>
+                </div>
+                <div class="flex items-center justify-between p-2 bg-red-50 rounded-lg">
+                    <span class="text-sm text-gray-700 font-semibold">Maintenance</span>
+                    <span class="inline-block w-8 h-8 bg-red-500 text-white rounded-lg flex items-center justify-center text-sm font-bold">
+                        0
+                    </span>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-12">
-            <a href="{% url 'lab_list' %}" class="btn btn-secondary">Back to Lab List</a>
+    <!-- Computers Section -->
+    <div class="computers-section">
+        <div class="computers-header">
+            <h2>
+                <i class="fas fa-desktop"></i>
+                Available Computers
+            </h2>
         </div>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <span class="stat-value">{{ computers|length }}</span>
+                <span class="stat-label">Total Computers</span>
+            </div>
+            <div class="stat-item">
+                <span class="text-green-500 font-bold text-lg">●</span>
+                <span class="stat-label">Available Now</span>
+            </div>
+            <div class="stat-item">
+                <span class="text-amber-500 font-bold text-lg">●</span>
+                <span class="stat-label">Reserved</span>
+            </div>
+            <div class="stat-item">
+                <span class="text-red-500 font-bold text-lg">●</span>
+                <span class="stat-label">Maintenance</span>
+            </div>
+        </div>
+
+        <!-- Computers Grid -->
+        {% if computers %}
+            <div class="computers-grid">
+                {% for computer in computers %}
+                    {% include 'components/computer_card.html' %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-inbox"></i>
+                </div>
+                <h3>No Computers Available</h3>
+                <p>There are currently no computers registered for this lab.</p>
+            </div>
+        {% endif %}
     </div>
+
+    <!-- Back Button -->
+    <a href="{% url 'lab_list' %}" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+        Back to Lab List
+    </a>
 </div>
+
+<script src="{% static 'js/lab_detail_enhanced.js' %}"></script>
 {% endblock %}
