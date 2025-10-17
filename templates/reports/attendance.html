@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Attendance Report - Lab Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h1 class="display-6 fw-bold text-ttu-green">
+                    <i class="fas fa-clipboard-check me-2"></i>Attendance Report
+                </h1>
+                <a href="?format=pdf" class="btn btn-primary">
+                    <i class="fas fa-file-pdf me-1"></i>Download PDF
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Overview -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-3">
+            <div class="card shadow-sm border-start border-5 border-success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="text-muted mb-1">Present</h6>
+                            <h2 class="text-success fw-bold">{{ summary.present_count }}</h2>
+                            <small class="text-muted">On time</small>
+                        </div>
+                        <i class="fas fa-user-check fa-2x opacity-25"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="card shadow-sm border-start border-5 border-warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="text-muted mb-1">Late</h6>
+                            <h2 class="text-warning fw-bold">{{ summary.late_count }}</h2>
+                            <small class="text-muted">Arrived late</small>
+                        </div>
+                        <i class="fas fa-clock fa-2x opacity-25"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="card shadow-sm border-start border-5 border-danger">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="text-muted mb-1">Absent</h6>
+                            <h2 class="text-danger fw-bold">{{ summary.absent_count }}</h2>
+                            <small class="text-muted">No show</small>
+                        </div>
+                        <i class="fas fa-user-times fa-2x opacity-25"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="card shadow-sm border-start border-5 border-info">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Sessions</h6>
+                            <h2 class="text-info fw-bold">{{ summary.total_sessions }}</h2>
+                            <small class="text-muted">Sessions held</small>
+                        </div>
+                        <i class="fas fa-calendar fa-2x opacity-25"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Rate -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0">Overall Attendance Rate</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h6 class="text-muted mb-3">Attendance Breakdown</h6>
+                                <div class="mb-3">
+                                    <div class="mb-2">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span>Present</span>
+                                            <span class="fw-bold">{{ summary.attendance_rate }}%</span>
+                                        </div>
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar bg-success" style="width: {{ summary.attendance_rate }}%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="row text-center">
+                                <div class="col-md-3">
+                                    <h6 class="text-muted">Present Rate</h6>
+                                    <h3 class="fw-bold text-success">{{ summary.attendance_rate }}%</h3>
+                                </div>
+                                <div class="col-md-3">
+                                    <h6 class="text-muted">Late Rate</h6>
+                                    <h3 class="fw-bold text-warning">{{ summary.late_rate }}%</h3>
+                                </div>
+                                <div class="col-md-3">
+                                    <h6 class="text-muted">Absent Rate</h6>
+                                    <h3 class="fw-bold text-danger">{{ summary.absent_rate }}%</h3>
+                                </div>
+                                <div class="col-md-3">
+                                    <h6 class="text-muted">Total Tracked</h6>
+                                    <h3 class="fw-bold">{{ summary.total_tracked }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Attending Students -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white border-0">
+                    <h5 class="mb-0">
+                        <i class="fas fa-trophy me-2"></i>Top 30 Attending Students
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if top_students %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Student</th>
+                                    <th>School/Department</th>
+                                    <th>Bookings</th>
+                                    <th>Present</th>
+                                    <th>Late</th>
+                                    <th>Absent</th>
+                                    <th>Rate (%)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in top_students|slice:":30" %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td class="fw-bold">{{ student.full_name }}</td>
+                                    <td>{{ student.school }}</td>
+                                    <td><span class="badge bg-info">{{ student.booking_count }}</span></td>
+                                    <td><span class="badge bg-success">{{ student.present }}</span></td>
+                                    <td><span class="badge bg-warning">{{ student.late }}</span></td>
+                                    <td><span class="badge bg-danger">{{ student.absent }}</span></td>
+                                    <td>
+                                        <strong class="text-ttu-green">{{ student.attendance_percentage }}%</strong>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted mb-0">No attendance data available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance by Lab/Session Type -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0">Attendance by Session Type</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Session Type</th>
+                                    <th>Total Sessions</th>
+                                    <th>Total Attendees</th>
+                                    <th>Present</th>
+                                    <th>Late</th>
+                                    <th>Absent</th>
+                                    <th>Attendance Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="fw-bold">Computer Bookings</td>
+                                    <td>{{ summary.computer_sessions }}</td>
+                                    <td>{{ summary.computer_attendees }}</td>
+                                    <td><span class="badge bg-success">{{ summary.computer_present }}</span></td>
+                                    <td><span class="badge bg-warning">{{ summary.computer_late }}</span></td>
+                                    <td><span class="badge bg-danger">{{ summary.computer_absent }}</span></td>
+                                    <td><strong>{{ summary.computer_rate }}%</strong></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Lab Sessions</td>
+                                    <td>{{ summary.lab_sessions }}</td>
+                                    <td>{{ summary.lab_attendees }}</td>
+                                    <td><span class="badge bg-success">{{ summary.lab_present }}</span></td>
+                                    <td><span class="badge bg-warning">{{ summary.lab_late }}</span></td>
+                                    <td><span class="badge bg-danger">{{ summary.lab_absent }}</span></td>
+                                    <td><strong>{{ summary.lab_rate }}%</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="row">
+        <div class="col-12">
+            <a href="{% url 'reports:dashboard' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Reports
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

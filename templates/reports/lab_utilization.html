@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Lab Utilization Report - Lab Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h1 class="display-6 fw-bold text-ttu-green">
+                    <i class="fas fa-chart-bar me-2"></i>Lab Utilization Report
+                </h1>
+                <div>
+                    <a href="?format=pdf" class="btn btn-primary">
+                        <i class="fas fa-file-pdf me-1"></i>Download PDF
+                    </a>
+                </div>
+            </div>
+            <p class="text-muted">{{ summary.date_range }}</p>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-start border-5 border-primary h-100">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Total Labs</h6>
+                    <h2 class="text-primary fw-bold">{{ summary.total_labs }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-start border-5 border-success h-100">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Total Computers</h6>
+                    <h2 class="text-success fw-bold">{{ summary.total_computers }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-start border-5 border-info h-100">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Total Hours</h6>
+                    <h2 class="text-info fw-bold">{{ summary.total_hours }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-start border-5 border-warning h-100">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Total Sessions</h6>
+                    <h2 class="text-warning fw-bold">{{ summary.total_sessions }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Lab Analysis -->
+    {% for lab in labs %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-gradient text-white border-0" style="background: linear-gradient(135deg, #2c6e49 0%, #1e4c33 100%);">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{{ lab.name }}</h5>
+                        <span class="badge bg-light text-dark">{{ lab.capacity }} Capacity</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <small class="text-muted">Location</small>
+                            <p class="mb-0">{{ lab.location }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted">Total Computers</small>
+                            <p class="mb-0">{{ lab.computers }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted">Utilization Rate</small>
+                            <p class="mb-0">
+                                <span class="fw-bold">{{ lab.utilization }}%</span>
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar {% if lab.utilization >= 75 %}bg-danger{% elif lab.utilization >= 50 %}bg-warning{% else %}bg-success{% endif %}" 
+                                         style="width: {{ lab.utilization }}%"></div>
+                                </div>
+                            </p>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted">Total Hours Used</small>
+                            <p class="mb-0"><strong>{{ lab.total_hours }} hrs</strong></p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold mb-3">Computer Bookings</h6>
+                            <table class="table table-sm">
+                                <tr>
+                                    <td>Total Bookings</td>
+                                    <td class="fw-bold">{{ lab.bookings }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Booking Hours</td>
+                                    <td class="fw-bold">{{ lab.booking_hours }}</td>
+                                </tr>
+                                <tr class="table-success">
+                                    <td><i class="fas fa-check-circle me-2"></i>Present</td>
+                                    <td class="fw-bold text-success">{{ lab.booking_attendance.present }}</td>
+                                </tr>
+                                <tr class="table-warning">
+                                    <td><i class="fas fa-clock me-2"></i>Late</td>
+                                    <td class="fw-bold text-warning">{{ lab.booking_attendance.late }}</td>
+                                </tr>
+                                <tr class="table-danger">
+                                    <td><i class="fas fa-times-circle me-2"></i>Absent</td>
+                                    <td class="fw-bold text-danger">{{ lab.booking_attendance.absent }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold mb-3">Lab Sessions</h6>
+                            <table class="table table-sm">
+                                <tr>
+                                    <td>Total Sessions</td>
+                                    <td class="fw-bold">{{ lab.sessions }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Session Hours</td>
+                                    <td class="fw-bold">{{ lab.session_hours }}</td>
+                                </tr>
+                                <tr class="table-success">
+                                    <td><i class="fas fa-check-circle me-2"></i>Present</td>
+                                    <td class="fw-bold text-success">{{ lab.session_attendance.present }}</td>
+                                </tr>
+                                <tr class="table-warning">
+                                    <td><i class="fas fa-clock me-2"></i>Late</td>
+                                    <td class="fw-bold text-warning">{{ lab.session_attendance.late }}</td>
+                                </tr>
+                                <tr class="table-danger">
+                                    <td><i class="fas fa-times-circle me-2"></i>Absent</td>
+                                    <td class="fw-bold text-danger">{{ lab.session_attendance.absent }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Back Button -->
+    <div class="row">
+        <div class="col-12">
+            <a href="{% url 'reports:dashboard' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Reports
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

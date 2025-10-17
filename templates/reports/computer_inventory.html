@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Computer Inventory Report - Lab Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h1 class="display-6 fw-bold text-ttu-green">
+                    <i class="fas fa-desktop me-2"></i>Computer Inventory Report
+                </h1>
+                <a href="?format=pdf" class="btn btn-primary">
+                    <i class="fas fa-file-pdf me-1"></i>Download PDF
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Overview -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-start border-5 border-success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="text-muted mb-1">Available</h6>
+                            <h2 class="text-success fw-bold">{{ active_computers.summary.available_count }}</h2>
+                            <small class="text-muted">Ready for use</small>
+                        </div>
+                        <i class="fas fa-check-circle fa-2x opacity-25"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-start border-5 border-warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="text-muted mb-1">Maintenance</h6>
+                            <h2 class="text-warning fw-bold">{{ active_computers.summary.maintenance_count }}</h2>
+                            <small class="text-muted">Under maintenance</small>
+                        </div>
+                        <i class="fas fa-tools fa-2x opacity-25"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-start border-5 border-info">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="text-muted mb-1">Reserved</h6>
+                            <h2 class="text-info fw-bold">{{ active_computers.summary.reserved_count }}</h2>
+                            <small class="text-muted">Reserved for events</small>
+                        </div>
+                        <i class="fas fa-lock fa-2x opacity-25"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Availability Summary -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0">System Availability</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <h6 class="text-muted mb-2">Total Computers</h6>
+                            <h3 class="fw-bold">{{ active_computers.summary.total }}</h3>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-muted mb-2">Availability Rate</h6>
+                            <h3 class="fw-bold text-success">{{ active_computers.summary.availability_percentage }}%</h3>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="progress" style="height: 30px;">
+                                <div class="progress-bar bg-success" style="width: {{ active_computers.summary.availability_percentage }}%">
+                                    {{ active_computers.summary.availability_percentage }}%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Available Computers -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white border-0">
+                    <h5 class="mb-0">
+                        <i class="fas fa-check-circle me-2"></i>Available Computers
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if active_computers.available %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Computer #</th>
+                                    <th>Lab</th>
+                                    <th>Specifications</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for comp in active_computers.available %}
+                                <tr>
+                                    <td class="fw-bold">#{{ comp.number }}</td>
+                                    <td>{{ comp.lab }}</td>
+                                    <td>{{ comp.specs }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted mb-0">No computers currently available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Maintenance Computers -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark border-0">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tools me-2"></i>Computers Under Maintenance
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if active_computers.maintenance %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Computer #</th>
+                                    <th>Lab</th>
+                                    <th>Specifications</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for comp in active_computers.maintenance %}
+                                <tr>
+                                    <td class="fw-bold">#{{ comp.number }}</td>
+                                    <td>{{ comp.lab }}</td>
+                                    <td>{{ comp.specs }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted mb-0">No computers currently under maintenance</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Used Computers -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0">Top 20 Most Used Computers</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Computer</th>
+                                    <th>Lab</th>
+                                    <th>Status</th>
+                                    <th>Bookings</th>
+                                    <th>Hours Used</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for comp in computers|slice:":20" %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td class="fw-bold">#{{ comp.number }}</td>
+                                    <td>{{ comp.lab }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if comp.active %}success{% else %}secondary{% endif %}">
+                                            {{ comp.status|title }}
+                                        </span>
+                                    </td>
+                                    <td>{{ comp.bookings }}</td>
+                                    <td><strong>{{ comp.hours }} hrs</strong></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="row">
+        <div class="col-12">
+            <a href="{% url 'reports:dashboard' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Reports
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

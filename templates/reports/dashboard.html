@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}System Reports - Lab Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5 fw-bold text-ttu-green mb-2">
+                <i class="fas fa-chart-line me-3"></i>System Reports
+            </h1>
+            <p class="text-muted">Access comprehensive reports on system usage, lab utilization, and attendance metrics</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {% for report in reports %}
+        <div class="col-lg-6 col-xl-3">
+            <div class="card shadow-lg border-0 h-100 report-card" style="transition: all 0.3s ease;">
+                <div class="card-header bg-gradient text-white border-0" style="background: linear-gradient(135deg, #2c6e49 0%, #1e4c33 100%);">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">{{ report.title }}</h5>
+                        <i class="fas fa-{{ report.icon }} fa-2x opacity-50"></i>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="card-text text-muted mb-4">{{ report.description }}</p>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'reports:'|add:report.url %}" class="btn btn-{{ report.color }} flex-grow-1">
+                            <i class="fas fa-eye me-1"></i>View Report
+                        </a>
+                        <a href="{% url 'reports:'|add:report.url %}?format=pdf" class="btn btn-outline-{{ report.color }}" title="Download as PDF">
+                            <i class="fas fa-file-pdf"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3 class="fw-bold text-ttu-green mb-3">Quick Navigation</h3>
+        </div>
+        <div class="col-md-3">
+            <a href="{% url 'admin_check_in_dashboard' %}" class="btn btn-outline-secondary w-100 py-3">
+                <i class="fas fa-clipboard-check me-2"></i>Check-in Dashboard
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary w-100 py-3">
+                <i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{% url 'booking_management' %}" class="btn btn-outline-secondary w-100 py-3">
+                <i class="fas fa-calendar-check me-2"></i>Bookings
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{% url 'home' %}" class="btn btn-outline-secondary w-100 py-3">
+                <i class="fas fa-home me-2"></i>Home
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .report-card {
+        cursor: pointer;
+    }
+
+    .report-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(44, 110, 73, 0.2) !important;
+    }
+</style>
+{% endblock %}

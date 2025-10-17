@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}System Usage Report - Lab Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h1 class="display-6 fw-bold text-ttu-green">
+                    <i class="fas fa-chart-line me-2"></i>System Usage Report
+                </h1>
+                <div class="btn-group" role="group">
+                    <a href="?days=7" class="btn btn-outline-secondary {% if days == 7 %}active{% endif %}">Last 7 Days</a>
+                    <a href="?days=30" class="btn btn-outline-secondary {% if days == 30 %}active{% endif %}">Last 30 Days</a>
+                    <a href="?days=90" class="btn btn-outline-secondary {% if days == 90 %}active{% endif %}">Last 90 Days</a>
+                    <a href="?days=365" class="btn btn-outline-secondary {% if days == 365 %}active{% endif %}">Last Year</a>
+                    <a href="?format=pdf" class="btn btn-primary">
+                        <i class="fas fa-file-pdf me-1"></i>Download PDF
+                    </a>
+                </div>
+            </div>
+            <p class="text-muted">{{ summary.date_range }}</p>
+        </div>
+    </div>
+
+    <!-- Summary Statistics -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-start border-5 border-success h-100">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Total Bookings</h6>
+                    <h2 class="text-success fw-bold">{{ summary.total_bookings }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-start border-5 border-info h-100">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Lab Sessions</h6>
+                    <h2 class="text-info fw-bold">{{ summary.total_sessions }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-start border-5 border-warning h-100">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Active Students</h6>
+                    <h2 class="text-warning fw-bold">{{ summary.total_users }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-start border-5 border-danger h-100">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Total Hours</h6>
+                    <h2 class="text-danger fw-bold">{{ summary.total_hours }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Statistics -->
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0">Computer Booking Attendance</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <td>Total Attendance Records</td>
+                            <td class="fw-bold">{{ summary.booking_attendance.total }}</td>
+                        </tr>
+                        <tr class="table-success">
+                            <td><i class="fas fa-check-circle me-2 text-success"></i>Present</td>
+                            <td class="fw-bold text-success">{{ summary.booking_attendance.present }}</td>
+                        </tr>
+                        <tr class="table-warning">
+                            <td><i class="fas fa-clock me-2 text-warning"></i>Late</td>
+                            <td class="fw-bold text-warning">{{ summary.booking_attendance.late }}</td>
+                        </tr>
+                        <tr class="table-danger">
+                            <td><i class="fas fa-times-circle me-2 text-danger"></i>Absent</td>
+                            <td class="fw-bold text-danger">{{ summary.booking_attendance.absent }}</td>
+                        </tr>
+                        <tr class="table-info">
+                            <td><i class="fas fa-ban me-2 text-info"></i>Excused</td>
+                            <td class="fw-bold text-info">{{ summary.booking_attendance.excused }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0">Lab Session Attendance</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <td>Total Attendance Records</td>
+                            <td class="fw-bold">{{ summary.session_attendance.total }}</td>
+                        </tr>
+                        <tr class="table-success">
+                            <td><i class="fas fa-check-circle me-2 text-success"></i>Present</td>
+                            <td class="fw-bold text-success">{{ summary.session_attendance.present }}</td>
+                        </tr>
+                        <tr class="table-warning">
+                            <td><i class="fas fa-clock me-2 text-warning"></i>Late</td>
+                            <td class="fw-bold text-warning">{{ summary.session_attendance.late }}</td>
+                        </tr>
+                        <tr class="table-danger">
+                            <td><i class="fas fa-times-circle me-2 text-danger"></i>Absent</td>
+                            <td class="fw-bold text-danger">{{ summary.session_attendance.absent }}</td>
+                        </tr>
+                        <tr class="table-info">
+                            <td><i class="fas fa-ban me-2 text-info"></i>Excused</td>
+                            <td class="fw-bold text-info">{{ summary.session_attendance.excused }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lab Utilization -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0">Lab Utilization Overview</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Lab Name</th>
+                                    <th>Location</th>
+                                    <th>Capacity</th>
+                                    <th>Bookings</th>
+                                    <th>Sessions</th>
+                                    <th>Total Hours</th>
+                                    <th>Utilization %</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for lab in labs %}
+                                <tr>
+                                    <td class="fw-bold">{{ lab.name }}</td>
+                                    <td>{{ lab.location }}</td>
+                                    <td>{{ lab.capacity }} computers</td>
+                                    <td>{{ lab.bookings }}</td>
+                                    <td>{{ lab.sessions }}</td>
+                                    <td>{{ lab.total_hours }} hrs</td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar {% if lab.utilization >= 75 %}bg-danger{% elif lab.utilization >= 50 %}bg-warning{% else %}bg-success{% endif %}" 
+                                                 role="progressbar" 
+                                                 style="width: {{ lab.utilization }}%">
+                                                {{ lab.utilization }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Computers by Usage -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0">Top 10 Most Used Computers</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Computer</th>
+                                    <th>Lab</th>
+                                    <th>Bookings</th>
+                                    <th>Hours Used</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for computer in computers|slice:":10" %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td class="fw-bold">#{{ computer.number }}</td>
+                                    <td>{{ computer.lab }}</td>
+                                    <td>{{ computer.bookings }}</td>
+                                    <td>{{ computer.hours }} hrs</td>
+                                    <td>
+                                        {% if computer.active %}
+                                            <span class="badge bg-success">Available</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ computer.status|title }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Computers Status -->
+    <div class="row mb-4">
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white border-0">
+                    <h6 class="mb-0">
+                        <i class="fas fa-check-circle me-2"></i>Available
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <h2 class="text-success fw-bold mb-2">{{ active_computers.summary.available_count }}</h2>
+                    <p class="text-muted">Ready for use</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark border-0">
+                    <h6 class="mb-0">
+                        <i class="fas fa-tools me-2"></i>Maintenance
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <h2 class="text-warning fw-bold mb-2">{{ active_computers.summary.maintenance_count }}</h2>
+                    <p class="text-muted">Under maintenance</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white border-0">
+                    <h6 class="mb-0">
+                        <i class="fas fa-lock me-2"></i>Reserved
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <h2 class="text-info fw-bold mb-2">{{ active_computers.summary.reserved_count }}</h2>
+                    <p class="text-muted">Reserved for events</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="row">
+        <div class="col-12">
+            <a href="{% url 'reports:dashboard' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Reports
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
