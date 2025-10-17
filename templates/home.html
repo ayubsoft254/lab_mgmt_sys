@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Home - Lab Management System{% endblock %}
 
@@ -70,7 +71,13 @@
                         <div class="group relative bg-white rounded-3xl shadow-lg overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-3">
                             <!-- Premium Lab Image Header -->
                             <div class="relative h-64 overflow-hidden">
-                                {% if lab.image %}
+                                {% if lab.name == "Cybersecurity Lab" or "cybersecurity" in lab.name|lower %}
+                                    <img src="{% static 'img/cys.JPG' %}" alt="{{ lab.name }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                                {% elif lab.name == "GIS Lab" or "gis" in lab.name|lower %}
+                                    <img src="{% static 'img/gis.jpg' %}" alt="{{ lab.name }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                                {% elif lab.name == "Software Engineering Lab" or "software" in lab.name|lower %}
+                                    <img src="{% static 'img/sow.jpg' %}" alt="{{ lab.name }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                                {% elif lab.image %}
                                     <img src="{{ lab.image.url }}" alt="{{ lab.name }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
                                 {% else %}
                                     <div class="w-full h-full bg-gradient-to-br from-ttu-green via-ttu-dark-green to-green-900 flex items-center justify-center">
@@ -107,12 +114,12 @@
                             <!-- Lab Content with Modern Spacing -->
                             <div class="p-6 space-y-6">
                                 <!-- Description -->
-                                <p class="text-gray-600 text-sm leading-relaxed line-clamp-3 min-h-[4.5rem]">
+                                <p class="text-gray-700 text-sm leading-relaxed line-clamp-3 min-h-[4.5rem] font-medium">
                                     {{ lab.description|truncatewords:18 }}
                                 </p>
                                 
                                 <!-- Premium Stats Card -->
-                                <div class="relative overflow-hidden bg-gradient-to-br from-ttu-light via-green-50 to-gray-50 rounded-2xl p-5 shadow-inner">
+                                <div class="relative overflow-hidden bg-gradient-to-br from-ttu-light via-green-50 to-gray-50 rounded-2xl p-5 shadow-inner border border-ttu-light">
                                     <div class="absolute top-0 right-0 w-24 h-24 bg-ttu-green/5 rounded-full -mr-12 -mt-12"></div>
                                     <div class="relative flex justify-around items-center">
                                         <div class="text-center">
@@ -418,6 +425,12 @@
 </div>
 
 <style>
+    :root {
+        --ttu-green: #2c6e49;
+        --ttu-dark-green: #1e4c33;
+        --ttu-light: #f2f9f5;
+    }
+
     /* Custom Scrollbar */
     .custom-scrollbar::-webkit-scrollbar {
         width: 6px;
@@ -467,6 +480,112 @@
     .bg-clip-text {
         -webkit-background-clip: text;
         background-clip: text;
+    }
+
+    /* Color utilities */
+    .bg-ttu-green {
+        background-color: var(--ttu-green);
+    }
+
+    .bg-ttu-dark-green {
+        background-color: var(--ttu-dark-green);
+    }
+
+    .bg-ttu-light {
+        background-color: var(--ttu-light);
+    }
+
+    .text-ttu-green {
+        color: var(--ttu-green);
+    }
+
+    .text-ttu-dark-green {
+        color: var(--ttu-dark-green);
+    }
+
+    .border-ttu-green {
+        border-color: var(--ttu-green);
+    }
+
+    /* Text visibility improvements */
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        line-height: 1.6;
+        color: #1f2937;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        color: #111827;
+        font-weight: 600;
+    }
+
+    p {
+        color: #374151;
+    }
+
+    /* Remove conflicting Bootstrap styles */
+    .container {
+        width: 100%;
+        padding-right: 0;
+        padding-left: 0;
+    }
+
+    /* Override any Bootstrap table styles */
+    table {
+        font-family: inherit;
+    }
+
+    table thead {
+        background-color: transparent;
+    }
+
+    /* Ensure proper button styling */
+    a {
+        text-decoration: none;
+    }
+
+    /* Smooth transitions */
+    * {
+        transition-duration: 300ms;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+        .text-2xl {
+            font-size: 1.5rem !important;
+        }
+        
+        .text-3xl {
+            font-size: 1.875rem !important;
+        }
+
+        .text-4xl {
+            font-size: 2rem !important;
+        }
+
+        .text-5xl {
+            font-size: 2.25rem !important;
+        }
+
+        .text-6xl {
+            font-size: 1.875rem !important;
+        }
+
+        .px-8 {
+            padding-left: 1.5rem !important;
+            padding-right: 1.5rem !important;
+        }
+
+        .py-12 {
+            padding-top: 2rem !important;
+            padding-bottom: 2rem !important;
+        }
+
+        .md\:py-16 {
+            padding-top: 2rem !important;
+            padding-bottom: 2rem !important;
+        }
     }
 </style>
 {% endblock %}
