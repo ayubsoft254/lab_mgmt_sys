@@ -655,18 +655,6 @@
             {% endif %}
         </div>
     </nav>
-                    </a>
-                {% else %}
-                    <a href="{% url 'account_login' %}" class="mobile-nav-link text-white">
-                        <i class="fas fa-sign-in-alt mr-2"></i> Login
-                    </a>
-                    <a href="{% url 'account_signup' %}" class="mobile-nav-link text-white">
-                        <i class="fas fa-user-plus mr-2"></i> Register
-                    </a>
-                {% endif %}
-            </div>
-        </div>
-    </nav>
 
     <main class="container px-4 py-6 mx-auto flex-grow">
         {% if messages %}
