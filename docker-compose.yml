@@ -1,0 +1,141 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    container_name: lab_mgmt_db
+    environment:
+      POSTGRES_DB: ${DB_NAME:-lab_mgmt}
+      POSTGRES_USER: ${DB_USER:-labuser}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-labpassword}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-labuser}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - lab_network
+
+  # Redis Cache & Celery Broker
+  redis:
+    image: redis:7-alpine
+    container_name: lab_mgmt_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - lab_network
+
+  # Django Web Application
+  web:
+    build: .
+    container_name: lab_mgmt_web
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             gunicorn --bind 0.0.0.0:8000 --workers 4 --threads 2 --timeout 60 src.wsgi:application"
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-labuser}:${DB_PASSWORD:-labpassword}@db:5432/${DB_NAME:-lab_mgmt}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-False}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      BASE_URL: ${BASE_URL:-http://localhost:8000}
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      EMAIL_HOST: ${EMAIL_HOST:-smtp.gmail.com}
+      EMAIL_PORT: ${EMAIL_PORT:-587}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS:-True}
+      TRUSTED_CSRF_ORIGINS: ${TRUSTED_CSRF_ORIGINS:-http://localhost:8000}
+      ADMIN_USER_NAME: ${ADMIN_USER_NAME}
+      ADMIN_USER_EMAIL: ${ADMIN_USER_EMAIL}
+    volumes:
+      - ./:/app
+      - static_volume:/app/staticfiles
+      - logs_volume:/app/logs
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - lab_network
+    restart: unless-stopped
+
+  # Celery Worker
+  celery_worker:
+    build: .
+    container_name: lab_mgmt_celery_worker
+    command: celery -A src worker -l info
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-labuser}:${DB_PASSWORD:-labpassword}@db:5432/${DB_NAME:-lab_mgmt}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-False}
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      EMAIL_HOST: ${EMAIL_HOST:-smtp.gmail.com}
+      EMAIL_PORT: ${EMAIL_PORT:-587}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS:-True}
+    volumes:
+      - ./:/app
+      - logs_volume:/app/logs
+    depends_on:
+      - db
+      - redis
+      - web
+    networks:
+      - lab_network
+    restart: unless-stopped
+
+  # Celery Beat (Scheduler)
+  celery_beat:
+    build: .
+    container_name: lab_mgmt_celery_beat
+    command: celery -A src beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-labuser}:${DB_PASSWORD:-labpassword}@db:5432/${DB_NAME:-lab_mgmt}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-False}
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      EMAIL_HOST: ${EMAIL_HOST:-smtp.gmail.com}
+      EMAIL_PORT: ${EMAIL_PORT:-587}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS:-True}
+    volumes:
+      - ./:/app
+      - logs_volume:/app/logs
+    depends_on:
+      - db
+      - redis
+      - web
+    networks:
+      - lab_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  static_volume:
+  logs_volume:
+
+networks:
+  lab_network:
+    driver: bridge
