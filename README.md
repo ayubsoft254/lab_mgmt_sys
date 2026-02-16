@@ -7,50 +7,50 @@
 
 A comprehensive Django-based web application designed specifically for managing computer laboratories at Taita Taveta University's School of Science and Informatics. This system facilitates efficient resource allocation, booking management, and lab administration.
 
-## 🔍 Overview
+## Overview
 The Lab Management System (LMS) provides an intuitive platform for students, lecturers, and administrators to coordinate the use of computer labs and equipment. With features like real-time availability tracking, automated notifications, and comprehensive analytics, LMS streamlines the entire lab management workflow.
 **Live link:**
 [LABMS](https://ttulabs.ayubsoft-inc.systems)
 
-## 🚀 Key Features
+## Key Features
 
-### 🔐 User Authentication & Role Management
+### User Authentication & Role Management
 - **Multi-Role Support**: Distinct user roles (Super Admin, Admin, Lecturer, Student) with tailored permissions
 - **Secure Authentication**: Integration with Django Allauth for robust authentication flows
 - **Role-Based Access Control**: Restricted access to features based on user role
 - **Profile Management**: Customizable user profiles with academic information
 
-### 📅 Booking & Scheduling
+### Booking & Scheduling
 - **Computer Booking**: Individual computer reservations with time-slot selection
 - **Lab Session Management**: Full lab reservations for classes and group activities
 - **Recurring Sessions**: Schedule repeating lab sessions (daily, weekly, monthly)
 - **Conflict Prevention**: Automated checks to prevent double-booking of resources
 - **Real-Time Availability**: Visual calendar showing resource availability
 
-### 📊 Analytics & Reporting
+### Analytics & Reporting
 - **Usage Statistics**: Comprehensive data on lab and computer utilization
 - **User Activity Tracking**: Monitor booking patterns and resource demands
 - **Performance Metrics**: System uptime and resource allocation efficiency
 - **Exportable Reports**: Generate PDF and CSV reports for administrative use
 
-### 🔔 Notifications & Alerts
+### Notifications & Alerts
 - **Real-Time Notifications**: In-app alerts for booking approvals, cancellations, and reminders
 - **Session Reminders**: Automated alerts when bookings are about to expire
 - **Session Extensions**: Option to extend sessions when resources remain available
 - **Email Notifications**: Optional email alerts for critical updates
 
-### 🛠️ Administration Tools
+### Administration Tools
 - **Lab Management**: Add, remove, and modify lab configurations
 - **Computer Management**: Track individual computer status and specifications
 - **User Management**: Admin interface for user role assignment and permissions
 - **System Events**: Logging of all significant system activities with severity levels
 
-### 💬 Support & Communication
+### Support & Communication
 - **Contact System**: Direct communication channel between users and administrators
 - **Help Documentation**: Integrated guides for system usage
 - **User Ratings**: Feedback mechanism to maintain accountability
 
-## 📦 Installation
+## Installation
 
 ### Prerequisites
 - Python 3.10+
@@ -68,7 +68,7 @@ The Lab Management System (LMS) provides an intuitive platform for students, lec
 7. **Start the Development Server**:
 8. **Start Celery for Background Tasks (Optional)**:
 
-## 💻 Usage Guide
+## Usage Guide
 
 ### For Students
 - Register/login with student credentials
@@ -99,7 +99,7 @@ The Lab Management System (LMS) provides an intuitive platform for students, lec
 - Configure global system settings
 - Access advanced analytics and system performance metrics
 
-## 🧩 System Architecture
+## System Architecture
 The Lab Management System is built with a modular architecture using Django's app structure:
 
 - **booking**: Core module handling lab and computer bookings
@@ -107,7 +107,7 @@ The Lab Management System is built with a modular architecture using Django's ap
 - **contact**: Communication system for users and administrators
 - **notifications**: Real-time alert management system
 
-## 🧪 Technologies Used
+## Technologies Used
 
 ### Backend
 - Django 4.2+: Main web framework
@@ -128,7 +128,7 @@ The Lab Management System is built with a modular architecture using Django's ap
 - GitHub Actions: CI/CD pipelines
 - pytest: Comprehensive testing framework
 
-## 🤝 Contributing
+## Contributing
 Contributions are welcome! Please follow these steps:
 
 1. Fork the repository
@@ -139,15 +139,14 @@ Contributions are welcome! Please follow these steps:
 
 Please ensure your code follows the project's style guidelines and includes appropriate tests.
 
-## 📝 License
+## License
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 📊 Project Status
+## Project Status
 This project is actively maintained and regularly updated with new features and bug fixes.
 
-## 📧 Contact
+## Contact
 For questions, support, or collaboration:
 
-**Email**: henryoayub15@gmail.com
+**Email**: henry@ayubsoft-inc.systems
 
-Built with ❤️ for Taita Taveta University's School of Science and Informatics
