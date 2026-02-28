@@ -10,14 +10,13 @@ def notifications_context(request):
     """
     Add unread notifications count to the template context.
     """
-    if request.user.is_authenticated:
+    unread_notifications_count = 0
+    if hasattr(request, 'user') and request.user.is_authenticated:
         unread_notifications = Notification.objects.filter(
             user=request.user,
             is_read=False
         )
         unread_notifications_count = unread_notifications.count()
-    else:
-        unread_notifications_count = 0
     
     return {
         'unread_notifications_count': unread_notifications_count

@@ -49,8 +49,12 @@ SECRET_KEY = config("DJANGO_SECRET_KEY")
 DEBUG = config("DJANGO_DEBUG", cast=bool, default=False)
 BASE_URL = config("BASE_URL", default=None)
 
-ALLOWED_HOSTS = config("DJANGO_ALLOWED_HOSTS", cast=lambda v: [s.strip() for s in v.split(',')])
-SECURE_SSL_REDIRECT = True
+ALLOWED_HOSTS = config(
+    "DJANGO_ALLOWED_HOSTS",
+    cast=lambda v: [s.strip() for s in v.split(',')],
+    default="localhost,127.0.0.1,127.0.0.1:8000,[::1]"
+)
+SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", cast=bool, default=True)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Application definition
