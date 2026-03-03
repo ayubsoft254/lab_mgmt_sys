@@ -123,9 +123,7 @@ The Lab Management System is built with a modular architecture using Django's ap
 - htmx: AJAX capabilities without writing JavaScript
 
 ### DevOps & Tools
-- Docker: Containerization (optional)
 - Git: Version control
-- GitHub Actions: CI/CD pipelines
 - pytest: Comprehensive testing framework
 
 ## Contributing
