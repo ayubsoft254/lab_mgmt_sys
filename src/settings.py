@@ -54,7 +54,7 @@ ALLOWED_HOSTS = config(
     cast=lambda v: [s.strip() for s in v.split(',')],
     default="localhost,127.0.0.1,127.0.0.1:8000,[::1]"
 )
-SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", cast=bool, default=True)
+SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", cast=bool, default=False)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Application definition
@@ -136,10 +136,10 @@ SESSION_COOKIE_AGE = 7200  # Session expires after 2 hours (in seconds)
 SESSION_SAVE_EVERY_REQUEST = True  # Update session expiry on every request
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Session expires when browser closes
 SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access to session cookie
-SESSION_COOKIE_SECURE = True  # Only send cookie over HTTPS
+SESSION_COOKIE_SECURE = not DEBUG  # Only send cookie over HTTPS in production
 SESSION_COOKIE_SAMESITE = 'Lax'  # CSRF protection
 SESSION_SERIALIZER = 'src.serializers.DateTimeAwareJSONSerializer'  # Custom serializer for datetime support
-CSRF_COOKIE_SECURE = True  # Only send CSRF cookie over HTTPS
+CSRF_COOKIE_SECURE = not DEBUG  # Only send CSRF cookie over HTTPS in production
 CSRF_COOKIE_SAMESITE = 'Lax'  # CSRF protection
 
 # Allauth settings
