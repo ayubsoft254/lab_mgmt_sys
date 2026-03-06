@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Renewal Invoice - Infovibez Tribe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            background-color: #f5f5f5;
+        }
+        
+        .invoice-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            border-bottom: 3px solid #2563eb;
+            padding-bottom: 30px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .company-info h1 {
+            color: #2563eb;
+            font-size: 32px;
+            margin-bottom: 5px;
+        }
+        
+        .tagline {
+            color: #6b7280;
+            font-style: italic;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        
+        .company-details {
+            color: #374151;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .company-details p {
+            margin: 5px 0;
+        }
+        
+        .invoice-title {
+            text-align: right;
+        }
+        
+        .invoice-title h2 {
+            font-size: 28px;
+            color: #1f2937;
+            margin-bottom: 20px;
+        }
+        
+        .invoice-meta {
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        .invoice-meta p {
+            margin: 5px 0;
+        }
+        
+        .invoice-meta span {
+            color: #1f2937;
+            font-weight: 600;
+        }
+        
+        .bill-to {
+            margin-bottom: 40px;
+        }
+        
+        .bill-to h3 {
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .bill-to p {
+            color: #1f2937;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .notice-box {
+            background-color: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .notice-box p {
+            color: #92400e;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .notice-box strong {
+            color: #78350f;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 40px;
+        }
+        
+        thead {
+            background-color: #2563eb;
+            color: white;
+        }
+        
+        thead th {
+            padding: 15px;
+            text-align: left;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        thead th:nth-child(2),
+        thead th:nth-child(3),
+        thead th:nth-child(4) {
+            text-align: right;
+        }
+        
+        tbody tr {
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        tbody td {
+            padding: 20px 15px;
+        }
+        
+        .item-description {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+        
+        .item-details {
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        .quantity, .unit-price {
+            text-align: right;
+            color: #374151;
+        }
+        
+        .amount {
+            text-align: right;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .totals {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 40px;
+        }
+        
+        .totals-content {
+            width: 300px;
+        }
+        
+        .subtotal {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+            color: #6b7280;
+        }
+        
+        .subtotal span:last-child {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .total {
+            display: flex;
+            justify-content: space-between;
+            background-color: #2563eb;
+            color: white;
+            padding: 15px 20px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        
+        .total span:last-child {
+            font-size: 18px;
+        }
+        
+        .payment-terms {
+            border-top: 2px solid #e5e7eb;
+            padding-top: 30px;
+        }
+        
+        .payment-terms h3 {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 15px;
+        }
+        
+        .terms-list {
+            font-size: 14px;
+            color: #374151;
+            line-height: 1.8;
+            margin-bottom: 25px;
+        }
+        
+        .payment-methods {
+            background-color: #f9fafb;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        
+        .payment-methods h4 {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        
+        .payment-method {
+            margin-bottom: 15px;
+        }
+        
+        .payment-method p {
+            font-size: 14px;
+            color: #374151;
+            margin: 3px 0;
+        }
+        
+        .payment-method .method-title {
+            font-weight: 600;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        .footer p:first-child {
+            margin-bottom: 10px;
+        }
+        
+        .footer p:last-child {
+            font-style: italic;
+        }
+        
+        @media print {
+            body {
+                background-color: white;
+                padding: 0;
+            }
+            
+            .invoice-container {
+                box-shadow: none;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="company-info">
+                <h1>AYUBSOFT INC.</h1>
+                <p class="tagline">Engineering Your Digital Future</p>
+                <div class="company-details">
+                    <p>Voi, Taita Taveta</p>
+                    <p>Kenya</p>
+                    <p style="margin-top: 10px;">Email: info@ayubsoft-inc.systems</p>
+                    <p>Phone: +254113364472</p>
+                </div>
+            </div>
+            <div class="invoice-title">
+                <h2>INVOICE</h2>
+                <div class="invoice-meta">
+                    <p>Invoice #: <span>INV-2026-1x902</span></p>
+                    <p>Date: <span id="invoiceDate"></span></p>
+                    <p>Due Date: <span>January 15, 2026</span></p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bill To -->
+        <div class="bill-to">
+            <h3>Bill To:</h3>
+            <p>Infovibez Tribe</p>
+        </div>
+        
+        <!-- Notice Box -->
+        <div class="notice-box">
+            <p><strong>Service Renewal Notice:</strong> This invoice is for the renewal of your web hosting subscription. Your next billing period begins on <strong>January 15, 2026</strong>. Please ensure payment is made before this date to avoid service interruption.</p>
+        </div>
+        
+        <!-- Items Table -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Qty</th>
+                    <th>Unit Price</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="item-description">Web Hosting Service - Monthly Subscription</div>
+                        <div class="item-details">Renewal period: January 15, 2026 - February 15, 2026</div>
+                    </td>
+                    <td class="quantity">1</td>
+                    <td class="unit-price">$15.00</td>
+                    <td class="amount">$15.00</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <!-- Totals -->
+        <div class="totals">
+            <div class="totals-content">
+                <div class="subtotal">
+                    <span>Subtotal:</span>
+                    <span>$15.00</span>
+                </div>
+                <div class="total">
+                    <span>Total Amount Due:</span>
+                    <span>$15.00</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Payment Terms -->
+        <div class="payment-terms">
+            <h3>Payment Information:</h3>
+            <div class="terms-list">
+                • Payment is due by <strong>January 15, 2026</strong> to ensure uninterrupted service<br>
+                • This is a recurring monthly subscription<br>
+                • Late payments may result in service suspension<br>
+                • A 1-week extension was previously granted, moving your renewal from January 8 to January 15, 2026
+            </div>
+            
+            <div class="payment-methods">
+                <h4>Payment Methods:</h4>
+                <div class="payment-method">
+                    <p class="method-title">Mobile Payment (M-Pesa):</p>
+                    <p>Paybill: 516600</p>
+                    <p>Account No: 5940636001</p>
+                </div>
+                <div class="payment-method">
+                    <p class="method-title">Bank Transfer:</p>
+                    <p>Swift: DTKEKENA</p>
+                    <p>Account No: 5940636001</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>Thank you for your continued business!</p>
+            <p>For questions about this invoice, please contact us at info@ayubsoft-inc.systems</p>
+        </div>
+    </div>
+    
+    <script>
+        // Set current date
+        const today = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('invoiceDate').textContent = today.toLocaleDateString('en-US', options);
+    </script>
+</body>
+</html>

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Receipt - Infovibez Tribe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            background-color: #f5f5f5;
+        }
+        
+        .receipt-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            border-bottom: 3px solid #10b981;
+            padding-bottom: 30px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .company-info h1 {
+            color: #2563eb;
+            font-size: 32px;
+            margin-bottom: 5px;
+        }
+        
+        .tagline {
+            color: #6b7280;
+            font-style: italic;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        
+        .company-details {
+            color: #374151;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .company-details p {
+            margin: 5px 0;
+        }
+        
+        .receipt-title {
+            text-align: right;
+        }
+        
+        .receipt-title h2 {
+            font-size: 28px;
+            color: #10b981;
+            margin-bottom: 10px;
+        }
+        
+        .paid-stamp {
+            background-color: #10b981;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 14px;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        
+        .receipt-meta {
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        .receipt-meta p {
+            margin: 5px 0;
+        }
+        
+        .receipt-meta span {
+            color: #1f2937;
+            font-weight: 600;
+        }
+        
+        .customer-info {
+            background-color: #f9fafb;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+        
+        .customer-info h3 {
+            font-size: 14px;
+            color: #6b7280;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .customer-info p {
+            color: #1f2937;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .payment-details {
+            margin-bottom: 30px;
+        }
+        
+        .payment-details h3 {
+            font-size: 16px;
+            color: #1f2937;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .detail-label {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .detail-value {
+            color: #1f2937;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .transaction-ref {
+            background-color: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .transaction-ref p {
+            color: #92400e;
+            font-size: 14px;
+        }
+        
+        .transaction-ref strong {
+            color: #78350f;
+            font-size: 16px;
+        }
+        
+        .amount-paid {
+            background-color: #10b981;
+            color: white;
+            padding: 25px;
+            border-radius: 5px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .amount-paid p {
+            font-size: 14px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+        
+        .amount-paid h2 {
+            font-size: 36px;
+            font-weight: bold;
+        }
+        
+        .service-details {
+            background-color: #f9fafb;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+        
+        .service-details h3 {
+            font-size: 16px;
+            color: #1f2937;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .service-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            color: #374151;
+            font-size: 14px;
+        }
+        
+        .service-description {
+            flex: 1;
+        }
+        
+        .service-amount {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .footer {
+            border-top: 2px solid #e5e7eb;
+            padding-top: 30px;
+            text-align: center;
+        }
+        
+        .footer p {
+            color: #6b7280;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        
+        .footer .thank-you {
+            font-size: 16px;
+            font-weight: 600;
+            color: #10b981;
+            margin-bottom: 15px;
+        }
+        
+        .footer .contact {
+            font-style: italic;
+            margin-top: 15px;
+        }
+        
+        @media print {
+            body {
+                background-color: white;
+                padding: 0;
+            }
+            
+            .receipt-container {
+                box-shadow: none;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="receipt-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="company-info">
+                <h1>AYUBSOFT INC.</h1>
+                <p class="tagline">Engineering Your Digital Future</p>
+                <div class="company-details">
+                    <p>Voi, Taita Taveta</p>
+                    <p>Kenya</p>
+                    <p style="margin-top: 10px;">Email: info@ayubsoft-inc.systems</p>
+                    <p>Phone: +254113364472</p>
+                </div>
+            </div>
+            <div class="receipt-title">
+                <div class="paid-stamp">PAID</div>
+                <h2>PAYMENT RECEIPT</h2>
+                <div class="receipt-meta">
+                    <p>Receipt #: <span>RCT-2025-002</span></p>
+                    <p>Date: <span id="receiptDate"></span></p>
+                    <p>Time: <span id="receiptTime"></span></p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Customer Info -->
+        <div class="customer-info">
+            <h3>Received From:</h3>
+            <p>Infovibez Tribe</p>
+        </div>
+        
+        <!-- Transaction Reference -->
+        <div class="transaction-ref">
+            <p><strong>M-Pesa Transaction Reference:</strong> UAAI339W7T</p>
+        </div>
+        
+        <!-- Amount Paid -->
+        <div class="amount-paid">
+            <p>Amount Received</p>
+            <h2>$15.00 USD</h2>
+        </div>
+        
+        <!-- Payment Details -->
+        <div class="payment-details">
+            <h3>Payment Details</h3>
+            <div class="detail-row">
+                <span class="detail-label">Payment Method:</span>
+                <span class="detail-value">M-Pesa Mobile Payment</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Transaction ID:</span>
+                <span class="detail-value">UAAI339W7T</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Payment Status:</span>
+                <span class="detail-value" style="color: #10b981;">Successful</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Invoice Reference:</span>
+                <span class="detail-value">INV-2025-002</span>
+            </div>
+        </div>
+        
+        <!-- Service Details -->
+        <div class="service-details">
+            <h3>Payment For:</h3>
+            <div class="service-item">
+                <div class="service-description">
+                    <strong>Web Hosting Service - Monthly Subscription</strong><br>
+                    <small style="color: #6b7280;">Service Period: January 15, 2026 - February 15, 2026</small>
+                </div>
+                <div class="service-amount">$15.00</div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p class="thank-you">Thank you for your payment!</p>
+            <p>This receipt confirms that your payment has been received and processed successfully.</p>
+            <p>Your web hosting service is now active and will continue uninterrupted.</p>
+            <p class="contact">For questions about this receipt, please contact us at info@ayubsoft-inc.systems</p>
+            <p style="margin-top: 20px; font-size: 12px; color: #9ca3af;">
+                This is an official payment receipt from Ayubsoft Inc.
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        // Set current date and time
+        const now = new Date();
+        const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+        const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: true };
+        
+        document.getElementById('receiptDate').textContent = now.toLocaleDateString('en-US', dateOptions);
+        document.getElementById('receiptTime').textContent = now.toLocaleTimeString('en-US', timeOptions);
+    </script>
+</body>
+</html>
