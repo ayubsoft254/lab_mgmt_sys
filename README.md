@@ -68,6 +68,55 @@ The Lab Management System (LMS) provides an intuitive platform for students, lec
 7. **Start the Development Server**:
 8. **Start Celery for Background Tasks (Optional)**:
 
+## Docker
+
+The project ships with a `Dockerfile` and `docker-compose.yml` that start the full stack (web, PostgreSQL, Redis, Celery worker, and Celery beat). A `Makefile` is included for convenience.
+
+### Quick start
+
+```bash
+# Build images
+make build
+
+# Start all services
+make up
+
+# Stop all services
+make down
+```
+
+### Entering a container shell
+
+```bash
+# Open a bash shell in the running web container
+make shell
+
+# Equivalent docker commands (no make required)
+docker compose exec web /bin/bash
+# or, using the container name directly:
+docker exec -it lab_mgmt_web /bin/bash
+```
+
+Additional shell targets:
+
+| Command | Description |
+|---------|-------------|
+| `make shell` | Bash shell inside the **web** container |
+| `make shell-db` | `psql` shell inside the **database** container |
+| `make shell-redis` | `redis-cli` shell inside the **Redis** container |
+
+### Other useful commands
+
+```bash
+make logs            # Follow logs for all services
+make logs-web        # Follow logs for the web service only
+make migrate         # Run Django database migrations
+make collectstatic   # Collect static files
+make createsuperuser # Create a Django superuser
+```
+
+Run `make help` for a full list of available targets.
+
 ## Usage Guide
 
 ### For Students
