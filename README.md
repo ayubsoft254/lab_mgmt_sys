@@ -9,6 +9,34 @@ A Django-based web application for managing computer labs at Taita Taveta Univer
 - **Support Ticketing:** Create, track, and manage support tickets with priority levels and admin notifications.
 
 ## 📦 Installation
+
+### Option A — Docker (recommended)
+1. **Clone the Repository:**
+   ```bash
+   git clone https://github.com/your-username/lab-management-system.git
+   cd lab-management-system
+   ```
+2. **Configure Environment Variables:**
+   ```bash
+   cp .env.example .env
+   # Edit .env and set DJANGO_SECRET_KEY and other values
+   ```
+3. **Build and Start Containers:**
+   ```bash
+   make build
+   make up
+   ```
+4. **Apply Migrations & Collect Static Files:**
+   ```bash
+   make migrate
+   make collectstatic
+   ```
+5. **Login to the Container:**
+   ```bash
+   make login
+   ```
+
+### Option B — Local Development
 1. **Clone the Repository:**
    ```bash
    git clone https://github.com/your-username/lab-management-system.git
@@ -31,6 +59,19 @@ A Django-based web application for managing computer labs at Taita Taveta Univer
    ```bash
    python manage.py runserver
    ```
+
+## 🐳 Docker Commands
+
+| Command              | Description                              |
+|----------------------|------------------------------------------|
+| `make build`         | Build Docker images                      |
+| `make up`            | Start all containers in detached mode    |
+| `make down`          | Stop and remove all containers           |
+| `make restart`       | Restart all containers                   |
+| `make login`         | Open a shell inside the web container    |
+| `make migrate`       | Run Django database migrations           |
+| `make collectstatic` | Collect static files                     |
+| `make logs`          | Tail logs for all containers             |
 
 ## ⚙️ Usage
 - Register and log in with the appropriate role.

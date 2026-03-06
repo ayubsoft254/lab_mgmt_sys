@@ -1,0 +1,29 @@
+services:
+  web:
+    build: .
+    container_name: lab_mgmt_web
+    env_file:
+      - .env
+    ports:
+      - "7557:7557"
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    container_name: lab_mgmt_db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-lab_mgmt}
+      POSTGRES_USER: ${POSTGRES_USER:-lab_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lab_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  static_volume:
