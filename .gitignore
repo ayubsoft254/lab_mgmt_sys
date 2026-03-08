@@ -103,3 +103,5 @@ GitHub.sublime-settings
 .dist
 pay.html
 rec.html
+
+nginx.conf
