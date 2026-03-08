@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,17 +8,18 @@
     {% load static %}
 
     <!-- Favicon -->
-    <link rel="icon" type="image/jpeg" href="https://projects.ttu.ac.ke/static/logo.png">
-    <link rel="shortcut icon" type="image/jpeg" href="https://projects.ttu.ac.ke/static/logo.png">
-    <link rel="apple-touch-icon" href="https://projects.ttu.ac.ke/static/logo.png">
+    <link rel="icon" type="image/jpeg" href="{% static 'img/logo.jpg' %}">
+    <link rel="shortcut icon" type="image/jpeg" href="{% static 'img/logo.jpg' %}">
+    <link rel="apple-touch-icon" href="{% static 'img/logo.jpg' %}">
 
     <!-- Existing CSS and scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <!-- Add FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    
+
+
     <style>
         :root {
             --ttu-green: #2c6e49;
@@ -26,17 +28,37 @@
             --ttu-lighter: #f8fcf9;
         }
 
-        .bg-ttu-green { background-color: var(--ttu-green); }
-        .bg-ttu-dark { background-color: var(--ttu-dark-green); }
-        .bg-ttu-light { background-color: var(--ttu-light); }
-        .bg-ttu-lighter { background-color: var(--ttu-lighter); }
+        .bg-ttu-green {
+            background-color: var(--ttu-green);
+        }
 
-        .text-ttu-green { color: var(--ttu-green); }
-        .text-ttu-dark { color: var(--ttu-dark-green); }
+        .bg-ttu-dark {
+            background-color: var(--ttu-dark-green);
+        }
 
-        .border-ttu-green { border-color: var(--ttu-green); }
+        .bg-ttu-light {
+            background-color: var(--ttu-light);
+        }
 
-        .hover-bg-ttu-dark:hover { background-color: var(--ttu-dark-green); }
+        .bg-ttu-lighter {
+            background-color: var(--ttu-lighter);
+        }
+
+        .text-ttu-green {
+            color: var(--ttu-green);
+        }
+
+        .text-ttu-dark {
+            color: var(--ttu-dark-green);
+        }
+
+        .border-ttu-green {
+            border-color: var(--ttu-green);
+        }
+
+        .hover-bg-ttu-dark:hover {
+            background-color: var(--ttu-dark-green);
+        }
 
         /* Modern navigation styles */
         .nav-link {
@@ -48,16 +70,16 @@
             margin: 0 0.25rem;
             font-weight: 500;
         }
-        
+
         .nav-link:hover {
             background-color: rgba(255, 255, 255, 0.15);
             transform: translateY(-1px);
         }
-        
+
         .nav-link.active {
             background-color: rgba(255, 255, 255, 0.2);
         }
-        
+
         .nav-link .notification-badge {
             position: absolute;
             top: 0.25rem;
@@ -73,11 +95,11 @@
             justify-content: center;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
         }
-        
+
         .user-menu {
             position: relative;
         }
-        
+
         .user-menu-button {
             display: flex;
             align-items: center;
@@ -87,11 +109,11 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
             transition: all 0.3s ease;
         }
-        
+
         .user-menu-button:hover {
             background-color: rgba(255, 255, 255, 0.15);
         }
-        
+
         /* Mobile Nav */
         .mobile-nav-link {
             display: block;
@@ -100,17 +122,17 @@
             text-decoration: none;
             transition: all 0.2s ease;
         }
-        
+
         .mobile-nav-link:hover {
             background-color: rgba(255, 255, 255, 0.15);
         }
-        
+
         .mobile-nav-divider {
             height: 1px;
             background-color: rgba(255, 255, 255, 0.2);
             margin: 0.5rem 0;
         }
-        
+
         .brand-logo {
             font-size: 1.25rem;
             font-weight: 700;
@@ -123,17 +145,32 @@
 
         /* Custom animations */
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .animate-fade-in {
             animation: fadeIn 0.8s ease-out forwards;
         }
 
-        .delay-100 { animation-delay: 0.1s; }
-        .delay-200 { animation-delay: 0.2s; }
-        .delay-300 { animation-delay: 0.3s; }
+        .delay-100 {
+            animation-delay: 0.1s;
+        }
+
+        .delay-200 {
+            animation-delay: 0.2s;
+        }
+
+        .delay-300 {
+            animation-delay: 0.3s;
+        }
 
         /* Glass morphism effect */
         .glass-card {
@@ -272,6 +309,7 @@
                 opacity: 0;
                 transform: translateY(-10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -464,7 +502,8 @@
             font-size: 0.875em;
         }
 
-        .table td, .table th {
+        .table td,
+        .table th {
             vertical-align: middle;
         }
 
@@ -488,6 +527,7 @@
     </style>
     {% block extra_head %}{% endblock %}
 </head>
+
 <body class="bg-gray-100 min-h-screen flex flex-col">
     <!-- Modern Navigation Bar -->
     <nav class="bg-ttu-green shadow-lg sticky top-0 z-50">
@@ -501,76 +541,76 @@
             <!-- Desktop Navigation -->
             <div class="desktop-nav hidden md:flex items-center gap-1">
                 {% if user.is_authenticated %}
-                    <a href="{% url 'lab_list' %}" class="nav-item-link">
-                        <i class="fas fa-flask"></i>
-                        <span class="hidden lg:inline">Labs</span>
+                <a href="{% url 'lab_list' %}" class="nav-item-link">
+                    <i class="fas fa-flask"></i>
+                    <span class="hidden lg:inline">Labs</span>
+                </a>
+                <a href="{% url 'free_timeslots' %}" class="nav-item-link">
+                    <i class="fas fa-clock"></i>
+                    <span class="hidden lg:inline">Slots</span>
+                </a>
+
+                {% if user.is_lecturer %}
+                <a href="{% url 'lecturer_booking' %}" class="nav-item-link">
+                    <i class="fas fa-calendar-plus"></i>
+                    <span class="hidden lg:inline">Book Lab</span>
+                </a>
+                {% endif %}
+
+                {% if user.is_admin or user.is_super_admin %}
+                <a href="{% url 'admin_dashboard' %}" class="nav-item-link">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span class="hidden lg:inline">Admin</span>
+                </a>
+                <a href="{% url 'analytics_dashboard' %}" class="nav-item-link">
+                    <i class="fas fa-chart-line"></i>
+                    <span class="hidden lg:inline">Analytics</span>
+                </a>
+                <a href="{% url 'admin_check_in_dashboard' %}" class="nav-item-link">
+                    <i class="fas fa-clipboard-check"></i>
+                    <span class="hidden lg:inline">Check-in</span>
+                </a>
+                {% endif %}
+
+                <!-- Notifications -->
+                <div class="nav-item">
+                    <a href="{% url 'notification_list' %}" class="nav-item-link">
+                        <i class="fas fa-bell"></i>
+                        <span class="hidden lg:inline">Notifications</span>
+                        {% if unread_notifications_count > 0 %}
+                        <span class="nav-notification-badge">{{ unread_notifications_count }}</span>
+                        {% endif %}
                     </a>
-                    <a href="{% url 'free_timeslots' %}" class="nav-item-link">
-                        <i class="fas fa-clock"></i>
-                        <span class="hidden lg:inline">Slots</span>
-                    </a>
+                </div>
 
-                    {% if user.is_lecturer %}
-                        <a href="{% url 'lecturer_booking' %}" class="nav-item-link">
-                            <i class="fas fa-calendar-plus"></i>
-                            <span class="hidden lg:inline">Book Lab</span>
-                        </a>
-                    {% endif %}
+                <!-- User Dropdown -->
+                <div class="nav-item relative">
+                    <button class="user-dropdown-toggle" id="user-dropdown-btn">
+                        <i class="fas fa-user-circle"></i>
+                        <span class="hidden lg:inline">{{ user.username }}</span>
+                        <i class="fas fa-chevron-down text-xs"></i>
+                    </button>
 
-                    {% if user.is_admin or user.is_super_admin %}
-                        <a href="{% url 'admin_dashboard' %}" class="nav-item-link">
-                            <i class="fas fa-tachometer-alt"></i>
-                            <span class="hidden lg:inline">Admin</span>
+                    <div class="user-dropdown-menu" id="user-dropdown-menu" style="display: none;">
+                        <a href="{% url 'profile' %}">
+                            <i class="fas fa-user"></i>
+                            <span>My Profile</span>
                         </a>
-                        <a href="{% url 'analytics_dashboard' %}" class="nav-item-link">
-                            <i class="fas fa-chart-line"></i>
-                            <span class="hidden lg:inline">Analytics</span>
-                        </a>
-                        <a href="{% url 'admin_check_in_dashboard' %}" class="nav-item-link">
-                            <i class="fas fa-clipboard-check"></i>
-                            <span class="hidden lg:inline">Check-in</span>
-                        </a>
-                    {% endif %}
-
-                    <!-- Notifications -->
-                    <div class="nav-item">
-                        <a href="{% url 'notification_list' %}" class="nav-item-link">
-                            <i class="fas fa-bell"></i>
-                            <span class="hidden lg:inline">Notifications</span>
-                            {% if unread_notifications_count > 0 %}
-                                <span class="nav-notification-badge">{{ unread_notifications_count }}</span>
-                            {% endif %}
+                        <a href="{% url 'account_logout' %}">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
                         </a>
                     </div>
-
-                    <!-- User Dropdown -->
-                    <div class="nav-item relative">
-                        <button class="user-dropdown-toggle" id="user-dropdown-btn">
-                            <i class="fas fa-user-circle"></i>
-                            <span class="hidden lg:inline">{{ user.username }}</span>
-                            <i class="fas fa-chevron-down text-xs"></i>
-                        </button>
-
-                        <div class="user-dropdown-menu" id="user-dropdown-menu" style="display: none;">
-                            <a href="{% url 'profile' %}">
-                                <i class="fas fa-user"></i>
-                                <span>My Profile</span>
-                            </a>
-                            <a href="{% url 'account_logout' %}">
-                                <i class="fas fa-sign-out-alt"></i>
-                                <span>Logout</span>
-                            </a>
-                        </div>
-                    </div>
+                </div>
                 {% else %}
-                    <a href="{% url 'account_login' %}" class="nav-item-link">
-                        <i class="fas fa-sign-in-alt"></i>
-                        <span class="hidden lg:inline">Login</span>
-                    </a>
-                    <a href="{% url 'account_signup' %}" class="nav-item-link">
-                        <i class="fas fa-user-plus"></i>
-                        <span class="hidden lg:inline">Register</span>
-                    </a>
+                <a href="{% url 'account_login' %}" class="nav-item-link">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span class="hidden lg:inline">Login</span>
+                </a>
+                <a href="{% url 'account_signup' %}" class="nav-item-link">
+                    <i class="fas fa-user-plus"></i>
+                    <span class="hidden lg:inline">Register</span>
+                </a>
                 {% endif %}
             </div>
 
@@ -585,89 +625,91 @@
         <!-- Mobile Navigation Menu -->
         <div id="mobile-menu" class="mobile-menu">
             {% if user.is_authenticated %}
-                <a href="{% url 'lab_list' %}" class="mobile-menu-item">
-                    <i class="fas fa-flask"></i>
-                    <span>Labs</span>
-                </a>
-                <a href="{% url 'free_timeslots' %}" class="mobile-menu-item">
-                    <i class="fas fa-clock"></i>
-                    <span>Free Timeslots</span>
-                </a>
+            <a href="{% url 'lab_list' %}" class="mobile-menu-item">
+                <i class="fas fa-flask"></i>
+                <span>Labs</span>
+            </a>
+            <a href="{% url 'free_timeslots' %}" class="mobile-menu-item">
+                <i class="fas fa-clock"></i>
+                <span>Free Timeslots</span>
+            </a>
 
-                {% if user.is_lecturer %}
-                    <a href="{% url 'lecturer_booking' %}" class="mobile-menu-item">
-                        <i class="fas fa-calendar-plus"></i>
-                        <span>Book Lab Session</span>
-                    </a>
+            {% if user.is_lecturer %}
+            <a href="{% url 'lecturer_booking' %}" class="mobile-menu-item">
+                <i class="fas fa-calendar-plus"></i>
+                <span>Book Lab Session</span>
+            </a>
+            {% endif %}
+
+            {% if user.is_admin or user.is_super_admin %}
+            <div class="mobile-menu-divider"></div>
+            <a href="{% url 'admin_dashboard' %}" class="mobile-menu-item">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Admin Dashboard</span>
+            </a>
+            <a href="{% url 'analytics_dashboard' %}" class="mobile-menu-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Analytics Dashboard</span>
+            </a>
+            <a href="{% url 'admin_check_in_dashboard' %}" class="mobile-menu-item">
+                <i class="fas fa-clipboard-check"></i>
+                <span>Attendance Check-in</span>
+            </a>
+            <a href="{% url 'reports:dashboard' %}" class="mobile-menu-item">
+                <i class="fas fa-chart-bar"></i>
+                <span>System Reports</span>
+            </a>
+            {% endif %}
+
+            <a href="{% url 'notification_list' %}" class="mobile-menu-item">
+                <i class="fas fa-bell"></i>
+                <span>Notifications</span>
+                {% if unread_notifications_count > 0 %}
+                <span
+                    class="inline-flex items-center justify-center ml-auto bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full">
+                    {{ unread_notifications_count }}
+                </span>
                 {% endif %}
+            </a>
 
-                {% if user.is_admin or user.is_super_admin %}
-                    <div class="mobile-menu-divider"></div>
-                    <a href="{% url 'admin_dashboard' %}" class="mobile-menu-item">
-                        <i class="fas fa-tachometer-alt"></i>
-                        <span>Admin Dashboard</span>
-                    </a>
-                    <a href="{% url 'analytics_dashboard' %}" class="mobile-menu-item">
-                        <i class="fas fa-chart-line"></i>
-                        <span>Analytics Dashboard</span>
-                    </a>
-                    <a href="{% url 'admin_check_in_dashboard' %}" class="mobile-menu-item">
-                        <i class="fas fa-clipboard-check"></i>
-                        <span>Attendance Check-in</span>
-                    </a>
-                    <a href="{% url 'reports:dashboard' %}" class="mobile-menu-item">
-                        <i class="fas fa-chart-bar"></i>
-                        <span>System Reports</span>
-                    </a>
-                {% endif %}
+            <div class="mobile-menu-divider"></div>
 
-                <a href="{% url 'notification_list' %}" class="mobile-menu-item">
-                    <i class="fas fa-bell"></i>
-                    <span>Notifications</span>
-                    {% if unread_notifications_count > 0 %}
-                        <span class="inline-flex items-center justify-center ml-auto bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full">
-                            {{ unread_notifications_count }}
-                        </span>
-                    {% endif %}
-                </a>
+            <div class="mobile-user-info">
+                Signed in as <strong>{{ user.username }}</strong>
+            </div>
 
-                <div class="mobile-menu-divider"></div>
-                
-                <div class="mobile-user-info">
-                    Signed in as <strong>{{ user.username }}</strong>
-                </div>
+            <a href="{% url 'profile' %}" class="mobile-menu-item">
+                <i class="fas fa-user"></i>
+                <span>My Profile</span>
+            </a>
 
-                <a href="{% url 'profile' %}" class="mobile-menu-item">
-                    <i class="fas fa-user"></i>
-                    <span>My Profile</span>
-                </a>
-
-                <a href="{% url 'account_logout' %}" class="mobile-menu-item">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
-                </a>
+            <a href="{% url 'account_logout' %}" class="mobile-menu-item">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
             {% else %}
-                <a href="{% url 'account_login' %}" class="mobile-menu-item">
-                    <i class="fas fa-sign-in-alt"></i>
-                    <span>Login</span>
-                </a>
-                <a href="{% url 'account_signup' %}" class="mobile-menu-item">
-                    <i class="fas fa-user-plus"></i>
-                    <span>Register</span>
-                </a>
+            <a href="{% url 'account_login' %}" class="mobile-menu-item">
+                <i class="fas fa-sign-in-alt"></i>
+                <span>Login</span>
+            </a>
+            <a href="{% url 'account_signup' %}" class="mobile-menu-item">
+                <i class="fas fa-user-plus"></i>
+                <span>Register</span>
+            </a>
             {% endif %}
         </div>
     </nav>
 
     <main class="container px-4 py-6 mx-auto flex-grow">
         {% if messages %}
-            <div class="mb-4">
-                {% for message in messages %}
-                    <div class="p-3 mb-2 rounded-md {% if message.tags == 'error' %}bg-red-100 text-red-700{% elif message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-blue-100 text-blue-700{% endif %}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
+        <div class="mb-4">
+            {% for message in messages %}
+            <div
+                class="p-3 mb-2 rounded-md {% if message.tags == 'error' %}bg-red-100 text-red-700{% elif message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+                {{ message }}
             </div>
+            {% endfor %}
+        </div>
         {% endif %}
 
         {% block content %}{% endblock %}
@@ -684,13 +726,15 @@
                 <div class="flex flex-col md:flex-row items-center gap-4">
                     <div class="flex items-center gap-2">
                         <span class="text-gray-600 text-sm">For inquiries:</span>
-                        <a href="https://wa.me/254113364472" target="_blank" rel="noopener noreferrer" class="text-green-600 hover:text-green-700 font-semibold flex items-center gap-1 transition-colors">
+                        <a href="https://wa.me/254113364472" target="_blank" rel="noopener noreferrer"
+                            class="text-green-600 hover:text-green-700 font-semibold flex items-center gap-1 transition-colors">
                             <i class="fab fa-whatsapp"></i> WhatsApp
                         </a>
                     </div>
                     <span class="hidden md:inline text-gray-400">|</span>
                     <div class="flex items-center gap-2">
-                        <a href="mailto:ictlabs@ttu.ac.ke" class="text-blue-600 hover:text-blue-700 font-semibold flex items-center gap-1 transition-colors">
+                        <a href="mailto:ictlabs@ttu.ac.ke"
+                            class="text-blue-600 hover:text-blue-700 font-semibold flex items-center gap-1 transition-colors">
                             <i class="fas fa-envelope"></i> ictlabs@ttu.ac.ke
                         </a>
                     </div>
@@ -699,10 +743,10 @@
         </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" 
-        integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
         crossorigin="anonymous"></script>
-    
+
     <!-- Add Alpine.js for dropdown functionality -->
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
@@ -712,7 +756,7 @@
         const mobileMenu = document.getElementById('mobile-menu');
 
         if (mobileMenuToggle) {
-            mobileMenuToggle.addEventListener('click', function() {
+            mobileMenuToggle.addEventListener('click', function () {
                 this.classList.toggle('active');
                 mobileMenu.classList.toggle('active');
             });
@@ -720,14 +764,14 @@
             // Close menu when a link is clicked
             const mobileMenuLinks = mobileMenu.querySelectorAll('.mobile-menu-item');
             mobileMenuLinks.forEach(link => {
-                link.addEventListener('click', function() {
+                link.addEventListener('click', function () {
                     mobileMenuToggle.classList.remove('active');
                     mobileMenu.classList.remove('active');
                 });
             });
 
             // Close menu when clicking outside
-            document.addEventListener('click', function(event) {
+            document.addEventListener('click', function (event) {
                 const isClickInside = mobileMenuToggle.contains(event.target) || mobileMenu.contains(event.target);
                 if (!isClickInside) {
                     mobileMenuToggle.classList.remove('active');
@@ -742,14 +786,14 @@
 
         if (userDropdownBtn && userDropdownMenu) {
             // Toggle dropdown on button click
-            userDropdownBtn.addEventListener('click', function(e) {
+            userDropdownBtn.addEventListener('click', function (e) {
                 e.stopPropagation();
                 const isVisible = userDropdownMenu.style.display !== 'none';
                 userDropdownMenu.style.display = isVisible ? 'none' : 'block';
             });
 
             // Close dropdown when clicking outside
-            document.addEventListener('click', function(e) {
+            document.addEventListener('click', function (e) {
                 const isClickInside = userDropdownBtn.contains(e.target) || userDropdownMenu.contains(e.target);
                 if (!isClickInside) {
                     userDropdownMenu.style.display = 'none';
@@ -759,17 +803,17 @@
             // Close dropdown when clicking a link
             const dropdownLinks = userDropdownMenu.querySelectorAll('a');
             dropdownLinks.forEach(link => {
-                link.addEventListener('click', function() {
+                link.addEventListener('click', function () {
                     userDropdownMenu.style.display = 'none';
                 });
             });
         }
-        
+
         // Add active class to current page link
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
             const currentPath = window.location.pathname;
             const navLinks = document.querySelectorAll('.nav-item-link, .mobile-menu-item');
-            
+
             navLinks.forEach(link => {
                 if (link.getAttribute('href') === currentPath) {
                     link.classList.add('active');
@@ -779,4 +823,5 @@
     </script>
     {% include "components/feedback_modal.html" %}
 </body>
+
 </html>
