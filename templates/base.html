@@ -8,9 +8,9 @@
     {% load static %}
 
     <!-- Favicon -->
-    <link rel="icon" type="image/jpeg" href="{% static 'img/logo.jpg' %}">
-    <link rel="shortcut icon" type="image/jpeg" href="{% static 'img/logo.jpg' %}">
-    <link rel="apple-touch-icon" href="{% static 'img/logo.jpg' %}">
+    <link rel="icon" type="image/png" href="{% static 'img/logo.png' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'img/logo.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'img/logo.png' %}">
 
     <!-- Existing CSS and scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -534,7 +534,7 @@
         <div class="navbar-container flex justify-between items-center py-3 md:py-2">
             <!-- Logo/Brand -->
             <a href="{% url 'landing' %}" class="navbar-brand">
-                <img src="https://projects.ttu.ac.ke/static/logo.png" alt="TTU Logo">
+                <img src="{% static 'img/logo.png' %}" alt="TTU Logo">
                 <span class="hidden sm:inline">Lab Mgmt</span>
             </a>
 
