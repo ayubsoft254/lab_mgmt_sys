@@ -75,7 +75,7 @@ def submit_inquiry(request):
                 request,
                 "Your inquiry has been submitted successfully! We'll review it and get back to you soon."
             )
-            return redirect('inquiry_success')
+            return redirect('contact:inquiry_success')
         else:
             for field, errors in form.errors.items():
                 for error in errors:
@@ -118,7 +118,7 @@ def submit_feedback(request):
                 request,
                 "Thank you for your feedback! Your input helps us improve the system."
             )
-            return redirect('feedback_success')
+            return redirect('contact:feedback_success')
         else:
             for field, errors in form.errors.items():
                 for error in errors:
