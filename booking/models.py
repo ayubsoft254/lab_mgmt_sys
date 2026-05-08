@@ -127,30 +127,31 @@ class LabSession(models.Model):
     
     def clean(self):
         # Check if end time is after start time
-        if self.end_time <= self.start_time:
-            raise ValidationError('End time must be after start time')
+        if self.start_time and self.end_time:
+            if self.end_time <= self.start_time:
+                raise ValidationError('End time must be after start time')
+                
+            # Check if lab is available for the requested time slot
+            conflicting_sessions = LabSession.objects.filter(
+                lab=self.lab,
+                is_approved=True,
+                start_time__lt=self.end_time,
+                end_time__gt=self.start_time
+            ).exclude(id=self.id)
             
-        # Check if lab is available for the requested time slot
-        conflicting_sessions = LabSession.objects.filter(
-            lab=self.lab,
-            is_approved=True,
-            start_time__lt=self.end_time,
-            end_time__gt=self.start_time
-        ).exclude(id=self.id)
-        
-        if conflicting_sessions.exists():
-            raise ValidationError('Lab is already booked for this time slot')
-        
-        # Check if there are less than 10 computer bookings during this time
-        booked_computers_count = ComputerBooking.objects.filter(
-            computer__lab=self.lab,
-            is_approved=True,
-            start_time__lt=self.end_time,
-            end_time__gt=self.start_time
-        ).count()
-        
-        if booked_computers_count > 10 and not self.is_approved:
-            raise ValidationError('Cannot book lab session when more than 10 computers are already booked')
+            if conflicting_sessions.exists():
+                raise ValidationError('Lab is already booked for this time slot')
+            
+            # Check if there are less than 10 computer bookings during this time
+            booked_computers_count = ComputerBooking.objects.filter(
+                computer__lab=self.lab,
+                is_approved=True,
+                start_time__lt=self.end_time,
+                end_time__gt=self.start_time
+            ).count()
+            
+            if booked_computers_count > 10 and not self.is_approved:
+                raise ValidationError('Cannot book lab session when more than 10 computers are already booked')
     
     def save(self, *args, **kwargs):
         is_new = self.pk is None
@@ -300,36 +301,37 @@ class ComputerBooking(models.Model):
     
     def clean(self):
         # Check if end time is after start time
-        if self.end_time <= self.start_time:
-            raise ValidationError('End time must be after start time')
-        
-        # Check if computer is available for the requested time slot
-        # Only check for conflicts if the booking is not cancelled
-        if not self.is_cancelled:
-            # Only check conflicts with approved bookings when this booking is being approved
-            # OR when creating a new booking
-            conflicting_bookings = ComputerBooking.objects.filter(
-                computer=self.computer,
-                is_approved=True,
-                is_cancelled=False,
-                start_time__lt=self.end_time,
-                end_time__gt=self.start_time
-            ).exclude(id=self.id)
+        if self.start_time and self.end_time:
+            if self.end_time <= self.start_time:
+                raise ValidationError('End time must be after start time')
             
-            if conflicting_bookings.exists():
-                raise ValidationError('Computer is already booked for this time slot')
+            # Check if computer is available for the requested time slot
+            # Only check for conflicts if the booking is not cancelled
+            if not self.is_cancelled:
+                # Only check conflicts with approved bookings when this booking is being approved
+                # OR when creating a new booking
+                conflicting_bookings = ComputerBooking.objects.filter(
+                    computer=self.computer,
+                    is_approved=True,
+                    is_cancelled=False,
+                    start_time__lt=self.end_time,
+                    end_time__gt=self.start_time
+                ).exclude(id=self.id)
                 
-            # Check if there's a lab session during this time
-            conflicting_sessions = LabSession.objects.filter(
-                lab=self.computer.lab,
-                is_approved=True,
-                is_cancelled=False,
-                start_time__lt=self.end_time,
-                end_time__gt=self.start_time
-            )
-            
-            if conflicting_sessions.exists():
-                raise ValidationError('Lab is reserved for a session during this time slot')
+                if conflicting_bookings.exists():
+                    raise ValidationError('Computer is already booked for this time slot')
+                    
+                # Check if there's a lab session during this time
+                conflicting_sessions = LabSession.objects.filter(
+                    lab=self.computer.lab,
+                    is_approved=True,
+                    is_cancelled=False,
+                    start_time__lt=self.end_time,
+                    end_time__gt=self.start_time
+                )
+                
+                if conflicting_sessions.exists():
+                    raise ValidationError('Lab is reserved for a session during this time slot')
     
     def save(self, *args, **kwargs):
         is_new = self.pk is None
@@ -507,16 +509,19 @@ class RecurringSession(models.Model):
     
     def clean(self):
         # Validate time and date ranges
-        if self.end_date < self.start_date:
-            raise ValidationError('End date must be after start date')
+        if self.start_date and self.end_date:
+            if self.end_date < self.start_date:
+                raise ValidationError('End date must be after start date')
         
-        if self.end_time <= self.start_time:
-            raise ValidationError('End time must be after start time')
+        if self.start_time and self.end_time:
+            if self.end_time <= self.start_time:
+                raise ValidationError('End time must be after start time')
         
         # Check for conflicts with existing lab sessions and recurring sessions
-        conflicts = self.check_session_conflicts()
-        if conflicts:
-            raise ValidationError(f'Conflicts exist with existing sessions: {conflicts}')
+        if self.start_date and self.end_date and self.start_time and self.end_time:
+            conflicts = self.check_session_conflicts()
+            if conflicts:
+                raise ValidationError(f'Conflicts exist with existing sessions: {conflicts}')
     
     def check_session_conflicts(self):
         conflicts = []
